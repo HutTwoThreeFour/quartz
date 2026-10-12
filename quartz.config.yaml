@@ -148,7 +148,7 @@ plugins:
       position: left
       priority: 50
   - source: "@quartz-community/graph"
-    enabled: true
+    enabled: false
     layout: null
   - source: "@quartz-community/search"
     enabled: true
@@ -229,7 +229,7 @@ plugins:
       position: footer
       priority: 50
   - source: "@quartz-community/recent-notes"
-    enabled: true
+    enabled: false
     options:
       title: Recent Notes
       limit: 5
