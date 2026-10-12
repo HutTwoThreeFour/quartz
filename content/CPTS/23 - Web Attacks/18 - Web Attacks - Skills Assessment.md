@@ -1,0 +1,9 @@
+# Web Attacks - Skills Assessment
+
+---
+
+## Scenario
+
+You are performing a web application penetration test for a software development company, and they task you with testing the latest build of their social networking web application. Try to utilize the various techniques you learned in this module to identify and exploit multiple vulnerabilities found in the web application.
+
+The login details are provided in the question below.

