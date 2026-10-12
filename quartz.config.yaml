@@ -7,7 +7,7 @@ configuration:
   analytics:
     provider: plausible
   locale: en-US
-  baseUrl: localhost
+  baseUrl: huttwothreefour.github.io/quartz
   ignorePatterns:
     - private
     - templates
