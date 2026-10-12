@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Attacking Web Applications with Ffuf — Mindmap</title>
+<style>
+  :root { color-scheme: light dark; }
+  html, body { margin: 0; height: 100%; }
+  body { background: #faf8f8; }
+  @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
+  svg.markmap { width: 100%; height: 100vh; display: block; }
+</style>
+<script>
+  window.markmap = {
+    autoLoader: {
+      toolbar: true,
+      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+    },
+  }
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</head>
+<body>
+  <div class="markmap">
+    <script type="text/template">
+# Attacking Web Applications with Ffuf
+## 🎯 Main Idea
+- Learn to use `ffuf` for fast web fuzzing to discover hidden content and inputs on web apps.
+- Enumerate directories, files, extensions, parameters, and values a site does not link to.
+- Discover DNS sub-domains and virtual hosts (VHosts) that share an IP.
+- Filter and tune results to cut noise and zero in on valid responses.
+
+## 💥 Attack / Exploit Vectors
+### Web Fuzzing Basics
+- Replace the part of a request to test with the `FUZZ` keyword and feed it a wordlist with `-w`.
+- **Commands**
+  - `ffuf -h` — show ffuf help/options
+  - `ffuf -w wordlist.txt:FUZZ -u http://SERVER_IP:PORT/FUZZ` — basic fuzz at FUZZ position
+
+### Directory Fuzzing
+- Brute-force directory/folder names to find unlinked paths.
+- **Commands**
+  - `ffuf -w wordlist.txt:FUZZ -u http://SERVER_IP:PORT/FUZZ` — directory fuzzing
+  - `/opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt` — directory/page wordlist
+
+### Extension Fuzzing
+- Discover which file extensions the server serves (.php, .html, .bak, etc.).
+- **Commands**
+  - `ffuf -w wordlist.txt:FUZZ -u http://SERVER_IP:PORT/indexFUZZ` — fuzz the extension after a known filename
+  - `/opt/useful/seclists/Discovery/Web-Content/web-extensions.txt` — extensions wordlist
+
+### Page Fuzzing
+- Enumerate page/file names within a known directory using a known extension.
+- **Commands**
+  - `ffuf -w wordlist.txt:FUZZ -u http://SERVER_IP:PORT/blog/FUZZ.php` — page fuzzing
+
+### Recursive Fuzzing
+- Automatically fuzz newly found directories to a set depth instead of repeating manually.
+- **Commands**
+  - `ffuf -w wordlist.txt:FUZZ -u http://SERVER_IP:PORT/FUZZ -recursion -recursion-depth 1 -e .php -v` — recursive fuzz, depth 1, append .php, verbose
+
+### DNS Records / Sub-domain Fuzzing
+- Brute-force sub-domains of a target domain by fuzzing the host portion.
+- **Commands**
+  - `ffuf -w wordlist.txt:FUZZ -u https://FUZZ.hackthebox.eu/` — sub-domain fuzzing
+  - `/opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt` — DNS/subdomain wordlist
+
+### VHost Fuzzing
+- Finds virtual hosts on the same IP by fuzzing the `Host:` header (works even when DNS has no record, unlike subdomain fuzzing which relies on public DNS resolution).
+- **Commands**
+  - `ffuf -w wordlist.txt:FUZZ -u http://academy.htb:PORT/ -H 'Host: FUZZ.academy.htb' -fs xxx` — VHost fuzzing (filter default-page size)
+
+### Filtering Results
+- Reduce noise by matching/filtering on size, words, lines, or status codes.
+- **Commands**
+  - `-fs xxx` — filter out responses of size xxx (also `-fc` status code, `-fw` word count, `-fl` line count; `-mc` matches codes)
+
+### Parameter Fuzzing - GET
+- Discover hidden GET parameters accepted by a page.
+- **Commands**
+  - `ffuf -w wordlist.txt:FUZZ -u http://admin.academy.htb:PORT/admin/admin.php?FUZZ=key -fs xxx` — GET parameter fuzzing
+  - `/opt/useful/seclists/Discovery/Web-Content/burp-parameter-names.txt` — parameters wordlist
+
+### Parameter Fuzzing - POST
+- Discover hidden POST body parameters.
+- **Commands**
+  - `ffuf -w wordlist.txt:FUZZ -u http://admin.academy.htb:PORT/admin/admin.php -X POST -d 'FUZZ=key' -H 'Content-Type: application/x-www-form-urlencoded' -fs xxx` — POST parameter fuzzing
+
+### Value Fuzzing
+- Once a valid parameter is found, brute-force its accepted values (e.g. IDs).
+- **Commands**
+  - `ffuf -w ids.txt:FUZZ -u http://admin.academy.htb:PORT/admin/admin.php -X POST -d 'id=FUZZ' -H 'Content-Type: application/x-www-form-urlencoded' -fs xxx` — value fuzzing
+  - `for i in $(seq 1 1000); do echo $i >> ids.txt; done` — create a sequential value wordlist
+
+### General Commands
+- `sudo sh -c 'echo "SERVER_IP academy.htb" >> /etc/hosts'` — add DNS entry to /etc/hosts (needed for subdomain/vhost access)
+- `curl http://admin.academy.htb:PORT/admin/admin.php -X POST -d 'id=key' -H 'Content-Type: application/x-www-form-urlencoded'` — manually confirm a finding with curl POST
+
+## 🛠️ Key Tools & Concepts
+- ffuf — fast web fuzzer; the `FUZZ` keyword marks the injection point
+- `-w` — wordlist (append `:FUZZ` to name the keyword), `-u` URL, `-X` method, `-d` POST data, `-H` custom header, `-e` extensions, `-recursion`/`-recursion-depth`
+- Filtering flags — `-fs`/`-fc`/`-fw`/`-fl` filter and `-mc` match by size/code/words/lines
+- SecLists — wordlist collection: directory-list for dirs/pages, web-extensions for extensions, subdomains-top1million for DNS, burp-parameter-names for params
+- Subdomain vs VHost — subdomain fuzzing resolves via public DNS; VHost fuzzing manipulates the Host header to reach non-public hosts on the same IP
+- /etc/hosts — map discovered vhosts/subdomains to the target IP
+    </script>
+  </div>
+</body>
+</html>

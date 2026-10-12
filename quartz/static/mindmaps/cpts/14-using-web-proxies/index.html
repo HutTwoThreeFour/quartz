@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Using Web Proxies — Mindmap</title>
+<style>
+  :root { color-scheme: light dark; }
+  html, body { margin: 0; height: 100%; }
+  body { background: #faf8f8; }
+  @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
+  svg.markmap { width: 100%; height: 100vh; display: block; }
+</style>
+<script>
+  window.markmap = {
+    autoLoader: {
+      toolbar: true,
+      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+    },
+  }
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</head>
+<body>
+  <div class="markmap">
+    <script type="text/template">
+# Using Web Proxies
+## 🎯 Main Idea
+- Use web proxies (Burp Suite & OWASP ZAP) as man-in-the-middle tools between browser and server to capture, inspect, modify, and replay HTTP/HTTPS traffic.
+- This is the core enabling skill for Web Application Penetration Testing; the module teaches the proxy feature set, not specific web attacks.
+- Covers Burp (most common, polished, key features paid/Pro) and ZAP (free, open-source, no throttling) side by side.
+- Each proxy feature maps to a class of attack it supports (interception, repeating, encoding, fuzzing, scanning, tool-proxying, extensions).
+
+## 💥 Attack / Exploit Vectors
+### Proxy Setup & CA Certificate
+- Route browser traffic through the proxy (pre-configured browser or Firefox + FoxyProxy), then install the proxy CA cert to decrypt HTTPS.
+- **Commands**
+  - `burpsuite` / `java -jar </path/to/burpsuite.jar>` — launch Burp
+  - `zaproxy` — launch ZAP
+  - FoxyProxy entry `127.0.0.1:8080` (both tools default to port 8080)
+  - Burp CA: browse `http://burp` → `CA Certificate`; import in Firefox `about:preferences#privacy` → Authorities → Import
+
+### Intercepting Requests
+- Pause outbound requests to modify them before they reach the server (e.g. bypass front-end JS validation, inject `;ls;` into an `ip` param → command injection).
+- **Commands**
+  - Burp `Proxy > Intercept` (on by default)
+  - ZAP toggle intercept `CTRL+B`, or HUD step/continue
+
+### Intercepting Responses
+- Pause server responses to edit HTML before the browser renders it: `type="number"`→`type="text"`, `maxlength="3"`→`maxlength="100"`, unhide hidden fields, enable disabled buttons.
+- **Commands**
+  - Burp `Proxy > Proxy settings > Response modification rules` → `Unhide hidden form fields`
+  - ZAP HUD one-click Show/Enable fields
+
+### Automatic Modification (Match & Replace)
+- Auto-apply rules to every request/response instead of intercepting the same change repeatedly.
+- **Commands**
+  - Burp `Proxy > Proxy settings > HTTP match and replace rules` — e.g. Request header, match `^User-Agent.*$`, replace `User-Agent: HackTheBox Agent 1.0`, Regex: True
+  - Burp response body rule — match `type="number"` replace `type="text"`
+  - ZAP `Replacer` (`CTRL+R`) — Match Type `Request Header (will add if not present)`, string `User-Agent`
+
+### Repeating Requests (Repeater)
+- Resend and tweak any prior request without re-intercepting; quickly change HTTP method.
+- **Commands**
+  - Burp Repeater — `CTRL+R` send to Repeater, `CTRL+SHIFT+R` go to Repeater
+  - ZAP `Open/Resend with Request Editor` / HUD Replay in Console/Browser
+
+### Encoding / Decoding
+- Built-in encoders/decoders to craft payloads: URL, HTML, Unicode, Base64, ASCII hex (e.g. decode a base64 cookie, change guest→admin / false→true, re-encode).
+- **Commands**
+  - Burp URL-encode selection `CTRL+U`, URL-decode `CTRL+SHIFT+U`; Burp Decoder / Inspector
+  - ZAP Encoder/Decoder/Hash `CTRL+E`
+
+### Proxying Tools (CLI / thick clients)
+- Route non-browser tool traffic through the proxy (`http://127.0.0.1:8080`) to inspect/debug their requests.
+- **Commands**
+  - proxychains: edit `/etc/proxychains.conf`, comment socks line, add `http 127.0.0.1 8080`; run `proxychains -q curl http://SERVER_IP:PORT`
+  - Metasploit: `set PROXIES HTTP:127.0.0.1:8080`
+
+### Burp Intruder
+- Burp's web fuzzer/brute-forcer (directories, params, subdomains, passwords, AD spraying). Free version throttled to 1 req/sec; Pro unlimited.
+- **Commands**
+  - `CTRL+I` send to Intruder, `CTRL+SHIFT+I` go to Intruder; payload markers `§`
+  - Positions → Payloads (type/processing/encoding) → Settings (Grep-Match e.g. `200 OK`) → Attack (Sniper, Cluster Bomb)
+  - Wordlist example `/opt/useful/seclists/Discovery/Web-Content/common.txt`; skip-regex `^\..*$`
+
+### ZAP Fuzzer
+- ZAP's fuzzer (`Attack > Fuzz`); not throttled, so often more useful than free Burp Intruder.
+- **Commands**
+  - Payloads: File, File Fuzzers (built-in, e.g. `dirbuster/directory-list-1.0.txt`), Numberzz
+  - Processors: Base64/MD5/SHA/URL Encode/Script; Options: Concurrent Threads e.g. `20`
+  - FuzzDB cmd-injection list: `fuzzdb > attack > os-cmd-execution`
+
+### Burp Scanner
+- Pro-only crawler + vulnerability scanner.
+- **Commands**
+  - Target Scope (include/exclude) → Crawler (Crawl vs Crawl and Audit) → Passive Scanner (severity+confidence) → Active Scanner (XSS/SQLi/command injection) → Reporting
+
+### ZAP Scanner
+- Free crawler + scanner.
+- **Commands**
+  - ZAP Spider + Ajax Spider (JS/AJAX links) → Passive Scanner (Alerts) → Active Scanner → Reporting (HTML/XML/Markdown)
+
+### Extensions
+- Extend functionality via marketplaces.
+- **Commands**
+  - Burp BApp Store (some Pro-only / need Jython), e.g. `Decoder Improved`
+  - ZAP Marketplace add-ons (Release/Beta/Alpha), e.g. FuzzDB wordlists
+
+## 🛠️ Key Tools & Concepts
+- Burp Suite — most common proxy; Community free, Pro unlocks Active Scanner, fast Intruder
+- OWASP ZAP — free open-source proxy; no paywall/throttling; unique in-browser HUD
+- Web Proxy / MITM — intercepts HTTP/80 & HTTPS/443 (vs Wireshark which sniffs all traffic)
+- proxychains — forces any CLI tool through a proxy via `/etc/proxychains.conf`
+- FoxyProxy — Firefox extension to switch proxy profiles quickly
+- CA Certificate — proxy cert in browser trust store to decrypt HTTPS cleanly
+- Target Scope — regex include/exclude to focus features & scans
+- Crawler/Spider — maps site via links/forms (ZAP Ajax Spider also follows JS); does not fuzz unreferenced pages
+- Passive vs Active Scan — passive analyzes seen responses; active sends payloads to verify real vulns
+- Severity / Confidence — prioritize High + Certain/Firm findings
+- ZAP HUD — in-browser overlay controlling ZAP's core features
+
+## 🛡️ Mitigations (only if the module covers them)
+- Never rely on client-side (front-end JS/HTML) validation — proxies trivially bypass it; enforce all validation server-side.
+    </script>
+  </div>
+</body>
+</html>

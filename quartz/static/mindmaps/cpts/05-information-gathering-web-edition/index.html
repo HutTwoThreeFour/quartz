@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Information Gathering - Web Edition — Mindmap</title>
+<style>
+  :root { color-scheme: light dark; }
+  html, body { margin: 0; height: 100%; }
+  body { background: #faf8f8; }
+  @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
+  svg.markmap { width: 100%; height: 100vh; display: block; }
+</style>
+<script>
+  window.markmap = {
+    autoLoader: {
+      toolbar: true,
+      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+    },
+  }
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</head>
+<body>
+  <div class="markmap">
+    <script type="text/template">
+# Information Gathering - Web Edition
+## 🎯 Main Idea
+- Web reconnaissance: systematically gather information about a website/web app before attacking it.
+- Goals: identify assets (domains, subdomains, IPs), uncover hidden info (dirs, files, tech), analyze the attack surface, and gather intelligence (emails, employees, tech stack).
+- Uses **active** recon (direct interaction, higher detection risk) and **passive** recon (public data, stealthier / OSINT).
+
+## 💥 Attack / Exploit Vectors
+### WHOIS Lookups (passive)
+- Query registration data: owner, registrar, dates, nameservers, contacts — useful for social engineering.
+- **Commands**
+  - `whois example.com` — retrieve domain registration/ownership info
+
+### DNS Enumeration (dig)
+- Resolve domains and pull record types (A, AAAA, CNAME, MX, NS, TXT, SOA) to map infrastructure.
+- **Commands**
+  - `dig example.com A` — query the IPv4 A record
+
+### Subdomain Enumeration
+- Discover subdomains that expose extra attack surface (dev/staging servers, forgotten apps).
+- Active (brute-force, zone transfers) vs passive (CT logs, search engines).
+- **Commands**
+  - `dnsenum example.com -f subdomains.txt` — dictionary brute-force of subdomains
+
+### DNS Zone Transfers (AXFR)
+- Misconfigured DNS servers may hand over the full zone file (all subdomains, IPs, mail config) to any requester.
+- **Commands**
+  - `dig @ns1.example.com example.com axfr` — request a full zone transfer
+
+### Virtual Host Discovery
+- Multiple sites share one IP; brute-force Host headers to reveal hidden vhosts not found by IP scanning.
+- **Commands**
+  - `gobuster vhost -u http://192.0.2.1 -w hostnames.txt` — enumerate virtual hosts by hostname
+
+### Certificate Transparency (CT) Logs (passive)
+- Public SSL/TLS cert logs reveal overlooked subdomains via crt.sh.
+- **Commands**
+  - `curl -s "https://crt.sh/?q=%25.example.com&output=json" | jq -r '.[].name_value' | sed 's/\*\.//g' | sort -u` — extract unique subdomains from crt.sh
+
+### Fingerprinting
+- Identify server software, versions, CMS, frameworks, and WAFs to target known exploits/misconfigs.
+- Techniques: banner grabbing, HTTP header analysis, probing for specific responses, page-content analysis.
+- **Commands**
+  - `curl -I inlanefreight.com` — grab HTTP headers / banner (Server, X-Powered-By)
+  - `pip3 install git+https://github.com/EnableSecurity/wafw00f` — install wafw00f
+  - `wafw00f inlanefreight.com` — detect presence/type of a WAF
+  - `nikto -h inlanefreight.com -Tuning b` — run Nikto software-identification modules only
+
+### Web Crawling / Spidering
+- Automated link-following to map site structure and extract links, comments, metadata, and sensitive files (.bak, web.config, logs, keys).
+- Breadth-first (broad overview) vs depth-first (reach deep).
+- **Commands**
+  - `wget -O ReconSpider.zip <htb-url>/ReconSpider.v1.2.zip` — download the custom ReconSpider
+  - `python3 ReconSpider.py http://inlanefreight.com` — crawl target, output to results.json
+  - `jq -r '.[] | select(.file != null) | .file' example_data.json | sort -u` — extract crawled links
+
+### robots.txt & .well-known URIs
+- robots.txt can reveal hidden/off-limits directories.
+- `.well-known/` standardized endpoints (security.txt, openid-configuration) expose config/metadata; openid-configuration leaks auth/token/userinfo endpoints and JWKS URI.
+
+### Search Engine Discovery (Google Dorking / OSINT)
+- Use advanced operators to find exposed docs, login pages, configs, and directories — passive and legal.
+- **Commands**
+  - `site:example.com "password reset"` — restrict to a site
+  - `inurl:admin login` / `allinurl:admin panel` — term in URL
+  - `filetype:pdf "confidential report"` — limit to a file type
+  - `intitle:"index of" /backup` — open directory listings
+  - `site:example.com inurl:config.php` — hunt config files
+  - `cache:example.com` — view cached version
+
+### Web Archives (Wayback Machine)
+- Historical snapshots reveal removed pages, old directories, subdomains, and content changes — passive.
+
+## 🛠️ Key Tools & Concepts
+- `whois` — domain registration lookups
+- `dig` / `dnsenum` — DNS queries, zone transfers, subdomain brute-force
+- `gobuster` (vhost mode) — virtual host enumeration
+- `crt.sh` + `jq`/`sed` — CT-log subdomain mining
+- `curl -I`, `whatweb`, `Wappalyzer`, `BuiltWith`, `Netcraft`, `Nmap` — fingerprinting
+- `wafw00f` — WAF detection
+- `Nikto` — web server scanner / fingerprinting
+- `Scrapy` / `ReconSpider`, Burp Spider, OWASP ZAP, Apache Nutch — crawlers
+- `FinalRecon` — all-in-one recon framework (headers, whois, SSL, crawl, DNS/subdomain/dir enum, wayback, port scan)
+  - `./finalrecon.py --headers --whois --url http://inlanefreight.com`
+  - `./finalrecon.py --full` / `--ps` / `--wayback`
+- Google Dorks, Wayback Machine — OSINT / passive recon
+
+## 🛡️ Mitigations
+- Restrict DNS zone transfers to authorized secondary servers only.
+- Suppress/obfuscate verbose banners and version headers; add security headers (HSTS).
+- Use domain privacy services to mask WHOIS data.
+- Remove sensitive/backup/config files from web roots and restrict directory listing.
+    </script>
+  </div>
+</body>
+</html>

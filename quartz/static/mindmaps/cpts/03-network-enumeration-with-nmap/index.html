@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Network Enumeration with Nmap — Mindmap</title>
+<style>
+  :root { color-scheme: light dark; }
+  html, body { margin: 0; height: 100%; }
+  body { background: #faf8f8; }
+  @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
+  svg.markmap { width: 100%; height: 100vh; display: block; }
+</style>
+<script>
+  window.markmap = {
+    autoLoader: {
+      toolbar: true,
+      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+    },
+  }
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</head>
+<body>
+  <div class="markmap">
+    <script type="text/template">
+# Network Enumeration with Nmap
+## 🎯 Main Idea
+- Master Nmap as the core tool for network enumeration: host discovery, port/service scanning, and OS detection.
+- Learn to tune scans for accuracy and performance, save results, extend with NSE scripts, and evade firewalls/IDS/IPS.
+
+## 💥 Attack / Exploit Vectors
+### Host Discovery
+- Determine which hosts are alive before port scanning.
+- **Commands**
+  - `-sn` — Disables port scanning (ping/host discovery only)
+  - `-PE` — Ping scan using ICMP Echo Requests
+  - `-Pn` — Disables ICMP Echo Requests (treat hosts as up)
+  - `-n` — Disables DNS resolution
+  - `--disable-arp-ping` — Disables ARP ping requests
+  - `--packet-trace` — Show all packets sent and received
+  - `--reason` — Display the reason for a result
+
+### Host & Port Scanning
+- Identify open ports and scan technique (SYN/ACK/UDP).
+- **Commands**
+  - `10.10.10.0/24` — Target a network range
+  - `-p-` — Scan all ports
+  - `-p22-110` — Scan a port range
+  - `-p22,25` — Scan specific ports
+  - `-F` — Scan top 100 ports
+  - `--top-ports=<num>` — Scan the N most frequent ports
+  - `-sS` — TCP SYN (stealth) scan
+  - `-sA` — TCP ACK scan
+  - `-sU` — UDP scan
+
+### Service & OS Enumeration
+- Fingerprint service versions and target operating system.
+- **Commands**
+  - `-sV` — Scan discovered services for versions
+  - `-O` — OS detection
+  - `-A` — OS detection, service detection, and traceroute
+
+### Nmap Scripting Engine (NSE)
+- Run categorized scripts for deeper enumeration and vuln checks.
+- **Commands**
+  - `-sC` — Script scan with "default" category scripts
+  - `--script <script>` — Run specified NSE script(s)
+
+### Saving the Results
+- Persist output for reporting and later parsing.
+- **Commands**
+  - `-oA filename` — Save in all formats
+  - `-oN filename` — Save in normal format
+  - `-oG filename` — Save in grepable format
+  - `-oX filename` — Save in XML format
+
+### Performance Tuning
+- Speed up or slow down scans and control timing/retries.
+- **Commands**
+  - `--max-retries <num>` — Retries for specific ports
+  - `--stats-every=5s` — Show scan status every 5s
+  - `-v`/`-vv` — Verbose output
+  - `--initial-rtt-timeout 50ms` — Initial RTT timeout
+  - `--max-rtt-timeout 100ms` — Maximum RTT timeout
+  - `--min-rate 300` — Packets sent simultaneously
+  - `-T <0-5>` — Timing template (0 paranoid … 5 insane)
+
+### Firewall & IDS/IPS Evasion
+- Bypass filtering and detection using decoys, spoofing, and crafted source params.
+- **Commands**
+  - `-D RND:5` — Use random decoys to mask the real source
+  - `-S 10.10.10.200` — Spoof the source IP address
+  - `-e <iface>` — Specify the network interface
+  - `-g <port>` — Specify the source port
+  - `--dns-server <ns>` — Resolve via a specified name server
+
+## 🛠️ Key Tools & Concepts
+- Nmap — the primary network mapper/scanner driving the whole module.
+- Enumeration — iterative information gathering as the foundation of a pentest.
+- TCP 3-way handshake — underpins SYN vs. ACK scan behavior and firewall responses.
+- Decoys & spoofing — hide the scanner's real identity from defenders.
+- Timing templates — balance of stealth vs. speed.
+
+## 🛡️ Mitigations
+- Deploy firewalls, IDS/IPS to detect and block scanning activity.
+- Rate-limit/drop unsolicited probes and filter ICMP to frustrate host discovery.
+- Monitor for decoy/spoofed-source and timing anomalies indicative of evasion.
+    </script>
+  </div>
+</body>
+</html>
