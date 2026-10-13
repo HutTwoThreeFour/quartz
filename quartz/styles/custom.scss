@@ -12,6 +12,27 @@
   }
 }
 
+// Force the code font. A theme resource stylesheet re-declares --codeFont
+// after our compiled CSS, so !important is needed to win the cascade.
+:root {
+  --codeFont: "Ubuntu Sans Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    monospace !important;
+}
+
+// Code blocks: black background, white text (overrides the Shiki syntax
+// theme's inline colors, hence !important). Scoped to block code (pre);
+// inline code and mermaid diagrams are left untouched.
+pre:not(:has(> code.mermaid)) {
+  background: #000 !important;
+  color: #fff !important;
+
+  code,
+  code span {
+    color: #fff !important;
+    background: transparent !important;
+  }
+}
+
 .page-title a {
   display: inline-flex;
   align-items: center;
