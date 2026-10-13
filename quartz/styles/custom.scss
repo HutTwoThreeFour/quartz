@@ -2,6 +2,16 @@
 
 // put your custom CSS here!
 
+// Explorer: align folder collapse arrows with the first line of a wrapped
+// title instead of the vertical middle.
+.folder-container {
+  align-items: flex-start;
+
+  & > .folder-icon {
+    margin-top: 0.2em;
+  }
+}
+
 .page-title a {
   display: inline-flex;
   align-items: center;
