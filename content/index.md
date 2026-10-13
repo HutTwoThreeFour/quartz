@@ -15,6 +15,7 @@ In *Interstellar*, the Endurance is a ring of modules spinning in the dark, carr
 * **Cooper**: the pilot. He takes the controls and asks the questions, which is the role of the writer here.
 * **TARS**: honest, dependable, set to the right level of humour. TARS stands for the practical side of this blog: notes, commands and checklists that work when you need them.
 * **CASE**: quiet and steady, holding the ship together while everyone else makes noise. CASE stands for the patient work that gets done in the background.
+* **Dr. Brand**: the scientist, daughter of Professor Brand. She reads the research, weighs the theory and insists the work holds up. Dr. Brand stands for the careful, evidence-led side of this blog: the "why" behind each note.
 
 > **Cooper:** "Hey TARS, what's your honesty parameter?"
 >
