@@ -38,8 +38,8 @@ pre:not(:has(> code.mermaid)) {
   &::before {
     content: "";
     flex-shrink: 0;
-    width: 1.6rem;
-    height: calc(1.6rem * 93.17 / 76.07);
+    width: 6.4rem;
+    height: calc(6.4rem * 93.17 / 76.07);
     background-color: var(--dark);
     -webkit-mask: url("./static/endurance_logo.svg") center / contain no-repeat;
     mask: url("./static/endurance_logo.svg") center / contain no-repeat;
