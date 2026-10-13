@@ -1,3 +1,19 @@
 @use "./variables.scss" as *;
 
 // put your custom CSS here!
+
+.page-title a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &::before {
+    content: "";
+    flex-shrink: 0;
+    width: 1.6rem;
+    height: calc(1.6rem * 93.17 / 76.07);
+    background-color: var(--dark);
+    -webkit-mask: url("./static/endurance_logo.svg") center / contain no-repeat;
+    mask: url("./static/endurance_logo.svg") center / contain no-repeat;
+  }
+}
