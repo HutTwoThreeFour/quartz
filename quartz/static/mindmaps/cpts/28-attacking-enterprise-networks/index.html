@@ -4,135 +4,39 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Attacking Enterprise Networks — Mindmap</title>
+<link rel="stylesheet" href="../../../vendor/markmap/markmap-toolbar.css" />
 <style>
   :root { color-scheme: light dark; }
   html, body { margin: 0; height: 100%; }
   body { background: #faf8f8; }
   @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
-  svg.markmap { width: 100%; height: 100vh; display: block; }
+  #mindmap { width: 100%; height: 100vh; display: block; }
+  .mm-toolbar { position: absolute; bottom: 0.75rem; right: 0.75rem; }
 </style>
-<script>
-  window.markmap = {
-    autoLoader: {
-      toolbar: true,
-      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
-    },
-  }
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+<script src="../../../vendor/markmap/d3.min.js"></script>
+<script src="../../../vendor/markmap/markmap-view.js"></script>
+<script src="../../../vendor/markmap/markmap-toolbar.js"></script>
 </head>
 <body>
-  <div class="markmap">
-    <script type="text/template">
-# Attacking Enterprise Networks
-## 🎯 Main Idea
-- End-to-end walkthrough of a full enterprise penetration test against INLANEFREIGHT, from external recon to full Active Directory domain compromise.
-- Ties together the whole Penetration Tester path: external gathering, service/web exploitation, initial access, pivoting, lateral movement, AD attacks, post-exploitation, and closeout.
-- Emphasizes methodology and workflow (a repeatable kill-chain) rather than any single technique.
-
-## 💥 Attack / Exploit Vectors (Engagement Phases)
-
-### Scenario & Kickoff
-- Project kickoff: confirm scope, rules of engagement, and start of testing.
-
-### External Information Gathering
-- Passive/active recon of public-facing assets, DNS, and subdomains.
-- **Commands**
-  - `sudo nmap --open ...` — scan external hosts for live services
-  - `dig axfr @<ns> inlanefreight.local` — attempt DNS zone transfer
-  - `fierce` / `dnsenum` — DNS and subdomain enumeration
-  - `curl -s -I http://10.129.203.101 -H "HOST: dev.inlanefreight.local"` — virtual host probing
-
-### Service Enumeration & Exploitation
-- Enumerate listening services (FTP, SSH, email/SMTP) and exploit misconfigurations.
-- **Commands**
-  - `sudo nmap -sV -sC -p25 10.129.203.101` — enumerate SMTP/mail service
-  - FTP anonymous access and SSH checks on identified hosts
-
-### Web Enumeration & Exploitation
-- Enumerate many virtual hosts (blog, careers, dev, gitlab, vpn, shopdev2, monitoring) and exploit the weakest.
-- **Commands**
-  - `eyewitness -f ilfreight_subdomains ...` — screenshot web apps
-  - `gobuster dir -u http://dev.inlanefreight.local -w <wordlist>` — directory brute force
-  - `ffuf -w <wordlist> ...` — fuzz paths/parameters/vhosts
-  - `curl http://ir.inlanefreight.local` — manual inspection
-  - `hydra -l admin ...` — brute-force a web login
-  - command injection / RCE on a vulnerable monitoring app to get code execution
-
-### Initial Access
-- Convert a web/service exploit into an interactive reverse shell on a DMZ host.
-- **Commands**
-  - Craft a reverse shell payload and catch with a listener (nc/msf)
-
-### Post-Exploitation Persistence & Local Priv Esc (DMZ)
-- Stabilize access, escalate locally to root, and establish persistence on the foothold.
-- **Commands**
-  - Local privesc enumeration (sudo rights, SUID, cron) to get root
-  - Add SSH keys / accounts for persistence
-
-### Internal Information Gathering & Pivoting
-- Pivot from the DMZ into the internal 172.16.8.0/23 network; enumerate hosts and AD.
-- **Commands**
-  - `ssh -D 8081 -i dmz01_key root@10.129.203.111` — SOCKS dynamic port forward (proxychains)
-  - `proxychains nmap -sT -p 21,22,80,8080 172.16.8.120` — scan internal hosts through proxy
-  - Metasploit `autoroute` / `socks_proxy` — alternate pivot setup
-  - `proxychains enum4linux 172.16.8.x` / `rpcclient` — SMB/AD enumeration
-  - SMB NULL session — anonymous AD enumeration
-  - Enumerate Tomcat (172.16.8.50) and DotNetNuke/DNN (172.16.8.20)
-
-### Internal Exploitation & Privilege Escalation
-- Exploit DotNetNuke (DNN) for code execution, then escalate on the Windows host.
-- **Commands**
-  - `ssh -i dmz01_key -R 172.16.8.120:443:0.0.0.0:7000 root@10.129.203.111 -vN` — reverse port forward for callback
-  - `secretsdump.py LOCAL -system SYSTEM.SAVE -sam SAM.SAVE -security SECURITY.SAVE` — dump local hashes
-  - `proxychains crackmapexec smb 172.16.8.20 --local-auth -u admin -H <hash>` — pass-the-hash check
-
-### Lateral Movement
-- Move across the domain via share hunting, Kerberoasting, and password spraying.
-- **Commands**
-  - `GetUserSPNs.py` — request service tickets (Kerberoasting)
-  - `hashcat -m 13100 ilfreight_spns <wordlist>` — crack TGS hashes
-  - `proxychains crackmapexec smb 172.16.8.3 -u ssmalls -p 'Str0...'` — password spray / validate creds
-  - `proxychains smbclient` — share hunting for sensitive files
-  - `nmap -sT -p 5985 172.16.8.50` + `proxychains evil-winrm ...` — WinRM access
-  - `ssh -i dmz01_key -L 13389:172.16.8.20:3389 root@10.129.203.111` — local forward for RDP
-
-### Active Directory Compromise
-- Escalate from domain foothold to Domain Admin / Domain Controller.
-- **Commands**
-  - `mimikatz.exe` — dump credentials / tickets from memory
-  - DCSync / NTDS extraction to obtain all domain hashes
-
-### Post-Exploitation
-- Full domain takeover actions: NTDS cracking, security audit, double pivot, exfil, trust attacks.
-- **Commands**
-  - `secretsdump.py` / crack NTDS with hashcat — domain password analysis
-  - Double pivot to MGMT01 (deeper segmented network)
-  - BloodHound — Active Directory security audit / attack-path mapping
-  - Data exfiltration simulation and attacking domain trusts
-
-### Engagement Closeout
-- Wrap-up and professional delivery.
-- **Key points**
-  - Attack-path recap and structuring findings
-  - Post-engagement cleanup (remove tools, accounts, artifacts)
-  - Client communication and internal project closeout
-
-## 🛠️ Key Tools & Concepts
-- `nmap`, `gobuster`, `ffuf`, `eyewitness`, `hydra` — recon & web enumeration
-- `proxychains` + SSH tunneling (`-D`, `-L`, `-R`) / Metasploit autoroute — pivoting
-- `enum4linux`, `rpcclient`, `crackmapexec`, `smbclient` — SMB/AD enumeration
-- `GetUserSPNs.py`, `secretsdump.py`, `evil-winrm`, `mimikatz` — AD attacks & cred dumping
-- `hashcat` / `john` — offline password cracking
-- `BloodHound` — AD attack-path analysis
-- Kill chain: recon → exploit → foothold → pivot → lateral movement → DA → post-exploit → report
-
-## 🛡️ Mitigations
-- Reduce external attack surface; patch and harden public-facing web/service apps.
-- Network segmentation to limit DMZ-to-internal pivoting.
-- Strong Kerberos service-account passwords (defeat Kerberoasting); enforce password policy to stop spraying.
-- Least privilege, disable SMB NULL sessions, protect LSASS/NTDS, and monitor for lateral movement.
-    </script>
-  </div>
+  <svg id="mindmap"></svg>
+  <script>
+    const data = {"content":"Attacking Enterprise Networks","children":[{"content":"&#x1f3af; Main Idea","children":[{"content":"End-to-end walkthrough of a full enterprise penetration test against INLANEFREIGHT, from external recon to full Active Directory domain compromise.","children":[],"payload":{"tag":"li","lines":"2,3"}},{"content":"Ties together the whole Penetration Tester path: external gathering, service/web exploitation, initial access, pivoting, lateral movement, AD attacks, post-exploitation, and closeout.","children":[],"payload":{"tag":"li","lines":"3,4"}},{"content":"Emphasizes methodology and workflow (a repeatable kill-chain) rather than any single technique.","children":[],"payload":{"tag":"li","lines":"4,6"}}],"payload":{"tag":"h2","lines":"1,2"}},{"content":"&#x1f4a5; Attack / Exploit Vectors (Engagement Phases)","children":[{"content":"Scenario &amp; Kickoff","children":[{"content":"Project kickoff: confirm scope, rules of engagement, and start of testing.","children":[],"payload":{"tag":"li","lines":"9,11"}}],"payload":{"tag":"h3","lines":"8,9"}},{"content":"External Information Gathering","children":[{"content":"Passive/active recon of public-facing assets, DNS, and subdomains.","children":[],"payload":{"tag":"li","lines":"12,13"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>sudo nmap --open ...<\/code> &#x2014; scan external hosts for live services","children":[],"payload":{"tag":"li","lines":"14,15"}},{"content":"<code>dig axfr @&lt;ns&gt; inlanefreight.local<\/code> &#x2014; attempt DNS zone transfer","children":[],"payload":{"tag":"li","lines":"15,16"}},{"content":"<code>fierce<\/code> / <code>dnsenum<\/code> &#x2014; DNS and subdomain enumeration","children":[],"payload":{"tag":"li","lines":"16,17"}},{"content":"<code>curl -s -I http://10.129.203.101 -H &quot;HOST: dev.inlanefreight.local&quot;<\/code> &#x2014; virtual host probing","children":[],"payload":{"tag":"li","lines":"17,19"}}],"payload":{"tag":"li","lines":"13,19"}}],"payload":{"tag":"h3","lines":"11,12"}},{"content":"Service Enumeration &amp; Exploitation","children":[{"content":"Enumerate listening services (FTP, SSH, email/SMTP) and exploit misconfigurations.","children":[],"payload":{"tag":"li","lines":"20,21"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>sudo nmap -sV -sC -p25 10.129.203.101<\/code> &#x2014; enumerate SMTP/mail service","children":[],"payload":{"tag":"li","lines":"22,23"}},{"content":"FTP anonymous access and SSH checks on identified hosts","children":[],"payload":{"tag":"li","lines":"23,25"}}],"payload":{"tag":"li","lines":"21,25"}}],"payload":{"tag":"h3","lines":"19,20"}},{"content":"Web Enumeration &amp; Exploitation","children":[{"content":"Enumerate many virtual hosts (blog, careers, dev, gitlab, vpn, shopdev2, monitoring) and exploit the weakest.","children":[],"payload":{"tag":"li","lines":"26,27"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>eyewitness -f ilfreight_subdomains ...<\/code> &#x2014; screenshot web apps","children":[],"payload":{"tag":"li","lines":"28,29"}},{"content":"<code>gobuster dir -u http://dev.inlanefreight.local -w &lt;wordlist&gt;<\/code> &#x2014; directory brute force","children":[],"payload":{"tag":"li","lines":"29,30"}},{"content":"<code>ffuf -w &lt;wordlist&gt; ...<\/code> &#x2014; fuzz paths/parameters/vhosts","children":[],"payload":{"tag":"li","lines":"30,31"}},{"content":"<code>curl http://ir.inlanefreight.local<\/code> &#x2014; manual inspection","children":[],"payload":{"tag":"li","lines":"31,32"}},{"content":"<code>hydra -l admin ...<\/code> &#x2014; brute-force a web login","children":[],"payload":{"tag":"li","lines":"32,33"}},{"content":"command injection / RCE on a vulnerable monitoring app to get code execution","children":[],"payload":{"tag":"li","lines":"33,35"}}],"payload":{"tag":"li","lines":"27,35"}}],"payload":{"tag":"h3","lines":"25,26"}},{"content":"Initial Access","children":[{"content":"Convert a web/service exploit into an interactive reverse shell on a DMZ host.","children":[],"payload":{"tag":"li","lines":"36,37"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Craft a reverse shell payload and catch with a listener (nc/msf)","children":[],"payload":{"tag":"li","lines":"38,40"}}],"payload":{"tag":"li","lines":"37,40"}}],"payload":{"tag":"h3","lines":"35,36"}},{"content":"Post-Exploitation Persistence &amp; Local Priv Esc (DMZ)","children":[{"content":"Stabilize access, escalate locally to root, and establish persistence on the foothold.","children":[],"payload":{"tag":"li","lines":"41,42"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Local privesc enumeration (sudo rights, SUID, cron) to get root","children":[],"payload":{"tag":"li","lines":"43,44"}},{"content":"Add SSH keys / accounts for persistence","children":[],"payload":{"tag":"li","lines":"44,46"}}],"payload":{"tag":"li","lines":"42,46"}}],"payload":{"tag":"h3","lines":"40,41"}},{"content":"Internal Information Gathering &amp; Pivoting","children":[{"content":"Pivot from the DMZ into the internal 172.16.8.0/23 network; enumerate hosts and AD.","children":[],"payload":{"tag":"li","lines":"47,48"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>ssh -D 8081 -i dmz01_key root@10.129.203.111<\/code> &#x2014; SOCKS dynamic port forward (proxychains)","children":[],"payload":{"tag":"li","lines":"49,50"}},{"content":"<code>proxychains nmap -sT -p 21,22,80,8080 172.16.8.120<\/code> &#x2014; scan internal hosts through proxy","children":[],"payload":{"tag":"li","lines":"50,51"}},{"content":"Metasploit <code>autoroute<\/code> / <code>socks_proxy<\/code> &#x2014; alternate pivot setup","children":[],"payload":{"tag":"li","lines":"51,52"}},{"content":"<code>proxychains enum4linux 172.16.8.x<\/code> / <code>rpcclient<\/code> &#x2014; SMB/AD enumeration","children":[],"payload":{"tag":"li","lines":"52,53"}},{"content":"SMB NULL session &#x2014; anonymous AD enumeration","children":[],"payload":{"tag":"li","lines":"53,54"}},{"content":"Enumerate Tomcat (172.16.8.50) and DotNetNuke/DNN (172.16.8.20)","children":[],"payload":{"tag":"li","lines":"54,56"}}],"payload":{"tag":"li","lines":"48,56"}}],"payload":{"tag":"h3","lines":"46,47"}},{"content":"Internal Exploitation &amp; Privilege Escalation","children":[{"content":"Exploit DotNetNuke (DNN) for code execution, then escalate on the Windows host.","children":[],"payload":{"tag":"li","lines":"57,58"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>ssh -i dmz01_key -R 172.16.8.120:443:0.0.0.0:7000 root@10.129.203.111 -vN<\/code> &#x2014; reverse port forward for callback","children":[],"payload":{"tag":"li","lines":"59,60"}},{"content":"<code>secretsdump.py LOCAL -system SYSTEM.SAVE -sam SAM.SAVE -security SECURITY.SAVE<\/code> &#x2014; dump local hashes","children":[],"payload":{"tag":"li","lines":"60,61"}},{"content":"<code>proxychains crackmapexec smb 172.16.8.20 --local-auth -u admin -H &lt;hash&gt;<\/code> &#x2014; pass-the-hash check","children":[],"payload":{"tag":"li","lines":"61,63"}}],"payload":{"tag":"li","lines":"58,63"}}],"payload":{"tag":"h3","lines":"56,57"}},{"content":"Lateral Movement","children":[{"content":"Move across the domain via share hunting, Kerberoasting, and password spraying.","children":[],"payload":{"tag":"li","lines":"64,65"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>GetUserSPNs.py<\/code> &#x2014; request service tickets (Kerberoasting)","children":[],"payload":{"tag":"li","lines":"66,67"}},{"content":"<code>hashcat -m 13100 ilfreight_spns &lt;wordlist&gt;<\/code> &#x2014; crack TGS hashes","children":[],"payload":{"tag":"li","lines":"67,68"}},{"content":"<code>proxychains crackmapexec smb 172.16.8.3 -u ssmalls -p &apos;Str0...&apos;<\/code> &#x2014; password spray / validate creds","children":[],"payload":{"tag":"li","lines":"68,69"}},{"content":"<code>proxychains smbclient<\/code> &#x2014; share hunting for sensitive files","children":[],"payload":{"tag":"li","lines":"69,70"}},{"content":"<code>nmap -sT -p 5985 172.16.8.50<\/code> + <code>proxychains evil-winrm ...<\/code> &#x2014; WinRM access","children":[],"payload":{"tag":"li","lines":"70,71"}},{"content":"<code>ssh -i dmz01_key -L 13389:172.16.8.20:3389 root@10.129.203.111<\/code> &#x2014; local forward for RDP","children":[],"payload":{"tag":"li","lines":"71,73"}}],"payload":{"tag":"li","lines":"65,73"}}],"payload":{"tag":"h3","lines":"63,64"}},{"content":"Active Directory Compromise","children":[{"content":"Escalate from domain foothold to Domain Admin / Domain Controller.","children":[],"payload":{"tag":"li","lines":"74,75"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>mimikatz.exe<\/code> &#x2014; dump credentials / tickets from memory","children":[],"payload":{"tag":"li","lines":"76,77"}},{"content":"DCSync / NTDS extraction to obtain all domain hashes","children":[],"payload":{"tag":"li","lines":"77,79"}}],"payload":{"tag":"li","lines":"75,79"}}],"payload":{"tag":"h3","lines":"73,74"}},{"content":"Post-Exploitation","children":[{"content":"Full domain takeover actions: NTDS cracking, security audit, double pivot, exfil, trust attacks.","children":[],"payload":{"tag":"li","lines":"80,81"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>secretsdump.py<\/code> / crack NTDS with hashcat &#x2014; domain password analysis","children":[],"payload":{"tag":"li","lines":"82,83"}},{"content":"Double pivot to MGMT01 (deeper segmented network)","children":[],"payload":{"tag":"li","lines":"83,84"}},{"content":"BloodHound &#x2014; Active Directory security audit / attack-path mapping","children":[],"payload":{"tag":"li","lines":"84,85"}},{"content":"Data exfiltration simulation and attacking domain trusts","children":[],"payload":{"tag":"li","lines":"85,87"}}],"payload":{"tag":"li","lines":"81,87"}}],"payload":{"tag":"h3","lines":"79,80"}},{"content":"Engagement Closeout","children":[{"content":"Wrap-up and professional delivery.","children":[],"payload":{"tag":"li","lines":"88,89"}},{"content":"<strong>Key points<\/strong>","children":[{"content":"Attack-path recap and structuring findings","children":[],"payload":{"tag":"li","lines":"90,91"}},{"content":"Post-engagement cleanup (remove tools, accounts, artifacts)","children":[],"payload":{"tag":"li","lines":"91,92"}},{"content":"Client communication and internal project closeout","children":[],"payload":{"tag":"li","lines":"92,94"}}],"payload":{"tag":"li","lines":"89,94"}}],"payload":{"tag":"h3","lines":"87,88"}}],"payload":{"tag":"h2","lines":"6,7"}},{"content":"&#x1f6e0;&#xfe0f; Key Tools &amp; Concepts","children":[{"content":"<code>nmap<\/code>, <code>gobuster<\/code>, <code>ffuf<\/code>, <code>eyewitness<\/code>, <code>hydra<\/code> &#x2014; recon &amp; web enumeration","children":[],"payload":{"tag":"li","lines":"95,96"}},{"content":"<code>proxychains<\/code> + SSH tunneling (<code>-D<\/code>, <code>-L<\/code>, <code>-R<\/code>) / Metasploit autoroute &#x2014; pivoting","children":[],"payload":{"tag":"li","lines":"96,97"}},{"content":"<code>enum4linux<\/code>, <code>rpcclient<\/code>, <code>crackmapexec<\/code>, <code>smbclient<\/code> &#x2014; SMB/AD enumeration","children":[],"payload":{"tag":"li","lines":"97,98"}},{"content":"<code>GetUserSPNs.py<\/code>, <code>secretsdump.py<\/code>, <code>evil-winrm<\/code>, <code>mimikatz<\/code> &#x2014; AD attacks &amp; cred dumping","children":[],"payload":{"tag":"li","lines":"98,99"}},{"content":"<code>hashcat<\/code> / <code>john<\/code> &#x2014; offline password cracking","children":[],"payload":{"tag":"li","lines":"99,100"}},{"content":"<code>BloodHound<\/code> &#x2014; AD attack-path analysis","children":[],"payload":{"tag":"li","lines":"100,101"}},{"content":"Kill chain: recon &#x2192; exploit &#x2192; foothold &#x2192; pivot &#x2192; lateral movement &#x2192; DA &#x2192; post-exploit &#x2192; report","children":[],"payload":{"tag":"li","lines":"101,103"}}],"payload":{"tag":"h2","lines":"94,95"}},{"content":"&#x1f6e1;&#xfe0f; Mitigations","children":[{"content":"Reduce external attack surface; patch and harden public-facing web/service apps.","children":[],"payload":{"tag":"li","lines":"104,105"}},{"content":"Network segmentation to limit DMZ-to-internal pivoting.","children":[],"payload":{"tag":"li","lines":"105,106"}},{"content":"Strong Kerberos service-account passwords (defeat Kerberoasting); enforce password policy to stop spraying.","children":[],"payload":{"tag":"li","lines":"106,107"}},{"content":"Least privilege, disable SMB NULL sessions, protect LSASS/NTDS, and monitor for lateral movement.","children":[],"payload":{"tag":"li","lines":"107,108"}}],"payload":{"tag":"h2","lines":"103,104"}}],"payload":{"tag":"h1","lines":"0,1"}}
+    const { Markmap, Toolbar, globalCSS } = window.markmap
+    if (globalCSS) {
+      const s = document.createElement("style")
+      s.textContent = globalCSS
+      document.head.appendChild(s)
+    }
+    const mm = Markmap.create(
+      "#mindmap",
+      { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+      data,
+    )
+    try {
+      const { el } = Toolbar.create(mm)
+      el.classList.add("mm-toolbar")
+      document.body.appendChild(el)
+    } catch (e) {}
+  </script>
 </body>
 </html>

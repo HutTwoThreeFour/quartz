@@ -4,125 +4,39 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Using Web Proxies — Mindmap</title>
+<link rel="stylesheet" href="../../../vendor/markmap/markmap-toolbar.css" />
 <style>
   :root { color-scheme: light dark; }
   html, body { margin: 0; height: 100%; }
   body { background: #faf8f8; }
   @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
-  svg.markmap { width: 100%; height: 100vh; display: block; }
+  #mindmap { width: 100%; height: 100vh; display: block; }
+  .mm-toolbar { position: absolute; bottom: 0.75rem; right: 0.75rem; }
 </style>
-<script>
-  window.markmap = {
-    autoLoader: {
-      toolbar: true,
-      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
-    },
-  }
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+<script src="../../../vendor/markmap/d3.min.js"></script>
+<script src="../../../vendor/markmap/markmap-view.js"></script>
+<script src="../../../vendor/markmap/markmap-toolbar.js"></script>
 </head>
 <body>
-  <div class="markmap">
-    <script type="text/template">
-# Using Web Proxies
-## 🎯 Main Idea
-- Use web proxies (Burp Suite & OWASP ZAP) as man-in-the-middle tools between browser and server to capture, inspect, modify, and replay HTTP/HTTPS traffic.
-- This is the core enabling skill for Web Application Penetration Testing; the module teaches the proxy feature set, not specific web attacks.
-- Covers Burp (most common, polished, key features paid/Pro) and ZAP (free, open-source, no throttling) side by side.
-- Each proxy feature maps to a class of attack it supports (interception, repeating, encoding, fuzzing, scanning, tool-proxying, extensions).
-
-## 💥 Attack / Exploit Vectors
-### Proxy Setup & CA Certificate
-- Route browser traffic through the proxy (pre-configured browser or Firefox + FoxyProxy), then install the proxy CA cert to decrypt HTTPS.
-- **Commands**
-  - `burpsuite` / `java -jar </path/to/burpsuite.jar>` — launch Burp
-  - `zaproxy` — launch ZAP
-  - FoxyProxy entry `127.0.0.1:8080` (both tools default to port 8080)
-  - Burp CA: browse `http://burp` → `CA Certificate`; import in Firefox `about:preferences#privacy` → Authorities → Import
-
-### Intercepting Requests
-- Pause outbound requests to modify them before they reach the server (e.g. bypass front-end JS validation, inject `;ls;` into an `ip` param → command injection).
-- **Commands**
-  - Burp `Proxy > Intercept` (on by default)
-  - ZAP toggle intercept `CTRL+B`, or HUD step/continue
-
-### Intercepting Responses
-- Pause server responses to edit HTML before the browser renders it: `type="number"`→`type="text"`, `maxlength="3"`→`maxlength="100"`, unhide hidden fields, enable disabled buttons.
-- **Commands**
-  - Burp `Proxy > Proxy settings > Response modification rules` → `Unhide hidden form fields`
-  - ZAP HUD one-click Show/Enable fields
-
-### Automatic Modification (Match & Replace)
-- Auto-apply rules to every request/response instead of intercepting the same change repeatedly.
-- **Commands**
-  - Burp `Proxy > Proxy settings > HTTP match and replace rules` — e.g. Request header, match `^User-Agent.*$`, replace `User-Agent: HackTheBox Agent 1.0`, Regex: True
-  - Burp response body rule — match `type="number"` replace `type="text"`
-  - ZAP `Replacer` (`CTRL+R`) — Match Type `Request Header (will add if not present)`, string `User-Agent`
-
-### Repeating Requests (Repeater)
-- Resend and tweak any prior request without re-intercepting; quickly change HTTP method.
-- **Commands**
-  - Burp Repeater — `CTRL+R` send to Repeater, `CTRL+SHIFT+R` go to Repeater
-  - ZAP `Open/Resend with Request Editor` / HUD Replay in Console/Browser
-
-### Encoding / Decoding
-- Built-in encoders/decoders to craft payloads: URL, HTML, Unicode, Base64, ASCII hex (e.g. decode a base64 cookie, change guest→admin / false→true, re-encode).
-- **Commands**
-  - Burp URL-encode selection `CTRL+U`, URL-decode `CTRL+SHIFT+U`; Burp Decoder / Inspector
-  - ZAP Encoder/Decoder/Hash `CTRL+E`
-
-### Proxying Tools (CLI / thick clients)
-- Route non-browser tool traffic through the proxy (`http://127.0.0.1:8080`) to inspect/debug their requests.
-- **Commands**
-  - proxychains: edit `/etc/proxychains.conf`, comment socks line, add `http 127.0.0.1 8080`; run `proxychains -q curl http://SERVER_IP:PORT`
-  - Metasploit: `set PROXIES HTTP:127.0.0.1:8080`
-
-### Burp Intruder
-- Burp's web fuzzer/brute-forcer (directories, params, subdomains, passwords, AD spraying). Free version throttled to 1 req/sec; Pro unlimited.
-- **Commands**
-  - `CTRL+I` send to Intruder, `CTRL+SHIFT+I` go to Intruder; payload markers `§`
-  - Positions → Payloads (type/processing/encoding) → Settings (Grep-Match e.g. `200 OK`) → Attack (Sniper, Cluster Bomb)
-  - Wordlist example `/opt/useful/seclists/Discovery/Web-Content/common.txt`; skip-regex `^\..*$`
-
-### ZAP Fuzzer
-- ZAP's fuzzer (`Attack > Fuzz`); not throttled, so often more useful than free Burp Intruder.
-- **Commands**
-  - Payloads: File, File Fuzzers (built-in, e.g. `dirbuster/directory-list-1.0.txt`), Numberzz
-  - Processors: Base64/MD5/SHA/URL Encode/Script; Options: Concurrent Threads e.g. `20`
-  - FuzzDB cmd-injection list: `fuzzdb > attack > os-cmd-execution`
-
-### Burp Scanner
-- Pro-only crawler + vulnerability scanner.
-- **Commands**
-  - Target Scope (include/exclude) → Crawler (Crawl vs Crawl and Audit) → Passive Scanner (severity+confidence) → Active Scanner (XSS/SQLi/command injection) → Reporting
-
-### ZAP Scanner
-- Free crawler + scanner.
-- **Commands**
-  - ZAP Spider + Ajax Spider (JS/AJAX links) → Passive Scanner (Alerts) → Active Scanner → Reporting (HTML/XML/Markdown)
-
-### Extensions
-- Extend functionality via marketplaces.
-- **Commands**
-  - Burp BApp Store (some Pro-only / need Jython), e.g. `Decoder Improved`
-  - ZAP Marketplace add-ons (Release/Beta/Alpha), e.g. FuzzDB wordlists
-
-## 🛠️ Key Tools & Concepts
-- Burp Suite — most common proxy; Community free, Pro unlocks Active Scanner, fast Intruder
-- OWASP ZAP — free open-source proxy; no paywall/throttling; unique in-browser HUD
-- Web Proxy / MITM — intercepts HTTP/80 & HTTPS/443 (vs Wireshark which sniffs all traffic)
-- proxychains — forces any CLI tool through a proxy via `/etc/proxychains.conf`
-- FoxyProxy — Firefox extension to switch proxy profiles quickly
-- CA Certificate — proxy cert in browser trust store to decrypt HTTPS cleanly
-- Target Scope — regex include/exclude to focus features & scans
-- Crawler/Spider — maps site via links/forms (ZAP Ajax Spider also follows JS); does not fuzz unreferenced pages
-- Passive vs Active Scan — passive analyzes seen responses; active sends payloads to verify real vulns
-- Severity / Confidence — prioritize High + Certain/Firm findings
-- ZAP HUD — in-browser overlay controlling ZAP's core features
-
-## 🛡️ Mitigations (only if the module covers them)
-- Never rely on client-side (front-end JS/HTML) validation — proxies trivially bypass it; enforce all validation server-side.
-    </script>
-  </div>
+  <svg id="mindmap"></svg>
+  <script>
+    const data = {"content":"Using Web Proxies","children":[{"content":"&#x1f3af; Main Idea","children":[{"content":"Use web proxies (Burp Suite &amp; OWASP ZAP) as man-in-the-middle tools between browser and server to capture, inspect, modify, and replay HTTP/HTTPS traffic.","children":[],"payload":{"tag":"li","lines":"2,3"}},{"content":"This is the core enabling skill for Web Application Penetration Testing; the module teaches the proxy feature set, not specific web attacks.","children":[],"payload":{"tag":"li","lines":"3,4"}},{"content":"Covers Burp (most common, polished, key features paid/Pro) and ZAP (free, open-source, no throttling) side by side.","children":[],"payload":{"tag":"li","lines":"4,5"}},{"content":"Each proxy feature maps to a class of attack it supports (interception, repeating, encoding, fuzzing, scanning, tool-proxying, extensions).","children":[],"payload":{"tag":"li","lines":"5,7"}}],"payload":{"tag":"h2","lines":"1,2"}},{"content":"&#x1f4a5; Attack / Exploit Vectors","children":[{"content":"Proxy Setup &amp; CA Certificate","children":[{"content":"Route browser traffic through the proxy (pre-configured browser or Firefox + FoxyProxy), then install the proxy CA cert to decrypt HTTPS.","children":[],"payload":{"tag":"li","lines":"9,10"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>burpsuite<\/code> / <code>java -jar &lt;/path/to/burpsuite.jar&gt;<\/code> &#x2014; launch Burp","children":[],"payload":{"tag":"li","lines":"11,12"}},{"content":"<code>zaproxy<\/code> &#x2014; launch ZAP","children":[],"payload":{"tag":"li","lines":"12,13"}},{"content":"FoxyProxy entry <code>127.0.0.1:8080<\/code> (both tools default to port 8080)","children":[],"payload":{"tag":"li","lines":"13,14"}},{"content":"Burp CA: browse <code>http://burp<\/code> &#x2192; <code>CA Certificate<\/code>; import in Firefox <code>about:preferences#privacy<\/code> &#x2192; Authorities &#x2192; Import","children":[],"payload":{"tag":"li","lines":"14,16"}}],"payload":{"tag":"li","lines":"10,16"}}],"payload":{"tag":"h3","lines":"8,9"}},{"content":"Intercepting Requests","children":[{"content":"Pause outbound requests to modify them before they reach the server (e.g. bypass front-end JS validation, inject <code>;ls;<\/code> into an <code>ip<\/code> param &#x2192; command injection).","children":[],"payload":{"tag":"li","lines":"17,18"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Burp <code>Proxy &gt; Intercept<\/code> (on by default)","children":[],"payload":{"tag":"li","lines":"19,20"}},{"content":"ZAP toggle intercept <code>CTRL+B<\/code>, or HUD step/continue","children":[],"payload":{"tag":"li","lines":"20,22"}}],"payload":{"tag":"li","lines":"18,22"}}],"payload":{"tag":"h3","lines":"16,17"}},{"content":"Intercepting Responses","children":[{"content":"Pause server responses to edit HTML before the browser renders it: <code>type=&quot;number&quot;<\/code>&#x2192;<code>type=&quot;text&quot;<\/code>, <code>maxlength=&quot;3&quot;<\/code>&#x2192;<code>maxlength=&quot;100&quot;<\/code>, unhide hidden fields, enable disabled buttons.","children":[],"payload":{"tag":"li","lines":"23,24"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Burp <code>Proxy &gt; Proxy settings &gt; Response modification rules<\/code> &#x2192; <code>Unhide hidden form fields<\/code>","children":[],"payload":{"tag":"li","lines":"25,26"}},{"content":"ZAP HUD one-click Show/Enable fields","children":[],"payload":{"tag":"li","lines":"26,28"}}],"payload":{"tag":"li","lines":"24,28"}}],"payload":{"tag":"h3","lines":"22,23"}},{"content":"Automatic Modification (Match &amp; Replace)","children":[{"content":"Auto-apply rules to every request/response instead of intercepting the same change repeatedly.","children":[],"payload":{"tag":"li","lines":"29,30"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Burp <code>Proxy &gt; Proxy settings &gt; HTTP match and replace rules<\/code> &#x2014; e.g. Request header, match <code>^User-Agent.*&#x24;<\/code>, replace <code>User-Agent: HackTheBox Agent 1.0<\/code>, Regex: True","children":[],"payload":{"tag":"li","lines":"31,32"}},{"content":"Burp response body rule &#x2014; match <code>type=&quot;number&quot;<\/code> replace <code>type=&quot;text&quot;<\/code>","children":[],"payload":{"tag":"li","lines":"32,33"}},{"content":"ZAP <code>Replacer<\/code> (<code>CTRL+R<\/code>) &#x2014; Match Type <code>Request Header (will add if not present)<\/code>, string <code>User-Agent<\/code>","children":[],"payload":{"tag":"li","lines":"33,35"}}],"payload":{"tag":"li","lines":"30,35"}}],"payload":{"tag":"h3","lines":"28,29"}},{"content":"Repeating Requests (Repeater)","children":[{"content":"Resend and tweak any prior request without re-intercepting; quickly change HTTP method.","children":[],"payload":{"tag":"li","lines":"36,37"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Burp Repeater &#x2014; <code>CTRL+R<\/code> send to Repeater, <code>CTRL+SHIFT+R<\/code> go to Repeater","children":[],"payload":{"tag":"li","lines":"38,39"}},{"content":"ZAP <code>Open/Resend with Request Editor<\/code> / HUD Replay in Console/Browser","children":[],"payload":{"tag":"li","lines":"39,41"}}],"payload":{"tag":"li","lines":"37,41"}}],"payload":{"tag":"h3","lines":"35,36"}},{"content":"Encoding / Decoding","children":[{"content":"Built-in encoders/decoders to craft payloads: URL, HTML, Unicode, Base64, ASCII hex (e.g. decode a base64 cookie, change guest&#x2192;admin / false&#x2192;true, re-encode).","children":[],"payload":{"tag":"li","lines":"42,43"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Burp URL-encode selection <code>CTRL+U<\/code>, URL-decode <code>CTRL+SHIFT+U<\/code>; Burp Decoder / Inspector","children":[],"payload":{"tag":"li","lines":"44,45"}},{"content":"ZAP Encoder/Decoder/Hash <code>CTRL+E<\/code>","children":[],"payload":{"tag":"li","lines":"45,47"}}],"payload":{"tag":"li","lines":"43,47"}}],"payload":{"tag":"h3","lines":"41,42"}},{"content":"Proxying Tools (CLI / thick clients)","children":[{"content":"Route non-browser tool traffic through the proxy (<code>http://127.0.0.1:8080<\/code>) to inspect/debug their requests.","children":[],"payload":{"tag":"li","lines":"48,49"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"proxychains: edit <code>/etc/proxychains.conf<\/code>, comment socks line, add <code>http 127.0.0.1 8080<\/code>; run <code>proxychains -q curl http://SERVER_IP:PORT<\/code>","children":[],"payload":{"tag":"li","lines":"50,51"}},{"content":"Metasploit: <code>set PROXIES HTTP:127.0.0.1:8080<\/code>","children":[],"payload":{"tag":"li","lines":"51,53"}}],"payload":{"tag":"li","lines":"49,53"}}],"payload":{"tag":"h3","lines":"47,48"}},{"content":"Burp Intruder","children":[{"content":"Burp&apos;s web fuzzer/brute-forcer (directories, params, subdomains, passwords, AD spraying). Free version throttled to 1 req/sec; Pro unlimited.","children":[],"payload":{"tag":"li","lines":"54,55"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>CTRL+I<\/code> send to Intruder, <code>CTRL+SHIFT+I<\/code> go to Intruder; payload markers <code>&#xa7;<\/code>","children":[],"payload":{"tag":"li","lines":"56,57"}},{"content":"Positions &#x2192; Payloads (type/processing/encoding) &#x2192; Settings (Grep-Match e.g. <code>200 OK<\/code>) &#x2192; Attack (Sniper, Cluster Bomb)","children":[],"payload":{"tag":"li","lines":"57,58"}},{"content":"Wordlist example <code>/opt/useful/seclists/Discovery/Web-Content/common.txt<\/code>; skip-regex <code>^\\..*&#x24;<\/code>","children":[],"payload":{"tag":"li","lines":"58,60"}}],"payload":{"tag":"li","lines":"55,60"}}],"payload":{"tag":"h3","lines":"53,54"}},{"content":"ZAP Fuzzer","children":[{"content":"ZAP&apos;s fuzzer (<code>Attack &gt; Fuzz<\/code>); not throttled, so often more useful than free Burp Intruder.","children":[],"payload":{"tag":"li","lines":"61,62"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Payloads: File, File Fuzzers (built-in, e.g. <code>dirbuster/directory-list-1.0.txt<\/code>), Numberzz","children":[],"payload":{"tag":"li","lines":"63,64"}},{"content":"Processors: Base64/MD5/SHA/URL Encode/Script; Options: Concurrent Threads e.g. <code>20<\/code>","children":[],"payload":{"tag":"li","lines":"64,65"}},{"content":"FuzzDB cmd-injection list: <code>fuzzdb &gt; attack &gt; os-cmd-execution<\/code>","children":[],"payload":{"tag":"li","lines":"65,67"}}],"payload":{"tag":"li","lines":"62,67"}}],"payload":{"tag":"h3","lines":"60,61"}},{"content":"Burp Scanner","children":[{"content":"Pro-only crawler + vulnerability scanner.","children":[],"payload":{"tag":"li","lines":"68,69"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Target Scope (include/exclude) &#x2192; Crawler (Crawl vs Crawl and Audit) &#x2192; Passive Scanner (severity+confidence) &#x2192; Active Scanner (XSS/SQLi/command injection) &#x2192; Reporting","children":[],"payload":{"tag":"li","lines":"70,72"}}],"payload":{"tag":"li","lines":"69,72"}}],"payload":{"tag":"h3","lines":"67,68"}},{"content":"ZAP Scanner","children":[{"content":"Free crawler + scanner.","children":[],"payload":{"tag":"li","lines":"73,74"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"ZAP Spider + Ajax Spider (JS/AJAX links) &#x2192; Passive Scanner (Alerts) &#x2192; Active Scanner &#x2192; Reporting (HTML/XML/Markdown)","children":[],"payload":{"tag":"li","lines":"75,77"}}],"payload":{"tag":"li","lines":"74,77"}}],"payload":{"tag":"h3","lines":"72,73"}},{"content":"Extensions","children":[{"content":"Extend functionality via marketplaces.","children":[],"payload":{"tag":"li","lines":"78,79"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"Burp BApp Store (some Pro-only / need Jython), e.g. <code>Decoder Improved<\/code>","children":[],"payload":{"tag":"li","lines":"80,81"}},{"content":"ZAP Marketplace add-ons (Release/Beta/Alpha), e.g. FuzzDB wordlists","children":[],"payload":{"tag":"li","lines":"81,83"}}],"payload":{"tag":"li","lines":"79,83"}}],"payload":{"tag":"h3","lines":"77,78"}}],"payload":{"tag":"h2","lines":"7,8"}},{"content":"&#x1f6e0;&#xfe0f; Key Tools &amp; Concepts","children":[{"content":"Burp Suite &#x2014; most common proxy; Community free, Pro unlocks Active Scanner, fast Intruder","children":[],"payload":{"tag":"li","lines":"84,85"}},{"content":"OWASP ZAP &#x2014; free open-source proxy; no paywall/throttling; unique in-browser HUD","children":[],"payload":{"tag":"li","lines":"85,86"}},{"content":"Web Proxy / MITM &#x2014; intercepts HTTP/80 &amp; HTTPS/443 (vs Wireshark which sniffs all traffic)","children":[],"payload":{"tag":"li","lines":"86,87"}},{"content":"proxychains &#x2014; forces any CLI tool through a proxy via <code>/etc/proxychains.conf<\/code>","children":[],"payload":{"tag":"li","lines":"87,88"}},{"content":"FoxyProxy &#x2014; Firefox extension to switch proxy profiles quickly","children":[],"payload":{"tag":"li","lines":"88,89"}},{"content":"CA Certificate &#x2014; proxy cert in browser trust store to decrypt HTTPS cleanly","children":[],"payload":{"tag":"li","lines":"89,90"}},{"content":"Target Scope &#x2014; regex include/exclude to focus features &amp; scans","children":[],"payload":{"tag":"li","lines":"90,91"}},{"content":"Crawler/Spider &#x2014; maps site via links/forms (ZAP Ajax Spider also follows JS); does not fuzz unreferenced pages","children":[],"payload":{"tag":"li","lines":"91,92"}},{"content":"Passive vs Active Scan &#x2014; passive analyzes seen responses; active sends payloads to verify real vulns","children":[],"payload":{"tag":"li","lines":"92,93"}},{"content":"Severity / Confidence &#x2014; prioritize High + Certain/Firm findings","children":[],"payload":{"tag":"li","lines":"93,94"}},{"content":"ZAP HUD &#x2014; in-browser overlay controlling ZAP&apos;s core features","children":[],"payload":{"tag":"li","lines":"94,96"}}],"payload":{"tag":"h2","lines":"83,84"}},{"content":"&#x1f6e1;&#xfe0f; Mitigations (only if the module covers them)","children":[{"content":"Never rely on client-side (front-end JS/HTML) validation &#x2014; proxies trivially bypass it; enforce all validation server-side.","children":[],"payload":{"tag":"li","lines":"97,98"}}],"payload":{"tag":"h2","lines":"96,97"}}],"payload":{"tag":"h1","lines":"0,1"}}
+    const { Markmap, Toolbar, globalCSS } = window.markmap
+    if (globalCSS) {
+      const s = document.createElement("style")
+      s.textContent = globalCSS
+      document.head.appendChild(s)
+    }
+    const mm = Markmap.create(
+      "#mindmap",
+      { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+      data,
+    )
+    try {
+      const { el } = Toolbar.create(mm)
+      el.classList.add("mm-toolbar")
+      document.body.appendChild(el)
+    } catch (e) {}
+  </script>
 </body>
 </html>

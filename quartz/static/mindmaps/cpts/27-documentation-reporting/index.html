@@ -4,93 +4,39 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Documentation & Reporting — Mindmap</title>
+<link rel="stylesheet" href="../../../vendor/markmap/markmap-toolbar.css" />
 <style>
   :root { color-scheme: light dark; }
   html, body { margin: 0; height: 100%; }
   body { background: #faf8f8; }
   @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
-  svg.markmap { width: 100%; height: 100vh; display: block; }
+  #mindmap { width: 100%; height: 100vh; display: block; }
+  .mm-toolbar { position: absolute; bottom: 0.75rem; right: 0.75rem; }
 </style>
-<script>
-  window.markmap = {
-    autoLoader: {
-      toolbar: true,
-      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
-    },
-  }
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+<script src="../../../vendor/markmap/d3.min.js"></script>
+<script src="../../../vendor/markmap/markmap-view.js"></script>
+<script src="../../../vendor/markmap/markmap-toolbar.js"></script>
 </head>
 <body>
-  <div class="markmap">
-    <script type="text/template">
-# Documentation & Reporting
-## 🎯 Main Idea
-- Teaches how to document a penetration test and deliver a professional report — the actual product the client pays for.
-- Covers notetaking/evidence handling during the engagement, report types, report structure, writing findings, and reporting workflow/tips.
-- Goal: communicate risk clearly to both executive and technical audiences with reproducible, actionable findings.
-
-## 💥 Key Phases & Report Components
-
-### Notetaking & Organization (during the engagement)
-- Keep a consistent note structure; log everything for reproducibility and attribution.
-- **Key points**
-  - Notetaking tools — Obsidian, CherryTree, OneNote; sample structured layout
-  - Logging — record all exploitation attempts, commands, and timestamps (tmux logging)
-  - Artifacts left behind — track account creation / system modifications for cleanup
-  - Evidence — what to capture (screenshots, command output) and how to store it securely
-  - Formatting & redaction — blur/blank out passwords; redact sensitive data in screenshots & terminal
-  - What NOT to archive — avoid retaining client-sensitive data beyond scope/policy
-
-### Types of Reports
-- Report content and depth vary by assessment type and audience.
-- **Key points**
-  - Vulnerability Assessment vs Penetration Test; Internal vs External scope
-  - Inter-disciplinary: Purple Team, Cloud-focused, IoT, Web App, Hardware testing
-  - Draft Report → Final Report → Post-Remediation (retest) Report
-  - Attestation Report (compliance proof)
-  - Other deliverables — slide deck, spreadsheet of findings
-  - Vulnerability Notifications — when to draft (critical/urgent issues) and their contents
-
-### Components of a Report
-- The standard structure of a professional penetration test report.
-- **Key points**
-  - Prioritizing efforts — focus on highest-impact issues
-  - Attack Chain — narrative walk-through of how compromise was achieved (with reproduction steps)
-  - Executive Summary — non-technical, risk-focused; Do/Don't and vocabulary guidance
-  - Summary of Recommendations — strategic remediation themes
-  - Findings — detailed technical issues
-  - Static Appendices — Scope, Methodology, Severity Ratings, Biographies
-  - Dynamic Appendices — Exploitation Attempts/Payloads, Compromised Credentials, Config Changes, Additional Affected Scope, Information Gathering, Domain Password Analysis
-
-### How to Write Up a Finding
-- Each finding must be clear, reproducible, and actionable.
-- **Key points**
-  - Breakdown of a finding — description, impact, affected assets, severity, evidence
-  - Adequate reproduction steps — enough detail for the client to replicate
-  - Effective remediation recommendations — specific, prioritized, with rationale
-  - Quality references — authoritative sources (vendor docs, CVEs, standards)
-  - Good vs poorly written finding examples (e.g. Kerberoasting, Tomcat default creds)
-
-### Reporting Tips & Tricks (workflow)
-- Make reporting efficient, consistent, and high quality.
-- **Key points**
-  - Templates and MS Word tips & tricks
-  - Automation and a reporting tool / findings database
-  - Client communication throughout the engagement
-  - QA process / report review meeting before delivery
-  - Presenting the final product professionally
-
-## 🛠️ Key Tools & Concepts
-- Obsidian / CherryTree / OneNote — structured notetaking
-- tmux logging — capture terminal evidence
-- Findings database & reporting tools — reuse and consistency
-- Severity ratings (CVSS) & methodology sections
-- Executive vs technical audience targeting
-
-## 🛡️ Mitigations
-- (Not applicable — this is a concept/process module, not an exploitation module.)
-    </script>
-  </div>
+  <svg id="mindmap"></svg>
+  <script>
+    const data = {"content":"Documentation &amp; Reporting","children":[{"content":"&#x1f3af; Main Idea","children":[{"content":"Teaches how to document a penetration test and deliver a professional report &#x2014; the actual product the client pays for.","children":[],"payload":{"tag":"li","lines":"2,3"}},{"content":"Covers notetaking/evidence handling during the engagement, report types, report structure, writing findings, and reporting workflow/tips.","children":[],"payload":{"tag":"li","lines":"3,4"}},{"content":"Goal: communicate risk clearly to both executive and technical audiences with reproducible, actionable findings.","children":[],"payload":{"tag":"li","lines":"4,6"}}],"payload":{"tag":"h2","lines":"1,2"}},{"content":"&#x1f4a5; Key Phases &amp; Report Components","children":[{"content":"Notetaking &amp; Organization (during the engagement)","children":[{"content":"Keep a consistent note structure; log everything for reproducibility and attribution.","children":[],"payload":{"tag":"li","lines":"9,10"}},{"content":"<strong>Key points<\/strong>","children":[{"content":"Notetaking tools &#x2014; Obsidian, CherryTree, OneNote; sample structured layout","children":[],"payload":{"tag":"li","lines":"11,12"}},{"content":"Logging &#x2014; record all exploitation attempts, commands, and timestamps (tmux logging)","children":[],"payload":{"tag":"li","lines":"12,13"}},{"content":"Artifacts left behind &#x2014; track account creation / system modifications for cleanup","children":[],"payload":{"tag":"li","lines":"13,14"}},{"content":"Evidence &#x2014; what to capture (screenshots, command output) and how to store it securely","children":[],"payload":{"tag":"li","lines":"14,15"}},{"content":"Formatting &amp; redaction &#x2014; blur/blank out passwords; redact sensitive data in screenshots &amp; terminal","children":[],"payload":{"tag":"li","lines":"15,16"}},{"content":"What NOT to archive &#x2014; avoid retaining client-sensitive data beyond scope/policy","children":[],"payload":{"tag":"li","lines":"16,18"}}],"payload":{"tag":"li","lines":"10,18"}}],"payload":{"tag":"h3","lines":"8,9"}},{"content":"Types of Reports","children":[{"content":"Report content and depth vary by assessment type and audience.","children":[],"payload":{"tag":"li","lines":"19,20"}},{"content":"<strong>Key points<\/strong>","children":[{"content":"Vulnerability Assessment vs Penetration Test; Internal vs External scope","children":[],"payload":{"tag":"li","lines":"21,22"}},{"content":"Inter-disciplinary: Purple Team, Cloud-focused, IoT, Web App, Hardware testing","children":[],"payload":{"tag":"li","lines":"22,23"}},{"content":"Draft Report &#x2192; Final Report &#x2192; Post-Remediation (retest) Report","children":[],"payload":{"tag":"li","lines":"23,24"}},{"content":"Attestation Report (compliance proof)","children":[],"payload":{"tag":"li","lines":"24,25"}},{"content":"Other deliverables &#x2014; slide deck, spreadsheet of findings","children":[],"payload":{"tag":"li","lines":"25,26"}},{"content":"Vulnerability Notifications &#x2014; when to draft (critical/urgent issues) and their contents","children":[],"payload":{"tag":"li","lines":"26,28"}}],"payload":{"tag":"li","lines":"20,28"}}],"payload":{"tag":"h3","lines":"18,19"}},{"content":"Components of a Report","children":[{"content":"The standard structure of a professional penetration test report.","children":[],"payload":{"tag":"li","lines":"29,30"}},{"content":"<strong>Key points<\/strong>","children":[{"content":"Prioritizing efforts &#x2014; focus on highest-impact issues","children":[],"payload":{"tag":"li","lines":"31,32"}},{"content":"Attack Chain &#x2014; narrative walk-through of how compromise was achieved (with reproduction steps)","children":[],"payload":{"tag":"li","lines":"32,33"}},{"content":"Executive Summary &#x2014; non-technical, risk-focused; Do/Don&apos;t and vocabulary guidance","children":[],"payload":{"tag":"li","lines":"33,34"}},{"content":"Summary of Recommendations &#x2014; strategic remediation themes","children":[],"payload":{"tag":"li","lines":"34,35"}},{"content":"Findings &#x2014; detailed technical issues","children":[],"payload":{"tag":"li","lines":"35,36"}},{"content":"Static Appendices &#x2014; Scope, Methodology, Severity Ratings, Biographies","children":[],"payload":{"tag":"li","lines":"36,37"}},{"content":"Dynamic Appendices &#x2014; Exploitation Attempts/Payloads, Compromised Credentials, Config Changes, Additional Affected Scope, Information Gathering, Domain Password Analysis","children":[],"payload":{"tag":"li","lines":"37,39"}}],"payload":{"tag":"li","lines":"30,39"}}],"payload":{"tag":"h3","lines":"28,29"}},{"content":"How to Write Up a Finding","children":[{"content":"Each finding must be clear, reproducible, and actionable.","children":[],"payload":{"tag":"li","lines":"40,41"}},{"content":"<strong>Key points<\/strong>","children":[{"content":"Breakdown of a finding &#x2014; description, impact, affected assets, severity, evidence","children":[],"payload":{"tag":"li","lines":"42,43"}},{"content":"Adequate reproduction steps &#x2014; enough detail for the client to replicate","children":[],"payload":{"tag":"li","lines":"43,44"}},{"content":"Effective remediation recommendations &#x2014; specific, prioritized, with rationale","children":[],"payload":{"tag":"li","lines":"44,45"}},{"content":"Quality references &#x2014; authoritative sources (vendor docs, CVEs, standards)","children":[],"payload":{"tag":"li","lines":"45,46"}},{"content":"Good vs poorly written finding examples (e.g. Kerberoasting, Tomcat default creds)","children":[],"payload":{"tag":"li","lines":"46,48"}}],"payload":{"tag":"li","lines":"41,48"}}],"payload":{"tag":"h3","lines":"39,40"}},{"content":"Reporting Tips &amp; Tricks (workflow)","children":[{"content":"Make reporting efficient, consistent, and high quality.","children":[],"payload":{"tag":"li","lines":"49,50"}},{"content":"<strong>Key points<\/strong>","children":[{"content":"Templates and MS Word tips &amp; tricks","children":[],"payload":{"tag":"li","lines":"51,52"}},{"content":"Automation and a reporting tool / findings database","children":[],"payload":{"tag":"li","lines":"52,53"}},{"content":"Client communication throughout the engagement","children":[],"payload":{"tag":"li","lines":"53,54"}},{"content":"QA process / report review meeting before delivery","children":[],"payload":{"tag":"li","lines":"54,55"}},{"content":"Presenting the final product professionally","children":[],"payload":{"tag":"li","lines":"55,57"}}],"payload":{"tag":"li","lines":"50,57"}}],"payload":{"tag":"h3","lines":"48,49"}}],"payload":{"tag":"h2","lines":"6,7"}},{"content":"&#x1f6e0;&#xfe0f; Key Tools &amp; Concepts","children":[{"content":"Obsidian / CherryTree / OneNote &#x2014; structured notetaking","children":[],"payload":{"tag":"li","lines":"58,59"}},{"content":"tmux logging &#x2014; capture terminal evidence","children":[],"payload":{"tag":"li","lines":"59,60"}},{"content":"Findings database &amp; reporting tools &#x2014; reuse and consistency","children":[],"payload":{"tag":"li","lines":"60,61"}},{"content":"Severity ratings (CVSS) &amp; methodology sections","children":[],"payload":{"tag":"li","lines":"61,62"}},{"content":"Executive vs technical audience targeting","children":[],"payload":{"tag":"li","lines":"62,64"}}],"payload":{"tag":"h2","lines":"57,58"}},{"content":"&#x1f6e1;&#xfe0f; Mitigations","children":[{"content":"(Not applicable &#x2014; this is a concept/process module, not an exploitation module.)","children":[],"payload":{"tag":"li","lines":"65,66"}}],"payload":{"tag":"h2","lines":"64,65"}}],"payload":{"tag":"h1","lines":"0,1"}}
+    const { Markmap, Toolbar, globalCSS } = window.markmap
+    if (globalCSS) {
+      const s = document.createElement("style")
+      s.textContent = globalCSS
+      document.head.appendChild(s)
+    }
+    const mm = Markmap.create(
+      "#mindmap",
+      { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+      data,
+    )
+    try {
+      const { el } = Toolbar.create(mm)
+      el.classList.add("mm-toolbar")
+      document.body.appendChild(el)
+    } catch (e) {}
+  </script>
 </body>
 </html>

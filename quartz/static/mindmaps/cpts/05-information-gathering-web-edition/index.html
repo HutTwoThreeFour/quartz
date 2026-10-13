@@ -4,118 +4,39 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Information Gathering - Web Edition — Mindmap</title>
+<link rel="stylesheet" href="../../../vendor/markmap/markmap-toolbar.css" />
 <style>
   :root { color-scheme: light dark; }
   html, body { margin: 0; height: 100%; }
   body { background: #faf8f8; }
   @media (prefers-color-scheme: dark) { body { background: #1e1e21; } }
-  svg.markmap { width: 100%; height: 100vh; display: block; }
+  #mindmap { width: 100%; height: 100vh; display: block; }
+  .mm-toolbar { position: absolute; bottom: 0.75rem; right: 0.75rem; }
 </style>
-<script>
-  window.markmap = {
-    autoLoader: {
-      toolbar: true,
-      options: { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
-    },
-  }
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+<script src="../../../vendor/markmap/d3.min.js"></script>
+<script src="../../../vendor/markmap/markmap-view.js"></script>
+<script src="../../../vendor/markmap/markmap-toolbar.js"></script>
 </head>
 <body>
-  <div class="markmap">
-    <script type="text/template">
-# Information Gathering - Web Edition
-## 🎯 Main Idea
-- Web reconnaissance: systematically gather information about a website/web app before attacking it.
-- Goals: identify assets (domains, subdomains, IPs), uncover hidden info (dirs, files, tech), analyze the attack surface, and gather intelligence (emails, employees, tech stack).
-- Uses **active** recon (direct interaction, higher detection risk) and **passive** recon (public data, stealthier / OSINT).
-
-## 💥 Attack / Exploit Vectors
-### WHOIS Lookups (passive)
-- Query registration data: owner, registrar, dates, nameservers, contacts — useful for social engineering.
-- **Commands**
-  - `whois example.com` — retrieve domain registration/ownership info
-
-### DNS Enumeration (dig)
-- Resolve domains and pull record types (A, AAAA, CNAME, MX, NS, TXT, SOA) to map infrastructure.
-- **Commands**
-  - `dig example.com A` — query the IPv4 A record
-
-### Subdomain Enumeration
-- Discover subdomains that expose extra attack surface (dev/staging servers, forgotten apps).
-- Active (brute-force, zone transfers) vs passive (CT logs, search engines).
-- **Commands**
-  - `dnsenum example.com -f subdomains.txt` — dictionary brute-force of subdomains
-
-### DNS Zone Transfers (AXFR)
-- Misconfigured DNS servers may hand over the full zone file (all subdomains, IPs, mail config) to any requester.
-- **Commands**
-  - `dig @ns1.example.com example.com axfr` — request a full zone transfer
-
-### Virtual Host Discovery
-- Multiple sites share one IP; brute-force Host headers to reveal hidden vhosts not found by IP scanning.
-- **Commands**
-  - `gobuster vhost -u http://192.0.2.1 -w hostnames.txt` — enumerate virtual hosts by hostname
-
-### Certificate Transparency (CT) Logs (passive)
-- Public SSL/TLS cert logs reveal overlooked subdomains via crt.sh.
-- **Commands**
-  - `curl -s "https://crt.sh/?q=%25.example.com&output=json" | jq -r '.[].name_value' | sed 's/\*\.//g' | sort -u` — extract unique subdomains from crt.sh
-
-### Fingerprinting
-- Identify server software, versions, CMS, frameworks, and WAFs to target known exploits/misconfigs.
-- Techniques: banner grabbing, HTTP header analysis, probing for specific responses, page-content analysis.
-- **Commands**
-  - `curl -I inlanefreight.com` — grab HTTP headers / banner (Server, X-Powered-By)
-  - `pip3 install git+https://github.com/EnableSecurity/wafw00f` — install wafw00f
-  - `wafw00f inlanefreight.com` — detect presence/type of a WAF
-  - `nikto -h inlanefreight.com -Tuning b` — run Nikto software-identification modules only
-
-### Web Crawling / Spidering
-- Automated link-following to map site structure and extract links, comments, metadata, and sensitive files (.bak, web.config, logs, keys).
-- Breadth-first (broad overview) vs depth-first (reach deep).
-- **Commands**
-  - `wget -O ReconSpider.zip <htb-url>/ReconSpider.v1.2.zip` — download the custom ReconSpider
-  - `python3 ReconSpider.py http://inlanefreight.com` — crawl target, output to results.json
-  - `jq -r '.[] | select(.file != null) | .file' example_data.json | sort -u` — extract crawled links
-
-### robots.txt & .well-known URIs
-- robots.txt can reveal hidden/off-limits directories.
-- `.well-known/` standardized endpoints (security.txt, openid-configuration) expose config/metadata; openid-configuration leaks auth/token/userinfo endpoints and JWKS URI.
-
-### Search Engine Discovery (Google Dorking / OSINT)
-- Use advanced operators to find exposed docs, login pages, configs, and directories — passive and legal.
-- **Commands**
-  - `site:example.com "password reset"` — restrict to a site
-  - `inurl:admin login` / `allinurl:admin panel` — term in URL
-  - `filetype:pdf "confidential report"` — limit to a file type
-  - `intitle:"index of" /backup` — open directory listings
-  - `site:example.com inurl:config.php` — hunt config files
-  - `cache:example.com` — view cached version
-
-### Web Archives (Wayback Machine)
-- Historical snapshots reveal removed pages, old directories, subdomains, and content changes — passive.
-
-## 🛠️ Key Tools & Concepts
-- `whois` — domain registration lookups
-- `dig` / `dnsenum` — DNS queries, zone transfers, subdomain brute-force
-- `gobuster` (vhost mode) — virtual host enumeration
-- `crt.sh` + `jq`/`sed` — CT-log subdomain mining
-- `curl -I`, `whatweb`, `Wappalyzer`, `BuiltWith`, `Netcraft`, `Nmap` — fingerprinting
-- `wafw00f` — WAF detection
-- `Nikto` — web server scanner / fingerprinting
-- `Scrapy` / `ReconSpider`, Burp Spider, OWASP ZAP, Apache Nutch — crawlers
-- `FinalRecon` — all-in-one recon framework (headers, whois, SSL, crawl, DNS/subdomain/dir enum, wayback, port scan)
-  - `./finalrecon.py --headers --whois --url http://inlanefreight.com`
-  - `./finalrecon.py --full` / `--ps` / `--wayback`
-- Google Dorks, Wayback Machine — OSINT / passive recon
-
-## 🛡️ Mitigations
-- Restrict DNS zone transfers to authorized secondary servers only.
-- Suppress/obfuscate verbose banners and version headers; add security headers (HSTS).
-- Use domain privacy services to mask WHOIS data.
-- Remove sensitive/backup/config files from web roots and restrict directory listing.
-    </script>
-  </div>
+  <svg id="mindmap"></svg>
+  <script>
+    const data = {"content":"Information Gathering - Web Edition","children":[{"content":"&#x1f3af; Main Idea","children":[{"content":"Web reconnaissance: systematically gather information about a website/web app before attacking it.","children":[],"payload":{"tag":"li","lines":"2,3"}},{"content":"Goals: identify assets (domains, subdomains, IPs), uncover hidden info (dirs, files, tech), analyze the attack surface, and gather intelligence (emails, employees, tech stack).","children":[],"payload":{"tag":"li","lines":"3,4"}},{"content":"Uses <strong>active<\/strong> recon (direct interaction, higher detection risk) and <strong>passive<\/strong> recon (public data, stealthier / OSINT).","children":[],"payload":{"tag":"li","lines":"4,6"}}],"payload":{"tag":"h2","lines":"1,2"}},{"content":"&#x1f4a5; Attack / Exploit Vectors","children":[{"content":"WHOIS Lookups (passive)","children":[{"content":"Query registration data: owner, registrar, dates, nameservers, contacts &#x2014; useful for social engineering.","children":[],"payload":{"tag":"li","lines":"8,9"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>whois example.com<\/code> &#x2014; retrieve domain registration/ownership info","children":[],"payload":{"tag":"li","lines":"10,12"}}],"payload":{"tag":"li","lines":"9,12"}}],"payload":{"tag":"h3","lines":"7,8"}},{"content":"DNS Enumeration (dig)","children":[{"content":"Resolve domains and pull record types (A, AAAA, CNAME, MX, NS, TXT, SOA) to map infrastructure.","children":[],"payload":{"tag":"li","lines":"13,14"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>dig example.com A<\/code> &#x2014; query the IPv4 A record","children":[],"payload":{"tag":"li","lines":"15,17"}}],"payload":{"tag":"li","lines":"14,17"}}],"payload":{"tag":"h3","lines":"12,13"}},{"content":"Subdomain Enumeration","children":[{"content":"Discover subdomains that expose extra attack surface (dev/staging servers, forgotten apps).","children":[],"payload":{"tag":"li","lines":"18,19"}},{"content":"Active (brute-force, zone transfers) vs passive (CT logs, search engines).","children":[],"payload":{"tag":"li","lines":"19,20"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>dnsenum example.com -f subdomains.txt<\/code> &#x2014; dictionary brute-force of subdomains","children":[],"payload":{"tag":"li","lines":"21,23"}}],"payload":{"tag":"li","lines":"20,23"}}],"payload":{"tag":"h3","lines":"17,18"}},{"content":"DNS Zone Transfers (AXFR)","children":[{"content":"Misconfigured DNS servers may hand over the full zone file (all subdomains, IPs, mail config) to any requester.","children":[],"payload":{"tag":"li","lines":"24,25"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>dig @ns1.example.com example.com axfr<\/code> &#x2014; request a full zone transfer","children":[],"payload":{"tag":"li","lines":"26,28"}}],"payload":{"tag":"li","lines":"25,28"}}],"payload":{"tag":"h3","lines":"23,24"}},{"content":"Virtual Host Discovery","children":[{"content":"Multiple sites share one IP; brute-force Host headers to reveal hidden vhosts not found by IP scanning.","children":[],"payload":{"tag":"li","lines":"29,30"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>gobuster vhost -u http://192.0.2.1 -w hostnames.txt<\/code> &#x2014; enumerate virtual hosts by hostname","children":[],"payload":{"tag":"li","lines":"31,33"}}],"payload":{"tag":"li","lines":"30,33"}}],"payload":{"tag":"h3","lines":"28,29"}},{"content":"Certificate Transparency (CT) Logs (passive)","children":[{"content":"Public SSL/TLS cert logs reveal overlooked subdomains via crt.sh.","children":[],"payload":{"tag":"li","lines":"34,35"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>curl -s &quot;https://crt.sh/?q=%25.example.com&amp;output=json&quot; | jq -r &apos;.[].name_value&apos; | sed &apos;s/\\*\\.//g&apos; | sort -u<\/code> &#x2014; extract unique subdomains from crt.sh","children":[],"payload":{"tag":"li","lines":"36,38"}}],"payload":{"tag":"li","lines":"35,38"}}],"payload":{"tag":"h3","lines":"33,34"}},{"content":"Fingerprinting","children":[{"content":"Identify server software, versions, CMS, frameworks, and WAFs to target known exploits/misconfigs.","children":[],"payload":{"tag":"li","lines":"39,40"}},{"content":"Techniques: banner grabbing, HTTP header analysis, probing for specific responses, page-content analysis.","children":[],"payload":{"tag":"li","lines":"40,41"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>curl -I inlanefreight.com<\/code> &#x2014; grab HTTP headers / banner (Server, X-Powered-By)","children":[],"payload":{"tag":"li","lines":"42,43"}},{"content":"<code>pip3 install git+https://github.com/EnableSecurity/wafw00f<\/code> &#x2014; install wafw00f","children":[],"payload":{"tag":"li","lines":"43,44"}},{"content":"<code>wafw00f inlanefreight.com<\/code> &#x2014; detect presence/type of a WAF","children":[],"payload":{"tag":"li","lines":"44,45"}},{"content":"<code>nikto -h inlanefreight.com -Tuning b<\/code> &#x2014; run Nikto software-identification modules only","children":[],"payload":{"tag":"li","lines":"45,47"}}],"payload":{"tag":"li","lines":"41,47"}}],"payload":{"tag":"h3","lines":"38,39"}},{"content":"Web Crawling / Spidering","children":[{"content":"Automated link-following to map site structure and extract links, comments, metadata, and sensitive files (.bak, web.config, logs, keys).","children":[],"payload":{"tag":"li","lines":"48,49"}},{"content":"Breadth-first (broad overview) vs depth-first (reach deep).","children":[],"payload":{"tag":"li","lines":"49,50"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>wget -O ReconSpider.zip &lt;htb-url&gt;/ReconSpider.v1.2.zip<\/code> &#x2014; download the custom ReconSpider","children":[],"payload":{"tag":"li","lines":"51,52"}},{"content":"<code>python3 ReconSpider.py http://inlanefreight.com<\/code> &#x2014; crawl target, output to results.json","children":[],"payload":{"tag":"li","lines":"52,53"}},{"content":"<code>jq -r &apos;.[] | select(.file != null) | .file&apos; example_data.json | sort -u<\/code> &#x2014; extract crawled links","children":[],"payload":{"tag":"li","lines":"53,55"}}],"payload":{"tag":"li","lines":"50,55"}}],"payload":{"tag":"h3","lines":"47,48"}},{"content":"robots.txt &amp; .well-known URIs","children":[{"content":"robots.txt can reveal hidden/off-limits directories.","children":[],"payload":{"tag":"li","lines":"56,57"}},{"content":"<code>.well-known/<\/code> standardized endpoints (security.txt, openid-configuration) expose config/metadata; openid-configuration leaks auth/token/userinfo endpoints and JWKS URI.","children":[],"payload":{"tag":"li","lines":"57,59"}}],"payload":{"tag":"h3","lines":"55,56"}},{"content":"Search Engine Discovery (Google Dorking / OSINT)","children":[{"content":"Use advanced operators to find exposed docs, login pages, configs, and directories &#x2014; passive and legal.","children":[],"payload":{"tag":"li","lines":"60,61"}},{"content":"<strong>Commands<\/strong>","children":[{"content":"<code>site:example.com &quot;password reset&quot;<\/code> &#x2014; restrict to a site","children":[],"payload":{"tag":"li","lines":"62,63"}},{"content":"<code>inurl:admin login<\/code> / <code>allinurl:admin panel<\/code> &#x2014; term in URL","children":[],"payload":{"tag":"li","lines":"63,64"}},{"content":"<code>filetype:pdf &quot;confidential report&quot;<\/code> &#x2014; limit to a file type","children":[],"payload":{"tag":"li","lines":"64,65"}},{"content":"<code>intitle:&quot;index of&quot; /backup<\/code> &#x2014; open directory listings","children":[],"payload":{"tag":"li","lines":"65,66"}},{"content":"<code>site:example.com inurl:config.php<\/code> &#x2014; hunt config files","children":[],"payload":{"tag":"li","lines":"66,67"}},{"content":"<code>cache:example.com<\/code> &#x2014; view cached version","children":[],"payload":{"tag":"li","lines":"67,69"}}],"payload":{"tag":"li","lines":"61,69"}}],"payload":{"tag":"h3","lines":"59,60"}},{"content":"Web Archives (Wayback Machine)","children":[{"content":"Historical snapshots reveal removed pages, old directories, subdomains, and content changes &#x2014; passive.","children":[],"payload":{"tag":"li","lines":"70,72"}}],"payload":{"tag":"h3","lines":"69,70"}}],"payload":{"tag":"h2","lines":"6,7"}},{"content":"&#x1f6e0;&#xfe0f; Key Tools &amp; Concepts","children":[{"content":"<code>whois<\/code> &#x2014; domain registration lookups","children":[],"payload":{"tag":"li","lines":"73,74"}},{"content":"<code>dig<\/code> / <code>dnsenum<\/code> &#x2014; DNS queries, zone transfers, subdomain brute-force","children":[],"payload":{"tag":"li","lines":"74,75"}},{"content":"<code>gobuster<\/code> (vhost mode) &#x2014; virtual host enumeration","children":[],"payload":{"tag":"li","lines":"75,76"}},{"content":"<code>crt.sh<\/code> + <code>jq<\/code>/<code>sed<\/code> &#x2014; CT-log subdomain mining","children":[],"payload":{"tag":"li","lines":"76,77"}},{"content":"<code>curl -I<\/code>, <code>whatweb<\/code>, <code>Wappalyzer<\/code>, <code>BuiltWith<\/code>, <code>Netcraft<\/code>, <code>Nmap<\/code> &#x2014; fingerprinting","children":[],"payload":{"tag":"li","lines":"77,78"}},{"content":"<code>wafw00f<\/code> &#x2014; WAF detection","children":[],"payload":{"tag":"li","lines":"78,79"}},{"content":"<code>Nikto<\/code> &#x2014; web server scanner / fingerprinting","children":[],"payload":{"tag":"li","lines":"79,80"}},{"content":"<code>Scrapy<\/code> / <code>ReconSpider<\/code>, Burp Spider, OWASP ZAP, Apache Nutch &#x2014; crawlers","children":[],"payload":{"tag":"li","lines":"80,81"}},{"content":"<code>FinalRecon<\/code> &#x2014; all-in-one recon framework (headers, whois, SSL, crawl, DNS/subdomain/dir enum, wayback, port scan)","children":[{"content":"<code>./finalrecon.py --headers --whois --url http://inlanefreight.com<\/code>","children":[],"payload":{"tag":"li","lines":"82,83"}},{"content":"<code>./finalrecon.py --full<\/code> / <code>--ps<\/code> / <code>--wayback<\/code>","children":[],"payload":{"tag":"li","lines":"83,84"}}],"payload":{"tag":"li","lines":"81,84"}},{"content":"Google Dorks, Wayback Machine &#x2014; OSINT / passive recon","children":[],"payload":{"tag":"li","lines":"84,86"}}],"payload":{"tag":"h2","lines":"72,73"}},{"content":"&#x1f6e1;&#xfe0f; Mitigations","children":[{"content":"Restrict DNS zone transfers to authorized secondary servers only.","children":[],"payload":{"tag":"li","lines":"87,88"}},{"content":"Suppress/obfuscate verbose banners and version headers; add security headers (HSTS).","children":[],"payload":{"tag":"li","lines":"88,89"}},{"content":"Use domain privacy services to mask WHOIS data.","children":[],"payload":{"tag":"li","lines":"89,90"}},{"content":"Remove sensitive/backup/config files from web roots and restrict directory listing.","children":[],"payload":{"tag":"li","lines":"90,91"}}],"payload":{"tag":"h2","lines":"86,87"}}],"payload":{"tag":"h1","lines":"0,1"}}
+    const { Markmap, Toolbar, globalCSS } = window.markmap
+    if (globalCSS) {
+      const s = document.createElement("style")
+      s.textContent = globalCSS
+      document.head.appendChild(s)
+    }
+    const mm = Markmap.create(
+      "#mindmap",
+      { maxWidth: 320, spacingVertical: 8, paddingX: 16 },
+      data,
+    )
+    try {
+      const { el } = Toolbar.create(mm)
+      el.classList.add("mm-toolbar")
+      document.body.appendChild(el)
+    } catch (e) {}
+  </script>
 </body>
 </html>
