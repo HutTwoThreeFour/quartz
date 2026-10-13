@@ -24,8 +24,7 @@ In web recon, the `.well-known` URIs can be invaluable for discovering endpoints
 
 The `openid-configuration` URI is part of the OpenID Connect Discovery protocol, an identity layer built on top of the OAuth 2.0 protocol. When a client application wants to use OpenID Connect for authentication, it can retrieve the OpenID Connect Provider's configuration by accessing the `https://example.com/.well-known/openid-configuration` endpoint. This endpoint returns a JSON document containing metadata about the provider's endpoints, supported authentication methods, token issuance, and more:
 
-```
-        json
+```json
 {
   "issuer": "https://example.com",
   "authorization_endpoint": "https://example.com/oauth2/authorize",

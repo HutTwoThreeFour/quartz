@@ -43,8 +43,7 @@ The [sshd\_config](https://www.ssh.com/academy/ssh/sshd_config) file, responsibl
 
 #### Default Configuration
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/ssh/sshd_config  | grep -v "#" | sed -r '/^\s*$/d'
 
 Include /etc/ssh/sshd_config.d/*.conf
@@ -85,8 +84,7 @@ One of the tools we can use to fingerprint the SSH server is [ssh-audit](https:/
 
 #### SSH-Audit
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/jtesta/ssh-audit.git && cd ssh-audit
 hiimeins@htb[/htb]$ ./ssh-audit.py 10.129.14.132
 
@@ -127,8 +125,7 @@ The first thing we can see in the first few lines of the output is the banner th
 
 #### Change Authentication Method
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh -v cry0l1t3@10.129.14.132
 
 OpenSSH_8.2p1 Ubuntu-4ubuntu0.3, OpenSSL 1.1.1f  31 Mar 2020
@@ -139,8 +136,7 @@ debug1: Authentications that can continue: publickey,password,keyboard-interacti
 
 For potential brute-force attacks, we can specify the authentication method with the SSH client option `PreferredAuthentications`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh -v cry0l1t3@10.129.14.132 -o PreferredAuthentications=password
 
 OpenSSH_8.2p1 Ubuntu-4ubuntu0.3, OpenSSL 1.1.1f  31 Mar 2020
@@ -168,8 +164,7 @@ Let's do a bit of quick footprinting. We can see that Rsync is in use using prot
 
 #### Scanning for Rsync
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -sV -p 873 127.0.0.1
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2022-09-19 09:31 EDT
@@ -187,8 +182,7 @@ Nmap done: 1 IP address (1 host up) scanned in 1.13 seconds
 
 We can next probe the service a bit to see what we can gain access to.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nv 127.0.0.1 873
 
 (UNKNOWN) [127.0.0.1] 873 (rsync) open
@@ -203,8 +197,7 @@ dev             Dev Tools
 
 Here we can see a share called `dev`, and we can enumerate it further.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rsync -av --list-only rsync://127.0.0.1/dev
 
 receiving incremental file list
@@ -250,8 +243,7 @@ The /etc/hosts.equiv file contains a list of trusted hosts and is used to grant 
 
 #### /etc/hosts.equiv
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/hosts.equiv
 
 # <hostname> <local username>
@@ -262,8 +254,7 @@ Now that we have a basic understanding of `r-commands`, let's do some quick foot
 
 #### Scanning for R-Services
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -sV -p 512,513,514 10.0.17.2
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2022-12-02 15:02 EST
@@ -287,8 +278,7 @@ The primary concern for `r-services`, and one of the primary reasons `SSH` was i
 
 #### Sample .rhosts File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat .rhosts
 
 htb-student     10.0.17.5
@@ -302,8 +292,7 @@ Misconfigurations in either of these files can allow an attacker to authenticate
 
 #### Logging in Using Rlogin
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rlogin 10.0.17.2 -l htb-student
 
 Last login: Fri Dec  2 16:11:21 from localhost
@@ -315,8 +304,7 @@ We have successfully logged in under the `htb-student` account on the remote hos
 
 #### Listing Authenticated Users Using Rwho
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rwho
 
 root     web01:pts/0 Dec  2 21:34
@@ -329,8 +317,7 @@ From this information, we can see that the `htb-student` user is currently authe
 
 To provide additional information in conjunction with `rwho`, we can issue the `rusers` command. This will give us a more detailed account of all logged-in users over the network, including information such as the username, hostname of the accessed machine, TTY that the user is logged in to, the date and time the user logged in, the amount of time since the user typed on the keyboard, and the remote host they logged in from (if applicable).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rusers -al 10.0.17.5
 
 htb-student     10.0.17.5:console          Dec 2 19:57     2:25

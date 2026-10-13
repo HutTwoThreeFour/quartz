@@ -14,15 +14,13 @@ Hydra's popularity stems from its:
 
 Hydra often comes pre-installed on popular penetration testing distributions. You can verify its presence by running:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -h
 ```
 
 If Hydra is not installed or you are using a different Linux distribution, you can install it from the package repository:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt-get -y update
 hiimeins@htb[/htb]$ sudo apt-get -y install hydra
 ```
@@ -31,8 +29,7 @@ hiimeins@htb[/htb]$ sudo apt-get -y install hydra
 
 Hydra's basic syntax is:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra [login_options] [password_options] [attack_options] [service_options]
 ```
 
@@ -68,8 +65,7 @@ Hydra services essentially define the specific protocols or services that Hydra 
 
 Imagine you're tasked with testing the security of a website using basic HTTP authentication at `www.example.com`. You have a list of potential usernames stored in `usernames.txt` and corresponding passwords in `passwords.txt`. To launch a brute-force attack against this HTTP service, use the following Hydra command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -L usernames.txt -P passwords.txt www.example.com http-get
 ```
 
@@ -86,8 +82,7 @@ Hydra will systematically try each username-password combination against the tar
 
 Consider a situation where you have identified several servers that may be vulnerable to SSH brute-force attacks. You compile their IP addresses into a file named `targets.txt` and know that these servers might use the default username "root" and password "toor." To efficiently test all these servers simultaneously, use the following Hydra command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -l root -p toor -M targets.txt ssh
 ```
 
@@ -104,8 +99,7 @@ Hydra will execute parallel brute-force attempts on each server, significantly s
 
 Imagine you need to assess the security of an FTP server hosted at `ftp.example.com`, which operates on a non-standard port `2121`. You have lists of potential usernames and passwords stored in `usernames.txt` and `passwords.txt`, respectively. To test these credentials against the FTP service, use the following Hydra command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -L usernames.txt -P passwords.txt -s 2121 -V ftp.example.com ftp
 ```
 
@@ -122,8 +116,7 @@ Hydra will attempt to match each username-password combination against the FTP s
 
 Suppose you are tasked with brute-forcing a login form on a web application at `www.example.com`. You know the username is "admin," and the form parameters for the login are `user=^USER^&pass=^PASS^`. To perform this attack, use the following Hydra command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -l admin -P passwords.txt www.example.com http-post-form "/login:user=^USER^&pass=^PASS^:S=302"
 ```
 
@@ -141,8 +134,7 @@ Hydra will systematically attempt each password for the "admin" account, checkin
 
 Now, imagine you're testing a Remote Desktop Protocol (RDP) service on a server with IP `192.168.1.100`. You suspect the username is "administrator," and that the password consists of 6 to 8 characters, including lowercase letters, uppercase letters, and numbers. To carry out this precise attack, use the following Hydra command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -l administrator -x 6:8:abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 192.168.1.100 rdp
 ```
 

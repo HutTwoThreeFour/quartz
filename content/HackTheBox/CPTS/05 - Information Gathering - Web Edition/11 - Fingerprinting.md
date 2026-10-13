@@ -39,15 +39,13 @@ Let's apply our fingerprinting knowledge to uncover the digital DNA of our purpo
 
 Our first step is to gather information directly from the web server itself. We can do this using the `curl` command with the `-I` flag (or `--head`) to fetch only the HTTP headers, not the entire page content.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -I inlanefreight.com
 ```
 
 The output will include the server banner, revealing the web server software and version number:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -I inlanefreight.com
 
 HTTP/1.1 301 Moved Permanently
@@ -59,8 +57,7 @@ Content-Type: text/html; charset=iso-8859-1
 
 In this case, we see that `inlanefreight.com` is running on `Apache/2.4.41`, specifically the `Ubuntu` version. This information is our first clue, hinting at the underlying technology stack. It's also trying to redirect to `https://inlanefreight.com/` so grab those banners too
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -I https://inlanefreight.com
 
 HTTP/1.1 301 Moved Permanently
@@ -73,8 +70,7 @@ Content-Type: text/html; charset=UTF-8
 
 We now get a really interesting header, the server is trying to redirect us again, but this time we see that it's `WordPress` that is doing the redirection to `https://www.inlanefreight.com/`
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -I https://www.inlanefreight.com
 
 HTTP/1.1 200 OK
@@ -94,15 +90,13 @@ A few more interesting headers, including an interesting path that contains `wp-
 
 To detect the presence of a WAF, we'll use the `wafw00f` tool. To install `wafw00f`, you can use pip3:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ pip3 install git+https://github.com/EnableSecurity/wafw00f
 ```
 
 Once it's installed, pass the domain you want to check as an argument to the tool:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wafw00f inlanefreight.com
 
                 ______
@@ -137,8 +131,7 @@ This means the site has an additional security layer that could block or filter 
 
 `Nikto` is pre-installed on pwnbox, but if you need to install it, you can run the following commands:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt update && sudo apt install -y perl
 hiimeins@htb[/htb]$ git clone https://github.com/sullo/nikto
 hiimeins@htb[/htb]$ cd nikto/program
@@ -147,8 +140,7 @@ hiimeins@htb[/htb]$ chmod +x ./nikto.pl
 
 To scan `inlanefreight.com` using `Nikto`, only running the fingerprinting modules, execute the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nikto -h inlanefreight.com -Tuning b
 ```
 
@@ -156,8 +148,7 @@ The `-h` flag specifies the target host. The `-Tuning b` flag tells `Nikto` to o
 
 `Nikto` will then initiate a series of tests, attempting to identify outdated software, insecure files or configurations, and other potential security risks.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nikto -h inlanefreight.com -Tuning b
 
 - Nikto v2.5.0

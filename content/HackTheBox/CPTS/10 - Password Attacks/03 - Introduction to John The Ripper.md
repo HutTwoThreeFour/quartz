@@ -12,15 +12,13 @@
 
 Imagine we as attackers came across the file `passwd` with the following contents:
 
-```
-        text
+```text
 r0lf:$6$ues25dIanlctrWxg$nZHVz2z4kCy1760Ee28M1xtHdGoy0C2cYzZ8l2sVa1kIa8K9gAcdBP.GI6ng/qA4oaMrgElZ1Cb9OeXO4Fvy3/:0:0:Rolf Sebastian:/home/r0lf:/bin/bash
 ```
 
 Based on the contents of the file, it can be inferred that the victim has the username `r0lf`, the real name `Rolf Sebastian`, and the home directory `/home/r0lf`. Single crack mode will use this information to generate candidate passwords and test them against the hash. We can run the attack with the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ john --single passwd
 
 Using default input encoding: UTF-8
@@ -40,8 +38,7 @@ In this case, the password hash was successfully cracked.
 
 `Wordlist mode` is used to crack passwords with a dictionary attack, meaning it attempts all passwords in a supplied wordlist against the password hash. The basic syntax for the command is as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ john --wordlist=<wordlist_file> <hash_file>
 ```
 
@@ -55,15 +52,13 @@ This mode is the most exhaustive, but also the most time-consuming. It generates
 
 The basic syntax is:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ john --incremental <hash_file>
 ```
 
 By default, JtR uses predefined incremental modes specified in its configuration file (`john.conf`), which define character sets and password lengths. You can customize these or define your own to target passwords that use special characters or specific patterns.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ grep '# Incremental modes' -A 100 /etc/john/john.conf
 
 # Incremental modes
@@ -103,15 +98,13 @@ CharCount = 95
 
 Sometimes, password hashes may appear in an unknown format, and even John the Ripper (JtR) may not be able to identify them with complete certainty. For example, consider the following hash:
 
-```
-        text
+```text
 193069ceb0461e1d40d216e32c79c704
 ```
 
 One way to get an idea is to consult [JtR's sample hash documentation](https://openwall.info/wiki/john/sample-hashes), or [this list by PentestMonkey](https://pentestmonkey.net/cheat-sheet/john-the-ripper-hash-formats). Both sources list multiple example hashes as well as the corresponding JtR format. Another option is to use a tool like [hashID](https://github.com/psypanda/hashID), which checks supplied hashes against a built-in list to suggest potential formats. By adding the `-j` flag, hashID will, in addition to the hash format, list the corresponding JtR format:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashid -j 193069ceb0461e1d40d216e32c79c704
 
 Analyzing '193069ceb0461e1d40d216e32c79c704'
@@ -207,8 +200,7 @@ JtR supports hundreds of hash formats, some of which are listed in the table bel
 
 It is also possible to crack password-protected or encrypted files with JtR. Multiple `"2john"` tools come with JtR that can be used to process files and produce hashes compatible with JtR. The generalized syntax for these tools is:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ <tool> <file_to_crack> > file.hash
 ```
 
@@ -234,8 +226,7 @@ Some of the tools included with JtR are:
 
 An even larger collection can be found on the `Pwnbox`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ locate *2john*
 
 /usr/bin/bitlocker2john

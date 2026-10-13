@@ -10,8 +10,7 @@ Now that we understand the concept of Web Fuzzing and know our wordlist, we shou
 
 `Ffuf` is pre-installed on your PwnBox instance. If you want to use it on your own machine, you can either use "`apt install ffuf -y`" or download it and use it from its [GitHub Repo](https://github.com/ffuf/ffuf.git). As a new user of this tool, we will start by issuing the `ffuf -h` command to see how the tools can be used:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -h
 
 HTTP OPTIONS:
@@ -57,22 +56,19 @@ As we can see, the `help` output is quite large, so we only kept the options tha
 
 As we can see from the example above, the main two options are `-w` for wordlists and `-u` for the URL. We can assign a wordlist to a keyword to refer to it where we want to fuzz. For example, we can pick our wordlist and assign the keyword `FUZZ` to it by adding `:FUZZ` after it:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ
 ```
 
 Next, as we want to be fuzzing for web directories, we can place the `FUZZ` keyword where the directory would be within our URL, with:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w <SNIP> -u http://SERVER_IP:PORT/FUZZ
 ```
 
 Now, let's start our target in the question below and run our final command on it:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://SERVER_IP:PORT/FUZZ
 
         /'___\  /'___\           /'___\       

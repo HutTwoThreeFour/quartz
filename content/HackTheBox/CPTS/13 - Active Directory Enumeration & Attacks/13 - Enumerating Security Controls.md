@@ -14,8 +14,7 @@ Windows Defender (or [Microsoft Defender](https://en.wikipedia.org/wiki/Microsof
 
 #### Checking the Status of Defender with Get-MpComputerStatus
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-MpComputerStatus
 
 AMEngineVersion                 : 1.1.17400.5
@@ -65,8 +64,7 @@ So, we can merely call it from other locations. Sometimes, we run into more stri
 
 #### Using Get-AppLockerPolicy cmdlet
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 
 PathConditions      : {%SYSTEM32%\WINDOWSPOWERSHELL\V1.0\POWERSHELL.EXE}
@@ -118,8 +116,7 @@ PowerShell [Constrained Language Mode](https://devblogs.microsoft.com/powershell
 
 #### Enumerating Language Mode
 
-```
-        powershell
+```powershell
 PS C:\htb> $ExecutionContext.SessionState.LanguageMode
 
 ConstrainedLanguage
@@ -133,8 +130,7 @@ The Microsoft [Local Administrator Password Solution (LAPS)](https://www.microso
 
 #### Using Find-LAPSDelegatedGroups
 
-```
-        powershell
+```powershell
 PS C:\htb> Find-LAPSDelegatedGroups
 
 OrgUnit                                             Delegated Groups
@@ -163,8 +159,7 @@ The `Find-AdmPwdExtendedRights` checks the rights on each computer with LAPS ena
 
 #### Using Find-AdmPwdExtendedRights
 
-```
-        powershell
+```powershell
 PS C:\htb> Find-AdmPwdExtendedRights
 
 ComputerName                Identity                    Reason
@@ -181,8 +176,7 @@ We can use the `Get-LAPSComputers` function to search for computers that have LA
 
 #### Using Get-LAPSComputers
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-LAPSComputers
 
 ComputerName                Password       Expiration

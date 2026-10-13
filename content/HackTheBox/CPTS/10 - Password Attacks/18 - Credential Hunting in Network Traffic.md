@@ -63,8 +63,7 @@ In order to run `Pcredz`, one may either clone the repository and install all de
 
 The following command can be used to run `Pcredz` against a packet capture file:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./Pcredz -f demo.pcapng -t -v
 
 Pcredz 2.0.2

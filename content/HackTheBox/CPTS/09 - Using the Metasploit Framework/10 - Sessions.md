@@ -16,8 +16,7 @@ While running any available exploits or auxiliary modules in msfconsole, we can 
 
 We can use the `sessions` command to view our currently active sessions.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/psexec_psh) > sessions
 
 Active sessions
@@ -32,8 +31,7 @@ Active sessions
 
 You can use the `sessions -i [no.]` command to open up a specific session.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/psexec_psh) > sessions -i 1
 [*] Starting interaction with 1...
 
@@ -58,8 +56,7 @@ Other types of tasks inside sessions can also be converted into jobs to run in t
 
 We can view the help menu for this command, like others, by typing `jobs -h`.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(multi/handler) > jobs -h
 Usage: jobs [options]
 
@@ -82,8 +79,7 @@ OPTIONS:
 
 When we run an exploit, we can run it as a job by typing `exploit -j`. Per the help menu for the `exploit` command, adding `-j` to our command. Instead of just `exploit` or `run`, will "run it in the context of a job."
 
-```
-        shellsession
+```shellsession
 msf6 exploit(multi/handler) > exploit -h
 Usage: exploit [options]
 
@@ -102,8 +98,7 @@ OPTIONS:
 
 #### Running an Exploit as a Background Job
 
-```
-        shellsession
+```shellsession
 
 msf6 exploit(multi/handler) > exploit -j
 [*] Exploit running as background job 0.
@@ -116,8 +111,7 @@ msf6 exploit(multi/handler) > exploit -j
 
 To list all running jobs, we can use the `jobs -l` command. To kill a specific job, look at the index no. of the job and use the `kill [index no.]` command. Use the `jobs -K` command to kill all running jobs.
 
-```
-        shellsession
+```shellsession
 
 msf6 exploit(multi/handler) > jobs -l
 

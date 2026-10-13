@@ -18,8 +18,7 @@ Enumeration is the key to privilege escalation. Several helper scripts (such as 
 
 #### List Current Processes
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ps aux | grep root
 
 root         1  1.3  0.1  37656  5664 ?        Ss   23:26   0:01 /sbin/init
@@ -41,8 +40,7 @@ root         9  0.0  0.0      0     0 ?        S    23:26   0:00 [migration/0]
 
 #### List Current Terminal-Attached Processes
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ps au
 
 USER            PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
@@ -59,8 +57,7 @@ shared          1397  0.0  0.1  37364  3428 pts/0    R+   23:30   0:00 ps au
 
 #### Home Directory Contents
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /home
 
 backupsvc  bob.jones  cliff.moore  logger  mrb3n  shared  stacey.jenkins
@@ -70,8 +67,7 @@ We can check individual user directories and check to see if files such as the `
 
 #### User's Home Directory Contents
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -la /home/stacey.jenkins/
 
 total 32
@@ -89,8 +85,7 @@ If you find an SSH key for your current user, this could be used to open an SSH 
 
 #### SSH Directory Contents
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -l ~/.ssh
 
 total 8
@@ -102,8 +97,7 @@ It is also important to check a user's bash history, as they may be passing pass
 
 #### Bash History
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ history
 
     1  id
@@ -119,8 +113,7 @@ hiimeins@htb[/htb]$ history
 
 #### Sudo - List User's Privileges
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo -l
 
 Matching Defaults entries for sysadm on NIX02:
@@ -138,8 +131,7 @@ User sysadm may run the following commands on NIX02:
 
 #### Passwd
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/passwd
 
 root:x:0:0:root:/root:/bin/bash
@@ -170,8 +162,7 @@ sysadm:$6$vdH7vuQIv6anIBWg$Ysk.UZzI7WxYUBYt8WRIWF0EzWlksOElDE0HLYinee38QI1A.0HW7
 
 #### Cron Jobs
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -la /etc/cron.daily/
 
 total 60
@@ -196,8 +187,7 @@ drwxr-xr-x 93 root root 4096 Aug 30 23:47 ..
 
 #### File Systems & Additional Drives
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ lsblk
 
 NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
@@ -214,8 +204,7 @@ sr0     11:0    1  848M  0 rom
 
 #### Find Writable Directories
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -path /proc -prune -o -type d -perm -o+w 2>/dev/null
 
 /dmz-backups
@@ -240,8 +229,7 @@ hiimeins@htb[/htb]$ find / -path /proc -prune -o -type d -perm -o+w 2>/dev/null
 
 #### Find Writable Files
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null
 
 /etc/cron.daily/backup

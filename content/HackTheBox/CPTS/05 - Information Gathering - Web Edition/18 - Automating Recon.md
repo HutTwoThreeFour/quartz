@@ -43,8 +43,7 @@ These frameworks aim to provide a complete suite of tools for web reconnaissance
 
 Installation is quick and easy:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/thewhiteh4t/FinalRecon.git
 hiimeins@htb[/htb]$ cd FinalRecon
 hiimeins@htb[/htb]$ pip3 install -r requirements.txt
@@ -113,8 +112,7 @@ Finally, you can verify that `FinalRecon` is installed correctly and get an over
 
 For instance, if we want `FinalRecon` to gather header information and perform a Whois lookup for `inlanefreight.com`, we would use the corresponding flags (`--headers` and `--whois`), so the command would be:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./finalrecon.py --headers --whois --url http://inlanefreight.com
 
  ______  __   __   __   ______   __

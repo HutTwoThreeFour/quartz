@@ -67,8 +67,7 @@ Below are the rights available to a local administrator account on a Windows sys
 
 If we run an elevated command window, we can see the complete listing of rights available to us:
 
-```
-        powershell
+```powershell
 PS C:\htb> whoami 
 
 winlpe-srv01\administrator
@@ -112,8 +111,7 @@ A standard user, in contrast, has drastically fewer rights.
 
 #### Standard User Rights
 
-```
-        powershell
+```powershell
 PS C:\htb> whoami 
 
 winlpe-srv01\htb-student
@@ -133,8 +131,7 @@ User rights increase based on the groups they are placed in or their assigned pr
 
 #### Backup Operators Rights
 
-```
-        powershell
+```powershell
 PS C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION

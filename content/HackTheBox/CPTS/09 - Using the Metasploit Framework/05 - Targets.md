@@ -6,8 +6,7 @@
 
 #### MSF - Show Targets
 
-```
-        shellsession
+```shellsession
 msf6 > show targets
 
 [-] No exploit module selected.
@@ -15,8 +14,7 @@ msf6 > show targets
 
 When looking at our previous exploit module, this would be what we see:
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_psexec) > options
 
    Name                  Current Setting                          Required  Description
@@ -65,8 +63,7 @@ If we want to find out more about this specific module and what the vulnerabilit
 
 #### MSF - Target Selection
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/browser/ie_execcommand_uaf) > info
 
        Name: MS12-063 Microsoft Internet Explorer execCommand Use-After-Free Vulnerability 
@@ -133,8 +130,7 @@ References:
 
 Looking at the description, we can get a general idea of what this exploit will accomplish for us. Keeping this in mind, we would next want to check which versions are vulnerable to this exploit.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/browser/ie_execcommand_uaf) > options
 
 Module options (exploit/windows/browser/ie_execcommand_uaf):
@@ -173,8 +169,7 @@ We see options for both different versions of Internet Explorer and various Wind
 
 If we, however, know what versions are running on our target, we can use the `set target <index no.>` command to pick a target from the list.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/browser/ie_execcommand_uaf) > show targets
 
 Exploit targets:

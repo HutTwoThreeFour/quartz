@@ -58,8 +58,7 @@ Here is a table of some of the more useful wordlists for login brute-forcing:
 
 Copy and paste this Python script below as `dictionary-solver.py` onto your machine. You only need to modify the IP and port variables to match your target system information.
 
-```
-        python
+```python
 import requests
 
 ip = "127.0.0.1"  # Change this to your instance IP address
@@ -89,8 +88,7 @@ The Python script orchestrates the dictionary attack. It performs the following 
 3. `Analyzes Responses`: The script checks the response status code after each request. If it's 200 (OK), it examines the response content further. If the response contains the "flag" key, it signifies a successful login. The script then prints the discovered password and the captured flag.
 4. `Continues or Terminates`: If the response doesn't indicate success, the script proceeds to the next password in the wordlist. This process continues until the correct password is found or the entire wordlist is exhausted.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 dictionary-solver.py
 
 ...

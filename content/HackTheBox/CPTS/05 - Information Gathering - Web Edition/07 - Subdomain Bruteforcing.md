@@ -38,8 +38,7 @@ There are several tools available that excel at brute-force enumeration:
 
 Let's see `dnsenum` in action by demonstrating how to enumerate subdomains for our target, `inlanefreight.com`. In this demonstration, we'll use the `subdomains-top1million-20000.txt` wordlist from [SecLists](https://github.com/danielmiessler/SecLists), which contains the top 20000 most common subdomains.
 
-```
-        bash
+```bash
 dnsenum --enum inlanefreight.com -f /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt -r
 ```
 
@@ -49,8 +48,7 @@ In this command:
 - `-f /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt`: We indicate the path to the SecLists wordlist we'll use for brute-forcing. Adjust the path if your SecLists installation is different.
 - `-r`: This option enables recursive subdomain brute-forcing, meaning that if `dnsenum` finds a subdomain, it will then try to enumerate subdomains of that subdomain.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dnsenum --enum inlanefreight.com -f  /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt 
 
 dnsenum VERSION:1.2.6

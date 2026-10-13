@@ -18,8 +18,7 @@ Whether assigned `dynamically` or `statically`, the IP address is assigned to a 
 
 #### Using ifconfig
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ifconfig
 
 eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
@@ -64,8 +63,7 @@ In the output above, each NIC has an identifier (`eth0`, `eth1`, `lo`, `tun0`) f
 
 #### Using ipconfig
 
-```
-        powershell
+```powershell
 PS C:\Users\htb-student> ipconfig
 
 Windows IP Configuration
@@ -105,8 +103,7 @@ It is common to think of a network appliance that connects us to the Internet wh
 
 #### Routing Table on Pwnbox
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netstat -r
 
 Kernel IP routing table

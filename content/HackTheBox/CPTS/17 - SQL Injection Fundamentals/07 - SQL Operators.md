@@ -10,15 +10,13 @@ Sometimes, expressions with a single condition are not enough to satisfy the use
 
 The `AND` operator takes in two conditions and returns `true` or `false` based on their evaluation:
 
-```
-        sql
+```sql
 condition1 AND condition2
 ```
 
 The result of the `AND` operation is `true` if and only if both `condition1` and `condition2` evaluate to `true`:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT 1 = 1 AND 'test' = 'test';
 
 +---------------------------+
@@ -46,8 +44,7 @@ In MySQL terms, any `non-zero` value is considered `true`, and it usually return
 
 The `OR` operator takes in two expressions as well, and returns `true` when at least one of them evaluates to `true`:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT 1 = 1 OR 'test' = 'abc';
 
 +-------------------------+
@@ -75,8 +72,7 @@ The queries above demonstrate how the `OR` operator works. The first query evalu
 
 The `NOT` operator simply toggles a `boolean` value 'i.e. `true` is converted to `false` and vice versa':
 
-```
-        shellsession
+```shellsession
 mysql> SELECT NOT 1 = 1;
 
 +-----------+
@@ -104,8 +100,7 @@ As seen in the examples above, the first query resulted in `false` because it is
 
 The `AND`, `OR` and `NOT` operators can also be represented as `&&`, `||` and `!`, respectively. The below are the same previous examples, by using the symbol operators:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT 1 = 1 && 'test' = 'abc';
 
 +-------------------------+
@@ -140,8 +135,7 @@ mysql> SELECT 1 != 1;
 
 Let us look at how these operators can be used in queries. The following query lists all records where the `username` is NOT `john`:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT * FROM logins WHERE username != 'john';
 
 +----+---------------+------------+---------------------+
@@ -156,8 +150,7 @@ mysql> SELECT * FROM logins WHERE username != 'john';
 
 The next query selects users who have their `id` greater than `1` AND `username` NOT equal to `john`:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT * FROM logins WHERE username != 'john' AND id > 1;
 
 +----+---------------+------------+---------------------+
@@ -186,22 +179,19 @@ Here is a list of common operations and their precedence, as seen in the [MariaD
 
 Operations at the top are evaluated before the ones at the bottom of the list. Let us look at an example:
 
-```
-        sql
+```sql
 SELECT * FROM logins WHERE username != 'tom' AND id > 3 - 2;
 ```
 
 The query has four operations: `!=`, `AND`, `>`, and `-`. From the operator precedence, we know that subtraction comes first, so it will first evaluate `3 - 2` to `1`:
 
-```
-        sql
+```sql
 SELECT * FROM logins WHERE username != 'tom' AND id > 1;
 ```
 
 Next, we have two comparison operations, `>` and `!=`. Both of these are of the same precedence and will be evaluated together. So, it will return all records where username is not `tom`, and all records where the `id` is greater than 1, and then apply `AND` to return all records with both of these conditions:
 
-```
-        shellsession
+```shellsession
 mysql> select * from logins where username != 'tom' AND id > 3 - 2;
 
 +----+---------------+------------+---------------------+

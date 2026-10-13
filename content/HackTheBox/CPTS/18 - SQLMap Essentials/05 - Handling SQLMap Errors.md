@@ -10,8 +10,7 @@ We may face many problems when setting up SQLMap or using it with HTTP requests.
 
 The first step is usually to switch the `--parse-errors`, to parse the DBMS errors (if any) and displays them as part of the program run:
 
-```
-        shellsession
+```shellsession
 ...SNIP...
 [16:09:20] [INFO] testing if GET parameter 'id' is dynamic
 [16:09:20] [INFO] GET parameter 'id' appears to be dynamic
@@ -29,8 +28,7 @@ With this option, SQLMap will automatically print the DBMS error, thus giving us
 
 The `-t` option stores the whole traffic content to an output file:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.target.com/vuln.php?id=1" --batch -t /tmp/traffic.txt
 
 ...SNIP...
@@ -68,8 +66,7 @@ As we can see from the above output, the `/tmp/traffic.txt` file now contains al
 
 Another useful flag is the `-v` option, which raises the verbosity level of the console output:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.target.com/vuln.php?id=1" -v 6 --batch
         ___
        __H__

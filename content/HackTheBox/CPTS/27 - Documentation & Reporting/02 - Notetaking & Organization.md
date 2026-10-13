@@ -56,22 +56,19 @@ It is essential that we log all scanning and attack attempts and keep raw tool o
 
 First, clone the [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) repo to our home directory (in our case `/home/htb-student` or just `~`).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ```
 
 Next, create a `.tmux.conf` file in the home directory.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ touch .tmux.conf
 ```
 
 The config file should have the following contents:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat .tmux.conf 
 
 # List of plugins
@@ -86,8 +83,7 @@ run '~/.tmux/plugins/tpm/tpm'
 
 After creating this config file, we need to execute it in our current session, so the settings in the `.tmux.conf` file take effect. We can do this with the [source](https://www.geeksforgeeks.org/source-command-in-linux-with-examples/) command.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tmux source ~/.tmux.conf
 ```
 
@@ -105,8 +101,7 @@ If we forget to enable Tmux logging and are deep into a project, we can perform 
 
 #### Tmux.conf
 
-```
-        shellsession
+```shellsession
 set -g history-limit 50000
 ```
 
@@ -192,13 +187,11 @@ Much like with our notetaking structure, it's a good idea to come up with a fram
 
 It's a good idea to have scripts and tricks for setting up at the beginning of an assessment. We could take the following command to make our directories and subdirectories and adapt it further.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mkdir -p ACME-IPT/{Admin,Deliverables,Evidence/{Findings,Scans/{Vuln,Service,Web,'AD Enumeration'},Notes,OSINT,Wireless,'Logging output','Misc Files'},Retest}
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tree ACME-IPT/
 
 ACME-IPT/
@@ -229,8 +222,7 @@ Drilling down further, we can see the benefits of combining our notetaking and f
 
 Taking a quick look at the directory structure, we can see each folder we created previously and some now populated with Obsidian Markdown pages.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tree
 .
 └── Inlanefreight Penetration Test
@@ -320,8 +312,7 @@ When starting a penetration test, we are being trusted by our customers to enter
 
 We have included a partially filled-out sample Obsidian notebook in the Parrot Linux host that can be spawned at the end of this section. You can access it with the credentials provided using the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp /v:10.129.203.82 /u:htb-student /p:HTB_@cademy_stdnt!
 ```
 

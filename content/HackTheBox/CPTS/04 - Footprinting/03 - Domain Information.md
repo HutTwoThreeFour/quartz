@@ -34,8 +34,7 @@ We can also output the results in JSON format.
 
 #### Certificate Transparency
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s https://crt.sh/\?q\=inlanefreight.com\&output\=json | jq .
 
 [
@@ -77,8 +76,7 @@ hiimeins@htb[/htb]$ curl -s https://crt.sh/\?q\=inlanefreight.com\&output\=json 
 
 If needed, we can also have them filtered by the unique subdomains.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s https://crt.sh/\?q\=inlanefreight.com\&output\=json | jq . | grep name | cut -d":" -f2 | grep -v "CN=" | cut -d'"' -f2 | awk '{gsub(/\\n/,"\n");}1;' | sort -u
 
 account.ttn.inlanefreight.com
@@ -109,8 +107,7 @@ Next, we can identify the hosts directly accessible from the Internet and not ho
 
 #### Company Hosted Servers
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(cat subdomainlist);do host $i | grep "has address" | grep inlanefreight.com | cut -d" " -f1,4;done
 
 blog.inlanefreight.com 10.129.24.93
@@ -126,8 +123,7 @@ Once we see which hosts can be investigated further, we can generate a list of I
 
 #### Shodan - IP List
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(cat subdomainlist);do host $i | grep "has address" | grep inlanefreight.com | cut -d" " -f4 >> ip-addresses.txt;done
 hiimeins@htb[/htb]$ for i in $(cat ip-addresses.txt);do shodan host $i;done
 
@@ -204,8 +200,7 @@ We remember the IP `10.129.127.22` (`matomo.inlanefreight.com`) for later active
 
 #### DNS Records
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig any inlanefreight.com
 
 ; <<>> DiG 9.16.1-Ubuntu <<>> any inlanefreight.com
@@ -252,8 +247,7 @@ Let us look at what we have learned here and come back to our principles. We see
 - `NS` records: These kinds of records show which name servers are used to resolve the FQDN to IP addresses. Most hosting providers use their own name servers, making it easier to identify the hosting provider.
 - `TXT` records: this type of record often contains verification keys for different third-party providers and other security aspects of DNS, such as [SPF](https://datatracker.ietf.org/doc/html/rfc7208), [DMARC](https://datatracker.ietf.org/doc/html/rfc7489), and [DKIM](https://datatracker.ietf.org/doc/html/rfc6376), which are responsible for verifying and confirming the origin of the emails sent. Here we can already see some valuable information if we look closer at the results.
 
-```
-        shellsession
+```shellsession
 ...SNIP... TXT     "MS=ms92346782372"
 ...SNIP... TXT     "atlassian-domain-verification=IJdXMt1rKCy68JFszSdCKVpwPN"
 ...SNIP... TXT     "google-site-verification=O7zV5-xFh_jn7JQ31"

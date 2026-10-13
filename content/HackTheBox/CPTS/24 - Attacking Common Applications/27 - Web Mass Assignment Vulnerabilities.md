@@ -8,8 +8,7 @@ Web mass assignment vulnerability is a type of security vulnerability where atta
 
 Ruby on Rails is a web application framework that is vulnerable to this type of attack. The following example shows how attackers can exploit mass assignment vulnerability in Ruby on Rails. Assuming we have a `User` model with the following attributes:
 
-```
-        ruby
+```ruby
 class User < ActiveRecord::Base
   attr_accessible :username, :email
 end
@@ -17,8 +16,7 @@ end
 
 The above model specifies that only the `username` and `email` attributes are allowed to be mass-assigned. However, attackers can modify other attributes by tampering with the parameters sent to the server. Let's assume that the server receives the following parameters.
 
-```
-        javascript
+```javascript
 { "user" => { "username" => "hacker", "email" => "hacker@example.com", "admin" => true } }
 ```
 
@@ -34,8 +32,7 @@ Suppose we come across the following application that features an Asset Manager 
 
 After login in, we get the message `Account is pending approval`. The administrator of this web app must approve our registration. Reviewing the python code of the `/opt/asset-manager/app.py` file reveals the following snippet.
 
-```
-        python
+```python
 for i,j,k in cur.execute('select * from users where username=? and password=?',(username,password)):
   if k:
     session['user']=i
@@ -46,8 +43,7 @@ for i,j,k in cur.execute('select * from users where username=? and password=?',(
 
 We can see that the application is checking if the value `k` is set. If yes, then it allows the user to log in. In the code below, we can also see that if we set the `confirmed` parameter during registration, then it inserts `cond` as `True` and allows us to bypass the registration checking step.
 
-```
-        python
+```python
 try:
   if request.form['confirmed']:
     cond=True
@@ -80,8 +76,7 @@ The mass assignment vulnerability is exploited successfully and we are now logge
 
 To prevent this type of attack, one should explicitly assign the attributes for the allowed fields, or use whitelisting methods provided by the framework to check the attributes that can be mass-assigned. The following example shows how to use strong parameters in the `User` controller.
 
-```
-        ruby
+```ruby
 class UsersController < ApplicationController
   def create
     @user = User.new(user_params)

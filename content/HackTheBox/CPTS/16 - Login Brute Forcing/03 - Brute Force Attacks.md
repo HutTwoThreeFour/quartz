@@ -41,8 +41,7 @@ The instance application generates a random 4-digit PIN and exposes an endpoint 
 
 We will use this simple demonstration Python script to brute-force the `/pin` endpoint on the API. Copy and paste this Python script below as `pin-solver.py` onto your machine. You only need to modify the IP and port variables to match your target system information.
 
-```
-        python
+```python
 import requests
 
 ip = "127.0.0.1"  # Change this to your instance IP address
@@ -65,8 +64,7 @@ for pin in range(10000):
 
 The Python script systematically iterates all possible 4-digit PINs (0000 to 9999) and sends GET requests to the Flask endpoint with each PIN. It checks the response status code and content to identify the correct PIN and capture the associated flag.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python pin-solver.py
 
 ...

@@ -19,8 +19,7 @@ Luckily for us, in the `SecLists` repo, there is a specific section for sub-doma
 
 As for our target, we will use `inlanefreight.com` as our target and run our scan on it. Let us use `ffuf` and place the `FUZZ` keyword in the place of sub-domains, and see if we get any hits:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u https://FUZZ.inlanefreight.com/
 
         /'___\  /'___\           /'___\
@@ -63,8 +62,7 @@ ________________________________________________
 
 We see that we do get a few hits back. Now, we can try running the same thing on `academy.htb` and see if we get any hits back:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://FUZZ.academy.htb/
 
         /'___\  /'___\           /'___\

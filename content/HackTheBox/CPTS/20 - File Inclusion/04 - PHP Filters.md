@@ -22,8 +22,7 @@ There are four different types of filters available for use, which are [String F
 
 The first step would be to fuzz for different available PHP pages with a tool like `ffuf` or `gobuster`, as covered in the [Attacking Web Applications with Ffuf](https://academy.hackthebox.com/app/module/54) module:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://<SERVER_IP>:<PORT>/FUZZ.php
 
 ...SNIP...
@@ -71,8 +70,7 @@ http://<SERVER\_IP>:<PORT>/index.php?language=php://filter/read=convert.base64-e
 
 As we can see, unlike our attempt with regular LFI, using the base64 filter returned an encoded string instead of the empty result we saw earlier. We can now decode this string to get the content of the source code of `config.php`, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo 'PD9waHAK...SNIP...KICB9Ciov' | base64 -d
 
 ...SNIP...

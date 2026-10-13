@@ -10,8 +10,7 @@ While login forms may appear as simple boxes soliciting your username and passwo
 
 Most login forms follow a similar structure. Here's an example:
 
-```
-        html
+```html
 <form action="/login" method="post">
   <label for="username">Username:</label>
   <input type="text" id="username" name="username"><br><br>
@@ -23,8 +22,7 @@ Most login forms follow a similar structure. Here's an example:
 
 This form, when submitted, sends a POST request to the `/login` endpoint on the server, including the entered username and password as form data.
 
-```
-        http
+```http
 POST /login HTTP/1.1
 Host: www.example.com
 Content-Type: application/x-www-form-urlencoded
@@ -49,8 +47,7 @@ Hydra's `http-post-form` service is specifically designed to target login forms.
 
 The general structure of a Hydra command using `http-post-form` looks like this:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra [options] target http-post-form "path:params:condition_string"
 ```
 
@@ -60,8 +57,7 @@ In Hydra’s `http-post-form` module, success and failure conditions are crucial
 
 The failure condition (`F=...`) is used to check for a specific string in the server's response that signals a failed login attempt. This is the most common approach because many websites return an error message (like "Invalid username or password") when the login fails. For example, if a login form returns the message "Invalid credentials" on a failed attempt, you can configure Hydra like this:
 
-```
-        bash
+```bash
 hydra ... http-post-form "/login:user=^USER^&pass=^PASS^:F=Invalid credentials"
 ```
 
@@ -69,15 +65,13 @@ In this case, Hydra will check each response for the string "Invalid credentials
 
 However, sometimes you may not have a clear failure message but instead have a distinct success condition. For instance, if the application redirects the user after a successful login (using HTTP status code `302`), or displays specific content (like "Dashboard" or "Welcome"), you can configure Hydra to look for that success condition using `S=`. Here’s an example where a successful login results in a 302 redirect:
 
-```
-        bash
+```bash
 hydra ... http-post-form "/login:user=^USER^&pass=^PASS^:S=302"
 ```
 
 In this case, Hydra will treat any response that returns an HTTP 302 status code as a successful login. Similarly, if a successful login results in content like "Dashboard" appearing on the page, you can configure Hydra to look for that keyword as a success condition:
 
-```
-        bash
+```bash
 hydra ... http-post-form "/login:user=^USER^&pass=^PASS^:S=Dashboard"
 ```
 
@@ -89,8 +83,7 @@ Before unleashing Hydra on a login form, it's essential to gather intelligence o
 
 Upon accessing the `IP:PORT` in your browser, a basic login form is presented. Using your browser's developer tools (typically by right-clicking and selecting "Inspect" or a similar option), you can view the underlying HTML code for this form. Let's break down its key components:
 
-```
-        html
+```html
 <form method="POST">
     <h2>Login</h2>
     <label for="username">Username:</label>
@@ -141,8 +134,7 @@ Let's apply this to our scenario. We've discovered:
 
 Therefore, our `params` string would be:
 
-```
-        bash
+```bash
 /:username=^USER^&password=^PASS^:F=Invalid credentials
 ```
 
@@ -154,8 +146,7 @@ We will be using [top-usernames-shortlist.txt](https://raw.githubusercontent.com
 
 This `params` string is incorporated into the Hydra command as follows. Hydra will systematically substitute `^USER^` and `^PASS^` with values from your wordlists, sending POST requests to the target and analyzing the responses for the specified failure condition. If a login attempt doesn't trigger the "Invalid credentials" message, Hydra will flag it as a potential success, revealing the valid credentials.
 
-```
-        shellsession
+```shellsession
 # Download wordlists if needed
 hiimeins@htb[/htb]$ curl -s -O https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt
 hiimeins@htb[/htb]$ curl -s -O https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Common-Credentials/2023-200_most_used_passwords.txt

@@ -12,8 +12,7 @@ IIS tilde directory enumeration primarily involves sending HTTP requests to the 
 
 The enumeration process starts by sending requests with various characters following the tilde:
 
-```
-        http
+```http
 http://example.com/~a
 http://example.com/~b
 http://example.com/~c
@@ -23,8 +22,7 @@ http://example.com/~c
 Assume the server contains a hidden directory named SecretDocuments. When a request is sent to `http://example.com/~s`, the server replies with a `200 OK` status code, revealing a directory with a short name beginning with "s".
 The enumeration process continues by appending more characters:
 
-```
-        http
+```http
 http://example.com/~se
 http://example.com/~sf
 http://example.com/~sg
@@ -34,8 +32,7 @@ http://example.com/~sg
 For the request `http://example.com/~se`, the server returns a `200 OK` status code, further refining the short name to "se".
 Further requests are sent, such as:
 
-```
-        http
+```http
 http://example.com/~sec
 http://example.com/~sed
 http://example.com/~see
@@ -50,16 +47,14 @@ Once the short name `secret~1` is identified, enumeration of specific file names
 
 For instance, if the short name `secret~1` is determined for the concealed directory SecretDocuments, files in that directory can be accessed by submitting requests such as:
 
-```
-        http
+```http
 http://example.com/secret~1/somefile.txt
 http://example.com/secret~1/anotherfile.docx
 ```
 
 The same IIS tilde directory enumeration technique can also detect 8.3 short file names for files within the directory. After obtaining the short names, those files can be directly accessed using the short names in the requests.
 
-```
-        http
+```http
 http://example.com/secret~1/somefi~1.txt
 ```
 
@@ -78,8 +73,7 @@ The initial phase involves mapping the target and determining which services are
 
 #### Nmap - Open ports
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -p- -sV -sC --open 10.129.224.91
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2023-03-14 19:44 GMT
@@ -107,8 +101,7 @@ Manually sending HTTP requests for each letter of the alphabet can be a tedious 
 
 When you run the below command, it will prompt you for a proxy, just hit enter for No.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ java -jar iis_shortname_scanner.jar 0 5 http://10.129.204.231/
 
 Picked up _JAVA_OPTIONS: -Dawt.useSystemAAFontSettings=on -Dswing.aatext=true
@@ -136,8 +129,7 @@ Upon executing the tool, it discovers 2 directories and 3 files. However, the ta
 
 The pwnbox image offers an extensive collection of wordlists located in the `/usr/share/wordlists/` directory, which can be utilised for this purpose.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ egrep -r ^transf /usr/share/wordlists/* | sed 's/^[^:]*://' > /tmp/list.txt
 ```
 
@@ -154,8 +146,7 @@ This command combines `egrep` and `sed` to filter and modify the contents of inp
 
 Once you have created the custom wordlist, you can use `gobuster` to enumerate all items in the target. GoBuster is an open-source directory and file brute-forcing tool written in the Go programming language. It is designed for penetration testers and security professionals to help identify and discover hidden files, directories, or resources on web servers during security assessments.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster dir -u http://10.129.204.231/ -w /tmp/list.txt -x .aspx,.asp
 
 ===============================================================

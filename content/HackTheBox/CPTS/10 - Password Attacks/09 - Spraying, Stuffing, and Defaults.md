@@ -6,8 +6,7 @@
 
 Depending on the target system, different tools may be used to carry out password spraying attacks. For web applications, [Burp Suite](https://portswigger.net/burp) is a strong option, while for Active Directory environments, tools such as [NetExec](https://github.com/Pennyw0rth/NetExec) or [Kerbrute](https://github.com/ropnop/kerbrute) are commonly used.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netexec smb 10.100.38.0/24 -u <usernames.list> -p 'ChangeMe123!'
 ```
 
@@ -15,8 +14,7 @@ hiimeins@htb[/htb]$ netexec smb 10.100.38.0/24 -u <usernames.list> -p 'ChangeMe1
 
 [Credential stuffing](https://owasp.org/www-community/attacks/Credential_stuffing) is another type of brute-force attack in which an attacker uses stolen credentials from one service to attempt access on others. Since many users reuse their usernames and passwords across multiple platforms (such as email, social media, and enterprise systems), these attacks are sometimes successful. As with password spraying, credential stuffing can be carried out using a variety of tools, depending on the target system. For example, if we have a list of `username:password` credentials obtained from a database leak, we can use `hydra` to perform a credential stuffing attack against an SSH service using the following syntax:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -C user_pass.list ssh://10.100.38.23
 ```
 
@@ -26,15 +24,13 @@ Many systems—such as routers, firewalls, and databases—come with `default cr
 
 While several lists of known default credentials are available online, there are also dedicated tools that automate the process. One widely used example is the [Default Credentials Cheat Sheet](https://github.com/ihebski/DefaultCreds-cheat-sheet), which we can install with `pip3`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ pip3 install defaultcreds-cheat-sheet
 ```
 
 Once installed, we can use the `creds` command to search for known default credentials associated with a specific product or vendor.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ creds search linksys
 
 +---------------+---------------+------------+

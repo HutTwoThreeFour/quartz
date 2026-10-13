@@ -12,8 +12,7 @@ If the operating system is vulnerable to [CVE-2018-0952](https://www.tenable.com
 
 An example of this is Firefox, which installs the `Mozilla Maintenance Service`. We can update [this exploit](https://raw.githubusercontent.com/decoder-it/Hyper-V-admin-EOP/master/hyperv-eop.ps1) (a proof-of-concept for NT hard link) to grant our current user full permissions on the file below:
 
-```
-        shellsession
+```shellsession
 C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
 ```
 
@@ -21,8 +20,7 @@ C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
 
 After running the PowerShell script, we should have full control of this file and can take ownership of it.
 
-```
-        cmd
+```bat
 C:\htb> takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
 ```
 
@@ -30,8 +28,7 @@ C:\htb> takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanc
 
 Next, we can replace this file with a malicious `maintenanceservice.exe`, start the maintenance service, and get command execution as SYSTEM.
 
-```
-        cmd
+```bat
 C:\htb> sc.exe start MozillaMaintenance
 ```
 

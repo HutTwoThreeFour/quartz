@@ -13,8 +13,7 @@ The use of plugins makes a pentester's life even easier, bringing the functional
 
 To start using a plugin, we will need to ensure it is installed in the correct directory on our machine. Navigating to `/usr/share/metasploit-framework/plugins`, which is the default directory for every new installation of `msfconsole`, should show us which plugins we have to our availability:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /usr/share/metasploit-framework/plugins
 
 aggregator.rb      beholder.rb        event_tester.rb  komand.rb     msfd.rb    nexpose.rb   request.rb  session_notifier.rb  sounds.rb  token_adduser.rb  wmap.rb
@@ -26,8 +25,7 @@ If the plugin is found here, we can fire it up inside `msfconsole` and will be m
 
 #### MSF - Load Nessus
 
-```
-        shellsession
+```shellsession
 msf6 > load nessus
 
 [*] Nessus Bridge for Metasploit
@@ -57,8 +55,7 @@ nessus_policy_del           Delete a policy
 
 If the plugin is not installed correctly, we will receive the following error upon trying to load it.
 
-```
-        shellsession
+```shellsession
 msf6 > load Plugin_That_Does_Not_Exist
 
 [-] Failed to load plugin from /usr/share/metasploit-framework/plugins/Plugin_That_Does_Not_Exist.rb: cannot load such file -- /usr/share/metasploit-framework/plugins/Plugin_That_Does_Not_Exist.rb
@@ -76,8 +73,7 @@ For example, let us try installing [DarkOperator's Metasploit-Plugins](https://g
 
 #### Downloading MSF Plugins
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/darkoperator/Metasploit-Plugins
 hiimeins@htb[/htb]$ ls Metasploit-Plugins
 
@@ -96,8 +92,7 @@ Here we can take the plugin `pentest.rb` as an example and copy it to `/usr/shar
 
 #### MSF - Copying Plugin to MSF
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo cp ./Metasploit-Plugins/pentest.rb /usr/share/metasploit-framework/plugins/pentest.rb
 ```
 
@@ -105,8 +100,7 @@ Afterward, launch `msfconsole` and check the plugin's installation by running th
 
 #### MSF - Load Plugin
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfconsole -q
 
 msf6 > load pentest

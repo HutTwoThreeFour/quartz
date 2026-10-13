@@ -78,8 +78,7 @@ http://SERVER\_IP:PORT/
 
 This will highlight the following HTML file input on line `18`:
 
-```
-        html
+```html
 <input type="file" name="uploadFile" id="uploadFile" onchange="checkFile(this)" accept=".jpg,.jpeg,.png">
 ```
 
@@ -87,8 +86,7 @@ Here, we see that the file input specifies (`.jpg,.jpeg,.png`) as the allowed fi
 
 The more interesting part is `onchange="checkFile(this)"`, which appears to run a JavaScript code whenever we select a file, which appears to be doing the file type validation. To get the details of this function, we can go to the browser's `Console` by clicking `CTRL+SHIFT+K`, and then we can type the function's name (`checkFile`) to get its details:
 
-```
-        javascript
+```javascript
 function checkFile(File) {
 ...SNIP...
     if (extension !== 'jpg' && extension !== 'jpeg' && extension !== 'png') {
@@ -118,8 +116,7 @@ With the `checkFile` function removed from the file input, we should be able to 
 
 Once we upload our web shell using either of the above methods and then refresh the page, we can use the `Page Inspector` once more with `CTRL+SHIFT+C`, click on the profile image, and we should see the URL of our uploaded web shell:
 
-```
-        html
+```html
 <img src="/profile_images/shell.php" class="profile-image" id="profile-image">
 ```
 

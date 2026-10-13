@@ -20,8 +20,7 @@ The Windows attack host starts a plink.exe process with the below command-line a
 
 #### Using Plink.exe
 
-```
-        cmd
+```bat
 plink -ssh -D 9050 ubuntu@10.129.15.50
 ```
 

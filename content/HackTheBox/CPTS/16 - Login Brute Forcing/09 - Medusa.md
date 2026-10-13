@@ -8,15 +8,13 @@ Medusa, a prominent tool in the cybersecurity arsenal, is designed to be a fast,
 
 Medusa often comes pre-installed on popular penetration testing distributions. You can verify its presence by running:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ medusa -h
 ```
 
 Installing Medusa on a Linux system is straightforward.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt-get -y update
 hiimeins@htb[/htb]$ sudo apt-get -y install medusa
 ```
@@ -25,8 +23,7 @@ hiimeins@htb[/htb]$ sudo apt-get -y install medusa
 
 Medusa's command-line interface is straightforward. It allows users to specify hosts, users, passwords, and modules with various options to fine-tune the attack process.
 
-```
-        shellsession
+```shellsession
  hiimeins@htb[/htb]$ medusa [target_options] [credential_options] -M module [module_options]
 ```
 
@@ -64,8 +61,7 @@ Each module in Medusa is tailored to interact with specific authentication mecha
 
 Imagine a scenario where you need to test the security of an SSH server at `192.168.0.100`. You have a list of potential usernames in `usernames.txt` and common passwords in `passwords.txt`. To launch a brute-force attack against the SSH service on this server, use the following Medusa command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ medusa -h 192.168.0.100 -U usernames.txt -P passwords.txt -M ssh
 ```
 
@@ -82,8 +78,7 @@ Medusa will systematically try each username-password combination against the SS
 
 Suppose you have a list of web servers that use basic HTTP authentication. These servers' addresses are stored in `web_servers.txt`, and you also have lists of common usernames and passwords in `usernames.txt` and `passwords.txt`, respectively. To test these servers concurrently, execute:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ medusa -H web_servers.txt -U usernames.txt -P passwords.txt -M http -m GET
 ```
 
@@ -99,8 +94,7 @@ By running multiple threads, Medusa efficiently checks each server for weak cred
 
 If you want to assess whether any accounts on a specific host (`10.0.0.5`) have empty or default passwords (where the password matches the username), you can use:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ medusa -h 10.0.0.5 -U usernames.txt -e ns -M service_name
 ```
 

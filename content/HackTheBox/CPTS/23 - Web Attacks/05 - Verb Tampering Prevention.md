@@ -12,8 +12,7 @@ HTTP Verb Tampering vulnerabilities can occur in most modern web servers, includ
 
 The following is an example of a vulnerable configuration for an Apache web server, which is located in the site configuration file (e.g. `000-default.conf`), or in a `.htaccess` web page configuration file:
 
-```
-        xml
+```xml
 <Directory "/var/www/html/admin">
     AuthType Basic
     AuthName "Admin Panel"
@@ -28,8 +27,7 @@ As we can see, this configuration is setting the authorization configurations fo
 
 The following example shows the same vulnerability for a `Tomcat` web server configuration, which can be found in the `web.xml` file for a certain Java web application:
 
-```
-        xml
+```xml
 <security-constraint>
     <web-resource-collection>
         <url-pattern>/admin/*</url-pattern>
@@ -45,8 +43,7 @@ We can see that the authorization is being limited only to the `GET` method with
 
 Finally, the following is an example for an `ASP.NET` configuration found in the `web.config` file of a web application:
 
-```
-        xml
+```xml
 <system.web>
     <authorization>
         <allow verbs="GET" roles="admin">
@@ -73,8 +70,7 @@ While identifying and patching insecure web server configurations is relatively 
 
 Let's consider the following `PHP` code from our `File Manager` exercise:
 
-```
-        php
+```php
 if (isset($_REQUEST['filename'])) {
     if (!preg_match('/[^A-Za-z0-9. _-]/', $_POST['filename'])) {
         system("touch " . $_REQUEST['filename']);

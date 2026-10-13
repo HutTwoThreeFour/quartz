@@ -14,8 +14,7 @@ After discovering a web application, it is always worth checking to see if we ca
 
 GoBuster is a versatile tool that allows for performing DNS, vhost, and directory brute-forcing. The tool has additional functionality, such as enumeration of public AWS S3 buckets. For this module's purposes, we are interested in the directory (and file) brute-forcing modes specified with the switch `dir`. Let us run a simple scan using the `dirb` `common.txt` wordlist.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster dir -u http://10.10.10.121/ -w /usr/share/seclists/Discovery/Web-Content/common.txt
 
 ===============================================================
@@ -54,20 +53,17 @@ There also may be essential resources hosted on subdomains, such as admin panels
 
 #### Install SecLists
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/danielmiessler/SecLists
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install seclists -y
 ```
 
 Next, add a DNS Server such as 1.1.1.1 to the `/etc/resolv.conf` file. We will target the domain `inlanefreight.com`, the website for a fictional freight and logistics company.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster dns -d inlanefreight.com -w /usr/share/SecLists/Discovery/DNS/namelist.txt
 
 ===============================================================
@@ -104,8 +100,7 @@ Let us walk through a few additional web enumeration tips that will help complet
 
 In the last section, we discussed banner grabbing for general purposes. Web server headers provide a good picture of what is hosted on a web server. They can reveal the specific application framework in use, the authentication options, and whether the server is missing essential security options or has been misconfigured. We can use `cURL` to retrieve server header information from the command line. `cURL` is another essential addition to our penetration testing toolkit, and familiarity with its many options is encouraged.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -IL https://www.inlanefreight.com
 
 HTTP/1.1 200 OK
@@ -122,8 +117,7 @@ Another handy tool is [EyeWitness](https://github.com/FortyNorthSecurity/EyeWitn
 
 We can extract the version of web servers, supporting frameworks, and applications using the command-line tool `whatweb`. This information can help us pinpoint the technologies in use and begin to search for potential vulnerabilities.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ whatweb 10.10.10.121
 
 http://10.10.10.121 [200 OK] Apache[2.4.41], Country[RESERVED][ZZ], Email[license@php.net], HTTPServer[Ubuntu Linux][Apache/2.4.41 (Ubuntu)], IP[10.10.10.121], Title[PHP 7.4.3 - phpinfo()]
@@ -131,8 +125,7 @@ http://10.10.10.121 [200 OK] Apache[2.4.41], Country[RESERVED][ZZ], Email[licens
 
 `Whatweb` is a handy tool and contains much functionality to automate web application enumeration across a network.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ whatweb --no-errors 10.10.10.0/24
 
 http://10.10.10.11 [200 OK] Country[RESERVED][ZZ], HTTPServer[nginx/1.14.1], IP[10.10.10.11], PoweredBy[Red,nginx], Title[Test Page for the Nginx HTTP Server on Red Hat Enterprise Linux], nginx[1.14.1]

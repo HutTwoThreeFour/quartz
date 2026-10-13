@@ -72,8 +72,7 @@ Scroll to the bottom, spawn the target, connect to the Linux attack host using `
 
 #### Start Wireshark on ea-attack01
 
-```
-        shellsession
+```shellsession
 ┌─[htb-student@ea-attack01]─[~]
 └──╼ $sudo -E wireshark
 
@@ -99,8 +98,7 @@ If we are on a host without a GUI (which is typical), we can use [tcpdump](https
 
 #### Tcpdump Output
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo tcpdump -i ens224
 ```
 
@@ -114,8 +112,7 @@ Our first look at network traffic pointed us to a couple of hosts via `MDNS` and
 
 #### Starting Responder
 
-```
-        bash
+```bash
 sudo responder -I ens224 -A
 ```
 
@@ -133,8 +130,7 @@ Our passive checks have given us a few hosts to note down for a more in-depth en
 
 Here we'll start `fping` with a few flags: `a` to show targets that are alive, `s` to print stats at the end of the scan, `g` to generate a target list from the CIDR network, and `q` to not show per-target results.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ fping -asgq 172.16.5.0/23
 
 172.16.5.5
@@ -171,8 +167,7 @@ Note: Scan results in the target network will differ from the command output in 
 
 Now that we have a list of active hosts within our network, we can enumerate those hosts further. We are looking to determine what services each host is running, identify critical hosts such as `Domain Controllers` and `web servers`, and identify potentially vulnerable hosts to probe later. With our focus on AD, after doing a broad sweep, it would be wise of us to focus on standard protocols typically seen accompanying AD services, such as DNS, SMB, LDAP, and Kerberos name a few. Below is a quick example of a simple Nmap scan.
 
-```
-        bash
+```bash
 sudo nmap -v -A -iL hosts.txt -oN /home/htb-student/Documents/host-enum
 ```
 
@@ -180,8 +175,7 @@ The [-A (Aggressive scan options)](https://nmap.org/book/man-misc-options.html) 
 
 #### NMAP Result Highlights
 
-```
-        shellsession
+```shellsession
 Nmap scan report for inlanefreight.local (172.16.5.5)
 Host is up (0.069s latency).
 Not shown: 987 closed tcp ports (conn-refused)
@@ -228,8 +222,7 @@ Service Info: Host: ACADEMY-EA-DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Our scans have provided us with the naming standard used by NetBIOS and DNS, we can see some hosts have RDP open, and they have pointed us in the direction of the primary `Domain Controller` for the INLANEFREIGHT.LOCAL domain (ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL). The results below show some interesting results surrounding a possibly outdated host (not in our current lab).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -A 172.16.5.100
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2022-04-08 13:42 EDT
@@ -307,8 +300,7 @@ To get started with Kerbrute, we can download [precompiled binaries](https://git
 
 #### Cloning Kerbrute GitHub Repo
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo git clone https://github.com/ropnop/kerbrute.git
 
 Cloning into 'kerbrute'...
@@ -324,8 +316,7 @@ Typing `make help` will show us the compiling options available.
 
 #### Listing Compiling Options
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ make help
 
 help:            Show this help.
@@ -340,8 +331,7 @@ We can choose to compile just one binary or type `make all` and compile one each
 
 #### Compiling for Multiple Platforms and Architectures
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo make all
 
 go: downloading github.com/spf13/cobra v1.1.1
@@ -368,8 +358,7 @@ The newly created `dist` directory will contain our compiled binaries.
 
 #### Listing the Compiled Binaries in dist
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls dist/
 
 kerbrute_darwin_amd64  kerbrute_linux_386  kerbrute_linux_amd64  kerbrute_windows_386.exe  kerbrute_windows_amd64.exe
@@ -379,8 +368,7 @@ We can then test out the binary to make sure it works properly. We will be using
 
 #### Testing the kerbrute\_linux\_amd64 Binary
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./kerbrute_linux_amd64 
 
     __             __               __     
@@ -405,16 +393,14 @@ We can add the tool to our PATH to make it easily accessible from anywhere on th
 
 #### Adding the Tool to our Path
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo $PATH
 /home/htb-student/.local/bin:/snap/bin:/usr/sandbox/:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/share/games:/usr/local/sbin:/usr/sbin:/sbin:/snap/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/htb-student/.dotnet/tools
 ```
 
 #### Moving the Binary
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo mv kerbrute_linux_amd64 /usr/local/bin/kerbrute
 ```
 
@@ -422,8 +408,7 @@ We can now type `kerbrute` from any location on the system and will be able to a
 
 #### Enumerating Users with Kerbrute
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_users
 
 2021/11/17 23:01:46 >  Using KDC(s):

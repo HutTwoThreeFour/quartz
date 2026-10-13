@@ -25,22 +25,19 @@ We have several ways to define the desired scripts in `Nmap`.
 
 #### Default Scripts
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap <target> -sC
 ```
 
 #### Specific Scripts Category
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap <target> --script <category>
 ```
 
 #### Defined Scripts
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap <target> --script <script-name>,<script-name>,...
 ```
 
@@ -48,8 +45,7 @@ For example, let us keep working with the target SMTP port and see the results w
 
 #### Nmap - Specifying Scripts
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p 25 --script banner,smtp-commands
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-16 23:21 CEST
@@ -73,8 +69,7 @@ We see that we can recognize the **Ubuntu** distribution of Linux by using the' 
 
 #### Nmap - Aggressive Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p 80 -A
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-17 01:38 CEST
 Nmap scan report for 10.129.2.28
@@ -117,8 +112,7 @@ Now let us move on to HTTP port 80 and see what information and vulnerabilities 
 
 #### Nmap - Vuln Category
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p 80 -sV --script vuln 
 
 Nmap scan report for 10.129.2.28

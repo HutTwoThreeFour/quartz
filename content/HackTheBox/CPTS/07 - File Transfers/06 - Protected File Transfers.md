@@ -18,8 +18,7 @@ Many different methods can be used to encrypt files and information on Windows s
 
 #### Invoke-AESEncryption.ps1
 
-```
-        powershell
+```powershell
 
 .EXAMPLE
 Invoke-AESEncryption -Mode Encrypt -Key "p@ssw0rd" -Text "Secret Text" 
@@ -148,8 +147,7 @@ We can use any previously shown file transfer methods to get this file onto a ta
 
 #### Import Module Invoke-AESEncryption.ps1
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\Invoke-AESEncryption.ps1
 ```
 
@@ -157,8 +155,7 @@ After the script is imported, it can encrypt strings or files, as shown in the f
 
 #### File Encryption Example
 
-```
-        powershell
+```powershell
 PS C:\htb> Invoke-AESEncryption -Mode Encrypt -Key "p4ssw0rd" -Path .\scan-results.txt
 
 File encrypted to C:\htb\scan-results.txt.aes
@@ -185,8 +182,7 @@ To encrypt a file using `openssl` we can select different ciphers, see [OpenSSL 
 
 #### Encrypting /etc/passwd with openssl
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ openssl enc -aes256 -iter 100000 -pbkdf2 -in /etc/passwd -out passwd.enc
 
 enter aes-256-cbc encryption password:                                                         
@@ -197,8 +193,7 @@ Remember to use a strong and unique password to avoid brute-force cracking attac
 
 #### Decrypt passwd.enc with openssl
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ openssl enc -d -aes256 -iter 100000 -pbkdf2 -in passwd.enc -out passwd                    
 
 enter aes-256-cbc decryption password:

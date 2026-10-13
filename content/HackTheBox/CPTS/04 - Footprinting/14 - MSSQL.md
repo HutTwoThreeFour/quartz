@@ -18,8 +18,7 @@ Many other clients can be used to access a database running on MSSQL. Including 
 
 Of the MSSQL clients listed above, pentesters may find Impacket's mssqlclient.py to be the most useful due to SecureAuthCorp's Impacket project being present on many pentesting distributions at install. To find if and where the client is located on our host, we can use the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ locate mssqlclient
 
 /usr/bin/impacket-mssqlclient
@@ -73,8 +72,7 @@ The scripted NMAP scan below provides us with helpful information. We can see th
 
 #### NMAP MSSQL Script Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap --script ms-sql-info,ms-sql-empty-password,ms-sql-xp-cmdshell,ms-sql-config,ms-sql-ntlm-info,ms-sql-tables,ms-sql-hasdbaccess,ms-sql-dac,ms-sql-dump-hashes --script-args mssql.instance-port=1433,mssql.username=sa,mssql.password=,mssql.instance-name=MSSQLSERVER -sV -p 1433 10.129.201.248
 
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-11-08 09:40 EST
@@ -116,8 +114,7 @@ We can also use Metasploit to run an auxiliary scanner called `mssql_ping` that 
 
 #### MSSQL Ping in Metasploit
 
-```
-        shellsession
+```shellsession
 msf6 auxiliary(scanner/mssql/mssql_ping) > set rhosts 10.129.201.248
 
 rhosts => 10.129.201.248
@@ -139,8 +136,7 @@ msf6 auxiliary(scanner/mssql/mssql_ping) > run
 
 If we can guess or gain access to credentials, this allows us to remotely connect to the MSSQL server and start interacting with databases using T-SQL (`Transact-SQL`). Authenticating with MSSQL will enable us to interact directly with databases through the SQL Database Engine. From Pwnbox or a personal attack host, we can use Impacket's mssqlclient.py to connect as seen in the output below. Once connected to the server, it may be good to get a lay of the land and list the databases present on the system.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 mssqlclient.py Administrator@10.129.201.248 -windows-auth
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation

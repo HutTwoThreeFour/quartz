@@ -34,15 +34,13 @@ As we can see, the page is indeed vulnerable, and we are able to read the conten
 
 In the earlier example, we read a file by specifying its `absolute path` (e.g. `/etc/passwd`). This would work if the whole input was used within the `include()` function without any additions, like the following example:
 
-```
-        php
+```php
 include($_GET['language']);
 ```
 
 In this case, if we try to read `/etc/passwd`, then the `include()` function would fetch that file directly. However, in many occasions, web developers may append or prepend a string to the `language` parameter. For example, the `language` parameter may be used for the filename, and may be added after a directory, as follows:
 
-```
-        php
+```php
 include("./languages/" . $_GET['language']);
 ```
 
@@ -74,8 +72,7 @@ As we can see, this time we were able to read the file regardless of the directo
 
 In our previous example, we used the `language` parameter after the directory, so we could traverse the path to read the `passwd` file. On some occasions, our input may be appended after a different string. For example, it may be used with a prefix to get the full filename, like the following example:
 
-```
-        php
+```php
 include("lang_" . $_GET['language']);
 ```
 
@@ -99,8 +96,7 @@ http://<SERVER\_IP>:<PORT>/index.php?language=/../../../etc/passwd
 
 Another very common example is when an extension is appended to the `language` parameter, as follows:
 
-```
-        php
+```php
 include($_GET['language'] . ".php");
 ```
 

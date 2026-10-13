@@ -28,8 +28,7 @@ As you can imagine, some of the above methods can perform very sensitive functio
 
 Insecure web server configurations cause the first type of HTTP Verb Tampering vulnerabilities. A web server's authentication configuration may be limited to specific HTTP methods, which would leave some HTTP methods accessible without authentication. For example, a system admin may use the following configuration to require authentication on a particular web page:
 
-```
-        xml
+```xml
 <Limit GET POST>
     Require valid-user
 </Limit>
@@ -43,8 +42,7 @@ As we can see, even though the configuration specifies both `GET` and `POST` req
 
 Insecure coding practices cause the other type of HTTP Verb Tampering vulnerabilities (though some may not consider this Verb Tampering). This can occur when a web developer applies specific filters to mitigate particular vulnerabilities while not covering all HTTP methods with that filter. For example, if a web page was found to be vulnerable to a SQL Injection vulnerability, and the back-end developer mitigated the SQL Injection vulnerability by the following applying input sanitization filters:
 
-```
-        php
+```php
 $pattern = "/^[A-Za-z\s]+$/";
 
 if(preg_match($pattern, $_GET["code"])) {

@@ -16,8 +16,7 @@ While paid tools usually have a higher level of accuracy in detecting XSS vulner
 
 Some of the common open-source tools that can assist us in XSS discovery are [XSS Strike](https://github.com/s0md3v/XSStrike), [Brute XSS](https://github.com/rajeshmajumdar/BruteXSS), and [XSSer](https://github.com/epsylon/xsser). We can try `XSS Strike` by cloning it to our VM with `git clone`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/s0md3v/XSStrike.git
 hiimeins@htb[/htb]$ cd XSStrike
 hiimeins@htb[/htb]$ pip install -r requirements.txt
@@ -29,8 +28,7 @@ XSStrike v3.1.4
 
 We can then run the script and provide it a URL with a parameter using `-u`. Let's try using it with our `Reflected XSS` example from the earlier section:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python xsstrike.py -u "http://SERVER_IP:PORT/index.php?task=test" 
 
         XSStrike v3.1.4

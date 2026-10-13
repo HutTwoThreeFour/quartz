@@ -10,15 +10,13 @@ So far, we have found the `Host Checker` web application to be potentially vulne
 
 We can add a semi-colon after our input IP `127.0.0.1`, and then append our command (e.g. `whoami`), such that the final payload we will use is (`127.0.0.1; whoami`), and the final command to be executed would be:
 
-```
-        bash
+```bash
 ping -c 1 127.0.0.1; whoami
 ```
 
 First, let's try running the above command on our Linux VM to ensure it does run:
 
-```
-        shellsession
+```shellsession
 21y4d@htb[/htb]$ ping -c 1 127.0.0.1; whoami
 
 PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.

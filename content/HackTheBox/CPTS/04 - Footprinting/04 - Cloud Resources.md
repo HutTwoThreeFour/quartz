@@ -8,8 +8,7 @@ Even though cloud providers secure their infrastructure centrally, this does not
 
 #### Company Hosted Servers
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(cat subdomainlist);do host $i | grep "has address" | grep inlanefreight.com | cut -d" " -f1,4;done
 
 blog.inlanefreight.com 10.129.24.93

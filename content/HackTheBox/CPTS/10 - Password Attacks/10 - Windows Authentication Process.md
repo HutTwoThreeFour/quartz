@@ -53,8 +53,7 @@ Source: [Microsoft Docs](https://docs.microsoft.com/en-us/windows-server/securit
 
 Credential Manager is a built-in feature of all Windows operating systems that allows users to store and manage credentials used to access network resources, websites, and applications. These saved credentials are stored per user profile in the user's `Credential Locker`. The credentials are encrypted and stored at the following location:
 
-```
-        powershell
+```powershell
 PS C:\Users\[Username]\AppData\Local\Microsoft\[Vault/Credentials]\
 ```
 

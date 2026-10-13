@@ -56,8 +56,7 @@ Throughout the module, we will cover examples with accompanying command output. 
 
 We can connect via command line using the command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp /v:<MS01 target IP> /u:htb-student /p:Academy_student_AD!
 ```
 
@@ -65,8 +64,7 @@ hiimeins@htb[/htb]$ xfreerdp /v:<MS01 target IP> /u:htb-student /p:Academy_stude
 
 We can connect to the provided Parrot Linux attack host using the command, then enter the provided password when prompted.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh htb-student@<ATTACK01 target IP>
 ```
 
@@ -74,8 +72,7 @@ hiimeins@htb[/htb]$ ssh htb-student@<ATTACK01 target IP>
 
 We also installed an `XRDP` server on the `ATTACK01` host to provide GUI access to the Parrot attack host. This can be used to interact with the BloodHound GUI tool which we will cover later in this section. In sections where this host spawns (where you are given SSH access) you can also connect to it using `xfreerdp` using the same command as you would with the Windows attack host above:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp /v:<ATTACK01 target IP> /u:htb-student /p:HTB_@cademy_stdnt!
 ```
 

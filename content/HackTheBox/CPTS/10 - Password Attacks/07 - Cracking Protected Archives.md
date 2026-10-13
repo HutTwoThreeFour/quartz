@@ -8,8 +8,7 @@ There are many types of archive files. Some of the more commonly encountered fil
 
 A comprehensive list of archive file types can be found on [FileInfo](https://fileinfo.com/filetypes/compressed). Rather than typing them out manually, we can also query the data using a one-liner, apply filters as needed, and save the results to a file. At the time of writing, the website lists `365` archive file types.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s https://fileinfo.com/filetypes/compressed | html2text | awk '{print tolower($1)}' | grep "\." | tee -a compressed_ext.txt
 
 .mint
@@ -36,8 +35,7 @@ Given the wide variety of archive formats and encryption tools, this section wil
 
 The `ZIP` format is often heavily used in Windows environments to compress many files into one file. The process of cracking an encrypted ZIP file is similar to what we have seen already, except for using a different script to extract the hashes.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ zip2john ZIP.zip > zip.hash
 hiimeins@htb[/htb]$ cat zip.hash 
 
@@ -46,8 +44,7 @@ ZIP.zip/customers.csv:$pkzip2$1*2*2*0*2a*1e*490e7510*0*42*0*2a*490e*409b*ef1e7fe
 
 Once we have extracted the hash, we can use JtR to crack it with the desired password list.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ john --wordlist=rockyou.txt zip.hash
 
 Using default input encoding: UTF-8
@@ -69,8 +66,7 @@ ZIP.zip/customers.csv:1234:customers.csv:ZIP.zip::ZIP.zip
 
 It is not always immediately apparent whether a file is password-protected, particularly when the file extension corresponds to a format that does not natively support password protection. As previously discussed, `openssl` can be used to encrypt files in the `GZIP` format. To determine the actual format of a file, we can use the `file` command, which provides detailed information about its contents. For example:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ file GZIP.gzip 
 
 GZIP.gzip: openssl enc'd data with salted password
@@ -80,8 +76,7 @@ When cracking OpenSSL encrypted files, we may encounter various challenges, incl
 
 The following one-liner may produce several GZIP-related error messages, which can be safely ignored. If the correct password list is used, as in this example, we will see another file successfully extracted from the archive.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(cat rockyou.txt);do openssl enc -aes-256-cbc -d -in GZIP.gzip -k $i 2>/dev/null| tar xz;done
 
 gzip: stdin: not in gzip format
@@ -96,8 +91,7 @@ tar: Error is not recoverable: exiting now
 
 Once the `for` loop has finished, we can check the current directory for a newly extracted file.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls
 
 customers.csv  GZIP.gzip  rockyou.txt
@@ -109,8 +103,7 @@ customers.csv  GZIP.gzip  rockyou.txt
 
 In enterprise environments, virtual drives are sometimes used to store personal information, documents, or notes on company-issued devices to prevent unauthorized access. To crack a BitLocker encrypted drive, we can use a script called `bitlocker2john` to [four different hashes](https://openwall.info/wiki/john/OpenCL-BitLocker): the first two correspond to the BitLocker password, while the latter two represent the recovery key. Because the recovery key is very long and randomly generated, it is generally not practical to guess—unless partial knowledge is available. Therefore, we will focus on cracking the password using the first hash (`$bitlocker$0$...`).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ bitlocker2john -i Backup.vhd > backup.hashes
 hiimeins@htb[/htb]$ grep "bitlocker\$0" backup.hashes > backup.hash
 hiimeins@htb[/htb]$ cat backup.hash
@@ -120,8 +113,7 @@ $bitlocker$0$16$02b329c0453b9273f2fc1b927443b5fe$1048576$12$00b0a67f961dd8010300
 
 Once a hash is generated, either `JtR` or `hashcat` can be used to crack it. For this example, we will look at the procedure with `hashcat`. The hashcat mode associated with the `$bitlocker$0$...` hash is `-m 22100`. We supply the hash, specify the wordlist, and define the hash mode. Since this encryption uses strong AES encryption, cracking may take considerable time depending on hardware performance.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -a 0 -m 22100 '$bitlocker$0$16$02b329c0453b9273f2fc1b927443b5fe$1048576$12$00b0a67f961dd80103000000$60$d59f37e70696f7eab6b8f95ae93bd53f3f7067d5e33c0394b3d8e2d1fdb885cb86c1b978f6cc12ed26de0889cd2196b0510bbcd2a8c89187ba8ec54f' /usr/share/wordlists/rockyou.txt
 
 <SNIP>
@@ -163,23 +155,20 @@ The easiest method for mounting a BitLocker-encrypted virtual drive on Windows i
 
 It is also possible to mount BitLocker-encrypted drives in Linux (or macOS). To do this, we can use a tool called [dislocker](https://github.com/Aorimn/dislocker). First, we need to install the package using `apt`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt-get install dislocker
 ```
 
 Next, we create two folders which we will use to mount the VHD.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo mkdir -p /media/bitlocker
 hiimeins@htb[/htb]$ sudo mkdir -p /media/bitlockermount
 ```
 
 We then use `losetup` to configure the VHD as [loop device](https://en.wikipedia.org/wiki/Loop_device), decrypt the drive using `dislocker`, and finally mount the decrypted volume:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo losetup -f -P Backup.vhd
 hiimeins@htb[/htb]$ sudo dislocker /dev/loop0p2 -u1234qwer -- /media/bitlocker
 hiimeins@htb[/htb]$ sudo mount -o loop /media/bitlocker/dislocker-file /media/bitlockermount
@@ -187,16 +176,14 @@ hiimeins@htb[/htb]$ sudo mount -o loop /media/bitlocker/dislocker-file /media/bi
 
 If everything was done correctly, we can now browse the files:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cd /media/bitlockermount/
 hiimeins@htb[/htb]$ ls -la
 ```
 
 Once we have analyzed the files on the mounted drive, we can unmount it using the following commands:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo umount /media/bitlockermount
 hiimeins@htb[/htb]$ sudo umount /media/bitlocker
 ```

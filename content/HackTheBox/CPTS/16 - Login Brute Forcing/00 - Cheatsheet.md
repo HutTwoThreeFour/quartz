@@ -57,8 +57,7 @@ A trial-and-error method used to crack passwords, login credentials, or encrypti
 - Flexible and adaptable
 - Relatively easy to use
 
-```
-        bash
+```bash
 hydra [-l LOGIN|-L FILE] [-p PASS|-P FILE] [-C FILE] -m MODULE [service://server[:PORT][/OPT]]
 ```
 
@@ -73,8 +72,7 @@ hydra [-l LOGIN|-L FILE] [-p PASS|-P FILE] [-C FILE] -m MODULE [service://server
 - Fast, massively parallel, modular login brute-forcer
 - Supports a wide array of services
 
-```
-        bash
+```bash
 medusa [-h host|-H file] [-u username|-U file] [-p password|-P file] [-C file] -M module [OPT]
 ```
 

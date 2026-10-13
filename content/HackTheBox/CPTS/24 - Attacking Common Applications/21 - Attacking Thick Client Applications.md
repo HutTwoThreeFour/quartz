@@ -76,8 +76,7 @@ The following scenario walks us through enumerating and exploiting a thick clien
 
 Exploring the `NETLOGON` share of the SMB service reveals `RestartOracle-Service.exe` among other files. Downloading the executable locally and running it through the command line, it seems like it does not run or it runs something hidden.
 
-```
-        cmd
+```bat
 C:\Apps>.\Restart-OracleService.exe
 C:\Apps>
 ```
@@ -92,8 +91,7 @@ In order to capture the files, it is required to change the permissions of the `
 
 Finally, we click `OK` -> `Apply` -> `OK` -> `OK` on the open windows. Once the folder permissions have been applied we simply run again the `Restart-OracleService.exe` and check the `temp` folder. The file `6F39.bat` is created under the `C:\Users\cybervaca\AppData\Local\Temp\2`. The names of the generated files are random every time the service is running.
 
-```
-        cmd
+```bat
 C:\Apps>dir C:\Users\cybervaca\AppData\Local\Temp\2
 
 ...SNIP...
@@ -103,8 +101,7 @@ C:\Apps>dir C:\Users\cybervaca\AppData\Local\Temp\2
 
 Listing the content of the `6F39` batch file reveals the following.
 
-```
-        batch
+```bat
 @shift /0
 @echo off
 
@@ -129,8 +126,7 @@ del c:\programdata\restart-service.exe
 
 Inspecting the content of the file reveals that two files are being dropped by the batch file and being deleted before anyone can get access to the leftovers. We can try to retrieve the content of the 2 files, by modifying the batch script and removing the deletion.
 
-```
-        batch
+```bat
 @shift /0
 @echo off
 
@@ -144,8 +140,7 @@ echo $salida = $null; $fichero = (Get-Content C:\ProgramData\oracle.txt) ; forea
 
 After executing the batch script by double-clicking on it, we wait a few minutes to spot the `oracle.txt` file which contains another file full of base64 lines, and the script `monta.ps1` which contains the following content, under the directory `c:\programdata\`. Listing the content of the file `monta.ps1` reveals the following code.
 
-```
-        powershell
+```powershell
 C:\>  cat C:\programdata\monta.ps1
 
 $salida = $null; $fichero = (Get-Content C:\ProgramData\oracle.txt) ; foreach ($linea in $fichero) {$salida += $linea }; $salida = $salida.Replace(" ",""); [System.IO.File]::WriteAllBytes("c:\programdata\restart-service.exe", [System.Convert]::FromBase64String($salida))
@@ -153,8 +148,7 @@ $salida = $null; $fichero = (Get-Content C:\ProgramData\oracle.txt) ; foreach ($
 
 This script simply reads the contents of the `oracle.txt` file and decodes it to the `restart-service.exe` executable. Running this script gives us a final executable that we can further analyze.
 
-```
-        powershell
+```powershell
 C:\>  ls C:\programdata\
 
 Mode                LastWriteTime         Length Name
@@ -166,8 +160,7 @@ Mode                LastWriteTime         Length Name
 
 Now when executing `restart-service.exe` we are presented with the banner `Restart Oracle` created by `HelpDesk` back in 2010.
 
-```
-        powershell
+```powershell
 C:\>  .\restart-service.exe
 
     ____            __             __     ____                  __
@@ -205,8 +198,7 @@ If we double-click on it, we will see the magic bytes `MZ` in the `ASCII` column
 
 Let's return to the Memory Map pane, then export the newly discovered mapped item from memory to a dump file by right-clicking on the address and selecting `Dump Memory to File`. Running `strings` on the exported file reveals some interesting information.
 
-```
-        powershell
+```powershell
 C:\> C:\TOOLS\Strings\strings64.exe .\restart-service_00000000001E0000.bin
 
 <SNIP>
@@ -220,8 +212,7 @@ FrameworkDisplayName
 
 Reading the output reveals that the dump contains a `.NET` executable. We can use `De4Dot` to reverse `.NET` executables back to the source code by dragging the `restart-service_00000000001E0000.bin` onto the `de4dot` executable.
 
-```
-        cmd
+```bat
 de4dot v3.1.41592.3405
 
 Detected Unknown Obfuscator (C:\Users\cybervaca\Desktop\restart-service_00000000001E0000.bin)

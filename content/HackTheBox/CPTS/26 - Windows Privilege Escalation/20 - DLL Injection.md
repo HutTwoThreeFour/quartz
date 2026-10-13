@@ -14,8 +14,7 @@ There are several different methods for actually executing a DLL injection.
 
 The `LoadLibrary` API is a function provided by the Windows operating system that loads a Dynamic Link Library (DLL) into the current process’s memory and returns a handle that can be used to get the addresses of functions within the DLL.
 
-```
-        c
+```c
 #include <windows.h>
 #include <stdio.h>
 
@@ -34,8 +33,7 @@ int main() {
 
 The first example shows how `LoadLibrary` can be used to load a DLL into the current process legitimately.
 
-```
-        c
+```c
 #include <windows.h>
 #include <stdio.h>
 
@@ -232,8 +230,7 @@ Then if you scroll to the bottom, you can see the call to load `library.dll`.
 
 We can further filter for an `Operation` of `Load Image` to only get the libraries the app is loading.
 
-```
-        shellsession
+```shellsession
 16:13:30,0074709    main.exe    47792   Load Image  C:\Users\PandaSt0rm\Desktop\Hijack\main.exe SUCCESS Image Base: 0xf60000, Image Size: 0x26000
 16:13:30,0075369    main.exe    47792   Load Image  C:\Windows\System32\ntdll.dll   SUCCESS Image Base: 0x7ffacdbf0000, Image Size: 0x214000
 16:13:30,0075986    main.exe    47792   Load Image  C:\Windows\SysWOW64\ntdll.dll   SUCCESS Image Base: 0x77a30000, Image Size: 0x1af000
@@ -312,8 +309,7 @@ Another option to execute a DLL Hijack attack is to replace a valid library the 
 
 As we know, `main.exe` searches in many locations looking for `x.dll`, but it doesn’t find it anywhere. The entry we are particularly interested in is:
 
-```
-        shellsession
+```shellsession
 17:55:39,7848570    main.exe    37940   CreateFile  C:\Users\PandaSt0rm\Desktop\Hijack\x.dll    NAME NOT FOUND  Desired Access: Read Attributes, Disposition: Open, Options: Open Reparse Point, Attributes: n/a, ShareMode: Read, Write, Delete, AllocationSize: n/a
 ```
 

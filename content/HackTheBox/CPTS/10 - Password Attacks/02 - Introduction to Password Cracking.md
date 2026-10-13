@@ -4,8 +4,7 @@ Passwords are commonly `hashed` when stored, in order to provide some protection
 
 Take the password `Soccer06!` for example. The corresponding `MD5` and `SHA-256` hashes can be generated with the following commands:
 
-```
-        shellsession
+```shellsession
 bmdyy@htb:~$ echo -n Soccer06! | md5sum
 40291c1d19ee11a7df8495c4cccefdfa  -
 
@@ -35,8 +34,7 @@ Rainbow tables are large pre-compiled maps of input and output values for a give
 
 Because rainbow tables are such a powerful attack, `salting` is used. A `salt`, in cryptographic terms, is a random sequence of bytes added to a password before it is hashed. To maximize impact, salts should not be reused, e.g. for all passwords stored in one database. For example, if the salt `Th1sIsTh3S@lt_` is prepended to the same password, the MD5 hash would now be as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo -n Th1sIsTh3S@lt_Soccer06! | md5sum
 
 90a10ba83c04e7996bc53373170b5474  -
@@ -69,8 +67,7 @@ A `brute-force` attack involves attempting every possible combination of letters
 
 A `dictionary` attack, otherwise known as a `wordlist` attack, is one of the most `efficient` techniques for cracking passwords, especially when operating under time-constraints as penetration testers usually do. Rather than attempting every possible combination of characters, a list containing statistically likely passwords is used. Well-known wordlists for password cracking are [rockyou.txt](https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt) and those included in [SecLists](https://github.com/danielmiessler/SecLists).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ head --lines=20 /usr/share/wordlists/rockyou.txt 
 
 123456

@@ -59,8 +59,7 @@ We can use the [Get-ADTrust](https://docs.microsoft.com/en-us/powershell/module/
 
 #### Using Get-ADTrust
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module activedirectory
 PS C:\htb> Get-ADTrust -Filter *
 
@@ -119,8 +118,7 @@ Aside from using built-in AD tools such as the Active Directory PowerShell modul
 
 #### Checking for Existing Trusts using Get-DomainTrust
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainTrust 
 
 SourceName      : INLANEFREIGHT.LOCAL
@@ -144,8 +142,7 @@ PowerView can be used to perform a domain trust mapping and provide information 
 
 #### Using Get-DomainTrustMapping
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainTrustMapping
 
 SourceName      : INLANEFREIGHT.LOCAL
@@ -185,8 +182,7 @@ From here, we could begin performing enumeration across the trusts. For example,
 
 #### Checking Users in the Child Domain using Get-DomainUser
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser -Domain LOGISTICS.INLANEFREIGHT.LOCAL | select SamAccountName
 
 samaccountname
@@ -202,8 +198,7 @@ Another tool we can use to get Domain Trust is `netdom`. The `netdom query` sub-
 
 #### Using netdom to query domain trust
 
-```
-        cmd
+```bat
 C:\htb> netdom query /domain:inlanefreight.local trust
 Direction Trusted\Trusting domain                         Trust type
 ========= =======================                         ==========
@@ -221,8 +216,7 @@ The command completed successfully.
 
 #### Using netdom to query domain controllers
 
-```
-        cmd
+```bat
 C:\htb> netdom query /domain:inlanefreight.local dc
 List of domain controllers with accounts in the domain:
 
@@ -232,8 +226,7 @@ The command completed successfully.
 
 #### Using netdom to query workstations and servers
 
-```
-        cmd
+```bat
 C:\htb> netdom query /domain:inlanefreight.local workstation
 List of workstations with accounts in the domain:
 

@@ -22,8 +22,7 @@ We can use a VPN service such as `NordVPN` or `Private Internet Access` and conn
 
 HTB and other services offering purposefully vulnerable VMs/networks require players to connect to the target network via a VPN to access the private lab network. Hosts within HTB networks cannot connect directly out to the internet. When connected to HTB VPN (or any penetration testing/hacking-focused lab), we should always consider the network to be "hostile." We should only connect from a virtual machine, disallow password authentication if SSH is enabled on our attacking VM, lockdown any web servers, and not leave sensitive information on our attack VM (i.e., do not play HTB or other vulnerable networks with the same VM that we use to perform client assessments). When connecting to a VPN (either within HTB Academy or the main HTB platform), we connect using the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo openvpn user.ovpn
 
 Thu Dec 10 18:42:41 2020 OpenVPN 2.4.9 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Apr 21 2020
@@ -41,8 +40,7 @@ The last line `Initialization Sequence Completed` tells us that we successfully 
 
 Where `sudo` tells our host to run the command as the elevated root user, `openvpn` is the VPN client, and the `user.ovpn` file is the VPN key that we download from either the Academy module section or the main HTB platform. If we type `ifconfig` in another terminal window, we will see a `tun` adapter if we successfully connected to the VPN.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ifconfig
 
 <SNIP>
@@ -56,8 +54,7 @@ tun0: flags=4305<UP,POINTOPOINT,RUNNING,NOARP,MULTICAST>  mtu 1500
 
 Typing `netstat -rn` will show us the networks accessible via the VPN.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netstat -rn
 
 Kernel IP routing table

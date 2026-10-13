@@ -14,8 +14,7 @@ In Python, we can import modules quite easily:
 
 #### Importing Modules
 
-```
-        python
+```python
 #!/usr/bin/env python3
 
 # Method 1 - Module Import
@@ -46,8 +45,7 @@ Let's first check our user's sudo privileges using the `sudo -l` command.
 
 #### Checking Sudo Privileges
 
-```
-        text
+```text
 htb-student@lpenix:~$ sudo -l
 
 Matching Defaults entries for htb-student on lpenix:
@@ -63,8 +61,7 @@ Let's quickly analyze the permissions of the `mem_status.py` Python file.
 
 #### Python Script - Permissions
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ ls -l mem_status.py
 
 -rwsrwxr-x 1 root mrb3n 188 Dec 13 20:13 mem_status.py
@@ -76,8 +73,7 @@ Now, let us examine the contents of `mem_status.py`.
 
 #### Python Script - Contents
 
-```
-        python
+```python
 #!/usr/bin/env python3
 import psutil
 
@@ -92,8 +88,7 @@ So we can look for this function in the folder of `psutil` and check if this mod
 
 #### Module Permissions
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ grep -r "def virtual_memory" /usr/local/lib/python3.8/dist-packages/psutil/*
 
 /usr/local/lib/python3.8/dist-packages/psutil/__init__.py:def virtual_memory():
@@ -113,8 +108,7 @@ Such permissions are most common in developer environments where many developers
 
 #### Module Contents
 
-```
-        python
+```python
 ...SNIP...
 
 def virtual_memory():
@@ -134,8 +128,7 @@ This is the part in the library where we can insert our code. It is recommended 
 
 #### Module Contents - Hijacking
 
-```
-        python
+```python
 ...SNIP...
 
 def virtual_memory():
@@ -159,8 +152,7 @@ Now we can run the script with `sudo` and check if we get the desired result.
 
 #### Privilege Escalation
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ sudo /usr/bin/python3 ./mem_status.py
 
 uid=0(root) gid=0(root) groups=0(root)
@@ -178,8 +170,7 @@ In Python, each version has a specified order in which libraries (`modules`) are
 
 #### PYTHONPATH Listing
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ python3 -c 'import sys; print("\n".join(sys.path))'
 
 /usr/lib/python38.zip
@@ -200,8 +191,7 @@ In order for this to make a bit more sense, let us continue with the previous ex
 
 #### Psutil Default Installation Location
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ pip3 show psutil
 
 ...SNIP...
@@ -214,8 +204,7 @@ From this example, we can see that `psutil` is installed in the following path: 
 
 #### Misconfigured Directory Permissions
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ ls -la /usr/lib/python3.8
 
 total 4916
@@ -227,8 +216,7 @@ After checking all of the directories listed, it appears that `/usr/lib/python3.
 
 #### Hijacked Module Contents - psutil.py
 
-```
-        python
+```python
 #!/usr/bin/env python3
 
 import os
@@ -243,8 +231,7 @@ Let us once again run the `mem_status.py` script using `sudo` like in the previo
 
 #### Privilege Escalation via Library Search Path Hijacking
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ sudo /usr/bin/python3 mem_status.py
 
 uid=0(root) gid=0(root) groups=0(root)
@@ -264,8 +251,7 @@ In the previous example, we touched upon the term `PYTHONPATH`, however, didn't 
 
 #### Checking Sudo Privileges
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ sudo -l 
 
 Matching Defaults entries for htb-student on ACADEMY-LPENIX:
@@ -279,8 +265,7 @@ As we can see from the example, we are allowed to run `/usr/bin/python3` under t
 
 #### Privilege Escalation via PYTHONPATH Environment Variable Hijacking
 
-```
-        shellsession
+```shellsession
 htb-student@lpenix:~$ sudo PYTHONPATH=/tmp/ /usr/bin/python3 ./mem_status.py
 
 uid=0(root) gid=0(root) groups=0(root)

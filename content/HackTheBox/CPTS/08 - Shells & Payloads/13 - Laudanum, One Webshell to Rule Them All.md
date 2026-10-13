@@ -18,8 +18,7 @@ Now that we understand what Laudanum is and how it works, let's look at a web ap
 
 #### Move a Copy for Modification
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cp /usr/share/laudanum/aspx/shell.aspx /home/tester/demo.aspx
 ```
 

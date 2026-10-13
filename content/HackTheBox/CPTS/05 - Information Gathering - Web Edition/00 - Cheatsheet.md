@@ -24,8 +24,7 @@ WHOIS is a query and response protocol used to retrieve information about domain
 
 For example, if you wanted to find out who owns the domain `example.com`, you could run the following command in your terminal:
 
-```
-        bash
+```bash
 whois example.com
 ```
 
@@ -39,8 +38,7 @@ The Domain Name System (DNS) functions as the internet's GPS, translating user-f
 
 The `dig` command allows you to query DNS servers directly, retrieving specific information about domain names. For instance, if you want to find the IP address associated with `example.com`, you can execute the following command:
 
-```
-        bash
+```bash
 dig example.com A
 ```
 
@@ -83,8 +81,7 @@ To use `dnsenum` for subdomain brute-forcing, you'll typically provide it with t
 
 For example, the following command would attempt to brute-force subdomains of `example.com` using a wordlist named `subdomains.txt`:
 
-```
-        bash
+```bash
 dnsenum example.com -f subdomains.txt
 ```
 
@@ -96,8 +93,7 @@ This zone file lists all the domain's subdomains, their associated IP addresses,
 
 To attempt a zone transfer, you can use the `dig` command with the `axfr` (full zone transfer) option. For example, to request a zone transfer from the DNS server `ns1.example.com` for the domain `example.com`, you would execute:
 
-```
-        bash
+```bash
 dig @ns1.example.com example.com axfr
 ```
 
@@ -113,8 +109,7 @@ Gobuster is a versatile tool that can be used for various types of brute-forcing
 
 To use Gobuster to brute-force virtual hosts, you'll need a wordlist containing potential hostnames. Here's an example command:
 
-```
-        bash
+```bash
 gobuster vhost -u http://192.0.2.1 -w hostnames.txt
 ```
 
@@ -126,8 +121,7 @@ Certificate Transparency (CT) logs offer a treasure trove of subdomain informati
 
 The `crt.sh` website provides a searchable interface for CT logs. To efficiently extract subdomains using `crt.sh` within your terminal, you can use a command like this:
 
-```
-        bash
+```bash
 curl -s "https://crt.sh/?q=%25.example.com&output=json" | jq -r '.[].name_value' | sed 's/\*\.//g' | sort -u
 ```
 
@@ -143,8 +137,7 @@ A crucial file that guides web crawlers is `robots.txt`. This file resides in a 
 
 Here's a basic Scrapy spider example to extract links from `example.com`:
 
-```
-        python
+```python
 import scrapy
 
 class ExampleSpider(scrapy.Spider):
@@ -161,8 +154,7 @@ class ExampleSpider(scrapy.Spider):
 
 After running the Scrapy spider, you'll have a file containing scraped data (e.g., `example_data.json`). You can analyze these results using standard command-line tools. For instance, to extract all links:
 
-```
-        bash
+```bash
 jq -r '.[] | select(.file != null) | .file' example_data.json | sort -u
 ```
 

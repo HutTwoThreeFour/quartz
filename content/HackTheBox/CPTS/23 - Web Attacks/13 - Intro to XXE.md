@@ -12,8 +12,7 @@
 
 Here we see a basic example of an XML document representing an e-mail document structure:
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <email>
   <date>01-01-2022</date>
@@ -53,8 +52,7 @@ Furthermore, some characters are used as part of an XML document structure, like
 
 `XML Document Type Definition (DTD)` allows the validation of an XML document against a pre-defined document structure. The pre-defined document structure can be defined in the document itself or in an external file. The following is an example DTD for the XML document we saw earlier:
 
-```
-        xml
+```xml
 <!DOCTYPE email [
   <!ELEMENT email (date, time, sender, recipients, body)>
   <!ELEMENT recipients (to, cc?)>
@@ -71,16 +69,14 @@ As we can see, the DTD is declaring the root `email` element with the `ELEMENT` 
 
 The above DTD can be placed within the XML document itself, right after the `XML Declaration` in the first line. Otherwise, it can be stored in an external file (e.g. `email.dtd`), and then referenced within the XML document with the `SYSTEM` keyword, as follows:
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE email SYSTEM "email.dtd">
 ```
 
 It is also possible to reference a DTD through a URL, as follows:
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE email SYSTEM "http://inlanefreight.com/email.dtd">
 ```
@@ -93,8 +89,7 @@ This is relatively similar to how HTML documents define and reference JavaScript
 
 We may also define custom entities (i.e. XML variables) in XML DTDs, to allow refactoring of variables and reduce repetitive data. This can be done with the use of the `ENTITY` keyword, which is followed by the entity name and its value, as follows:
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE email [
   <!ENTITY company "Inlane Freight">
@@ -103,8 +98,7 @@ We may also define custom entities (i.e. XML variables) in XML DTDs, to allow re
 
 Once we define an entity, it can be referenced in an XML document between an ampersand `&` and a semi-colon `;` (e.g. `&company;`). Whenever an entity is referenced, it will be replaced with its value by the XML parser. Most interestingly, however, we can `reference External XML Entities` with the `SYSTEM` keyword, which is followed by the external entity's path, as follows:
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE email [
   <!ENTITY company SYSTEM "http://localhost/company.txt">

@@ -10,8 +10,7 @@ In this section we will learn how to use comments to subvert the logic of more a
 
 Just like any other language, SQL allows the use of comments as well. Comments are used to document queries or ignore a certain part of the query. We can use two types of line comments with MySQL `--`  and `#`, in addition to an in-line comment `/**/` (although this is not typically used in basic sql injections). The `--`  can be used as follows:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT username FROM logins; -- Selects usernames from the logins table 
 
 +---------------+
@@ -29,8 +28,7 @@ Note: In SQL, using two dashes only is not enough to start a comment. So, there 
 
 The `#` symbol can be used as well.
 
-```
-        shellsession
+```shellsession
 mysql> SELECT * FROM logins WHERE username = 'admin'; # You can place anything here AND password = 'something'
 
 +----+----------+----------+---------------------+
@@ -51,8 +49,7 @@ The server will ignore the part of the query with `AND password = 'something'` d
 
 Let us go back to our previous example and inject `admin'--`  as our username. The final query will be:
 
-```
-        sql
+```sql
 SELECT * FROM logins WHERE username='admin'-- ' AND password = 'something';
 ```
 
@@ -92,8 +89,7 @@ The login failed due to a syntax error, as a closed one did not balance the open
 
 The query was successful, and we logged in as admin. The final query as a result of our input is:
 
-```
-        sql
+```sql
 SELECT * FROM logins where (username='admin')
 ```
 

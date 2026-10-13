@@ -41,8 +41,7 @@ One of the most used FTP servers on Linux-based distributions is [vsFTPd](https:
 
 #### Install vsFTPd
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install vsftpd
 ```
 
@@ -50,8 +49,7 @@ The vsFTPd server is only one of a few FTP servers available to us. There are ma
 
 #### vsFTPd Config File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/vsftpd.conf | grep -v "#"
 ```
 
@@ -75,8 +73,7 @@ In addition, there is a file called `/etc/ftpusers` that we also need to pay att
 
 #### FTPUSERS
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/ftpusers
 
 guest
@@ -105,8 +102,7 @@ As soon as we connect to the vsFTPd server, the `response code 220` is displayed
 
 #### Anonymous Login
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ftp 10.129.14.136
 
 Connected to 10.129.14.136.
@@ -133,8 +129,7 @@ However, to get the first overview of the server's settings, we can use the foll
 
 #### vsFTPd Status
 
-```
-        shellsession
+```shellsession
 ftp> status
 
 Connected to 10.129.14.136.
@@ -155,8 +150,7 @@ Some commands should be used occasionally, as these will make the server show us
 
 #### vsFTPd Detailed Output
 
-```
-        shellsession
+```shellsession
 ftp> debug
 
 Debugging on (debug=1).
@@ -197,8 +191,7 @@ In the following example, we can see that if the `hide_ids=YES` setting is prese
 
 #### Hiding IDs - YES
 
-```
-        shellsession
+```shellsession
 ftp> ls
 
 ---> TYPE A
@@ -223,8 +216,7 @@ Another helpful setting we can use for our purposes is the `ls_recurse_enable=YE
 
 #### Recursive Listing
 
-```
-        shellsession
+```shellsession
 ftp> ls -R
 
 ---> PORT 10,10,14,4,222,149
@@ -268,8 +260,7 @@ drwxrwxrwx    2 ftp      ftp          4096 Sep 16 18:00 Inlanefreight
 
 #### Download a File
 
-```
-        shellsession
+```shellsession
 ftp> ls
 
 200 PORT command successful. Consider using PASV.
@@ -294,8 +285,7 @@ ftp> exit
 221 Goodbye.
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls | grep Notes.txt
 
 'Important Notes.txt'
@@ -305,8 +295,7 @@ We also can download all the files and folders we have access to at once. This i
 
 #### Download All Available Files
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget -m --no-passive ftp://anonymous:anonymous@10.129.14.136
 
 --2021-09-19 14:45:58--  ftp://anonymous:*password*@10.129.14.136/                                         
@@ -336,8 +325,7 @@ Downloaded: 15 files, 1,7K in 0,001s (3,02 MB/s)
 
 Once we have downloaded all the files, `wget` will create a directory with the name of the IP address of our target. All downloaded files are stored there, which we can then inspect locally.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tree .
 
 .
@@ -365,15 +353,13 @@ The ability to upload files to the FTP server connected to a web server increase
 
 #### Upload a File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ touch testupload.txt
 ```
 
 With the `PUT` command, we can upload files in the current folder to the FTP server.
 
-```
-        shellsession
+```shellsession
 ftp> put testupload.txt 
 
 local: testupload.txt remote: testupload.txt
@@ -408,8 +394,7 @@ Footprinting using various network scanners is also a handy and widespread appro
 
 #### Nmap FTP Scripts
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap --script-updatedb
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-19 13:49 CEST
@@ -420,8 +405,7 @@ Nmap done: 0 IP addresses (0 hosts up) scanned in 0.28 seconds
 
 All the NSE scripts are located on the Pwnbox in `/usr/share/nmap/scripts/`, but on our systems, we can find them using a simple command.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -type f -name ftp* 2>/dev/null | grep scripts
 
 /usr/share/nmap/scripts/ftp-syst.nse
@@ -438,8 +422,7 @@ As we already know, the FTP server usually runs on the standard TCP port 21, whi
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -sV -p21 -sC -A 10.129.14.136
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-16 18:12 CEST
@@ -476,8 +459,7 @@ The `ftp-syst`, for example, executes the `STAT` command, which displays informa
 
 #### Nmap Script Trace
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -sV -p21 -sC -A 10.129.14.136 --script-trace
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-19 13:54 CEST                                                                                                                                                   
@@ -502,20 +484,17 @@ The scan history shows that four different parallel scans are running against th
 
 #### Service Interaction
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nv 10.129.14.136 21
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ telnet 10.129.14.136 21
 ```
 
 It looks slightly different if the FTP server runs with TLS/SSL encryption. Because then we need a client that can handle TLS/SSL. For this, we can use the client `openssl` and communicate with the FTP server. The good thing about using `openssl` is that we can see the SSL certificate, which can also be helpful.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ openssl s_client -connect 10.129.14.136:21 -starttls ftp
 
 CONNECTED(00000003)                                                                                      

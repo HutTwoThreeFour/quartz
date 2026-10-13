@@ -14,8 +14,7 @@ The first and most common type of upload vulnerabilities we discussed in this mo
 
 While whitelisting extensions is always more secure, as we have seen previously, it is recommended to use both by whitelisting the allowed extensions and blacklisting dangerous extensions. This way, the blacklist list will prevent uploading malicious scripts if the whitelist is ever bypassed (e.g. `shell.php.jpg`). The following example shows how this can be done with a PHP web application, but the same concept can be applied to other frameworks:
 
-```
-        php
+```php
 $fileName = basename($_FILES["uploadFile"]["name"]);
 
 // blacklist test
@@ -41,8 +40,7 @@ As we have also learned in this module, extension validation is not enough, as w
 
 The following example shows us how we can validate the file extension through whitelisting, and validate both the File Signature and the HTTP Content-Type header, while ensuring both of them match our expected file type:
 
-```
-        php
+```php
 $fileName = basename($_FILES["uploadFile"]["name"]);
 $contentType = $_FILES['uploadFile']['type'];
 $MIMEtype = mime_content_type($_FILES['uploadFile']['tmp_name']);

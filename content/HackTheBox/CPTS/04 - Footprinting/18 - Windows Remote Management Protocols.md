@@ -30,8 +30,7 @@ Scanning the RDP service can quickly give us a lot of information about the host
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sV -sC 10.129.201.248 -p3389 --script rdp*
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2021-11-06 15:45 CET
@@ -61,8 +60,7 @@ Nmap done: 1 IP address (1 host up) scanned in 8.26 seconds
 
 In addition, we can use `--packet-trace` to track the individual packages and inspect their contents manually. We can see that the `RDP cookies` (`mstshash=nmap`) used by Nmap to interact with the RDP server can be identified by `threat hunters` and various security services such as [Endpoint Detection and Response](https://en.wikipedia.org/wiki/Endpoint_detection_and_response) (`EDR`), and can lock us out as penetration testers on hardened networks.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sV -sC 10.129.201.248 -p3389 --packet-trace --disable-arp-ping -n
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2021-11-06 16:23 CET
@@ -123,8 +121,7 @@ A Perl script named [rdp-sec-check.pl](https://github.com/CiscoCXSecurity/rdp-se
 
 #### RDP Security Check - Installation
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo cpan
 
 Loading internal logger. Log::Log4perl recommended for better logging
@@ -155,8 +152,7 @@ Reading '/root/.cpan/sources/authors/01mailrc.txt.gz'
 
 #### RDP Security Check
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/CiscoCXSecurity/rdp-sec-check.git && cd rdp-sec-check
 hiimeins@htb[/htb]$ ./rdp-sec-check.pl 10.129.201.248
 
@@ -205,8 +201,7 @@ Authentication and connection to such RDP servers can be made in several ways. F
 
 #### Initiate an RDP Session
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp /u:cry0l1t3 /p:"P455w0rd!" /v:10.129.201.248
 
 [16:37:47:135] [95319:95320] [INFO][com.freerdp.core] - freerdp_connect:freerdp_set_last_error_ex resetting error state
@@ -267,8 +262,7 @@ As we already know, WinRM uses TCP ports `5985` (`HTTP`) and `5986` (`HTTPS`) by
 
 #### Nmap WinRM
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sV -sC 10.129.201.248 -p5985,5986 --disable-arp-ping -n
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2021-11-06 16:31 CET
@@ -287,8 +281,7 @@ Nmap done: 1 IP address (1 host up) scanned in 7.34 seconds
 
 If we want to find out whether one or more remote servers can be reached via WinRM, we can easily do this with the help of PowerShell. The [Test-WsMan](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/test-wsman?view=powershell-7.2) cmdlet is responsible for this, and the host's name in question is passed to it. In Linux-based environments, we can use the tool called [evil-winrm](https://github.com/Hackplayers/evil-winrm), another penetration testing tool designed to interact with WinRM.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ evil-winrm -i 10.129.201.248 -u Cry0l1t3 -p P455w0rD!
 
 Evil-WinRM shell v3.3
@@ -316,8 +309,7 @@ The initialization of the WMI communication always takes place on `TCP` port `13
 
 #### WMIexec.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ /usr/share/doc/python3-impacket/examples/wmiexec.py Cry0l1t3:"P455w0rD!"@10.129.201.248 "hostname"
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation

@@ -75,8 +75,7 @@ http://support.inlanefreight.local/open.php
 
 Let's say we are on an external penetration test. During our OSINT and information gathering, we discover several user credentials using the tool [Dehashed](http://dehashed.com/) (for our purposes, the sample data below is fictional).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 dehashed.py -q inlanefreight.local -p
 
 id : 5996447501
@@ -106,8 +105,7 @@ database_name : MyFitnessPal
 
 This dump shows cleartext passwords for two different users: `jclayton` and `kgrimes`. At this point, we have also performed subdomain enumeration and come across several interesting ones.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat ilfreight_subdomains
 
 vpn.inlanefreight.local

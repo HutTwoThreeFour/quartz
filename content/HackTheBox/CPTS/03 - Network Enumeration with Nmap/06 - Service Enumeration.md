@@ -13,8 +13,7 @@ We can use the version scan to scan the specific ports for services and their ve
 
 A full port scan takes quite a long time. To view the scan status, we can press the `[Space Bar]` during the scan, which will cause `Nmap` to show us the scan status.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p- -sV
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-15 19:44 CEST
@@ -33,8 +32,7 @@ SYN Stealth Scan Timing: About 3.64% done; ETC: 19:45 (0:00:53 remaining)
 
 Another option (`--stats-every=5s`) that we can use is defining how periods of time the status should be shown. Here we can specify the number of seconds (`s`) or minutes (`m`), after which we want to get the status.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p- -sV --stats-every=5s
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-15 19:46 CEST
@@ -55,8 +53,7 @@ SYN Stealth Scan Timing: About 39.57% done; ETC: 19:48 (0:00:15 remaining)
 
 We can also increase the `verbosity level` (`-v` / `-vv`), which will show us the open ports directly when `Nmap` detects them.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p- -sV -v 
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-15 20:03 CEST
@@ -91,8 +88,7 @@ Discovered open port 22/tcp on 10.129.2.28
 
 Once the scan is complete, we will see all TCP ports with the corresponding service and their versions that are active on the system.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p- -sV
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-15 20:00 CEST
@@ -126,8 +122,7 @@ Nmap done: 1 IP address (1 host up) scanned in 91.73 seconds
 
 Primarily, `Nmap` looks at the banners of the scanned ports and prints them out. If it cannot identify versions through the banners, `Nmap` attempts to identify them through a signature-based matching system, but this significantly increases the scan's duration. One disadvantage to `Nmap`'s presented results is that the automatic scan can miss some information because sometimes `Nmap` does not know how to handle it. Let us look at an example of this.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p- -sV -Pn -n --disable-arp-ping --packet-trace
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-16 20:10 CEST
@@ -167,8 +162,7 @@ Then we see that the SMTP server on our target gave us more information than `Nm
 
 #### Tcpdump
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo tcpdump -i eth0 host 10.10.14.2 and 10.129.2.28
 
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
@@ -177,8 +171,7 @@ listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
 
 #### Nc
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$  nc -nv 10.129.2.28 25
 
 Connection to 10.129.2.28 port 25 [tcp/*] succeeded!
@@ -187,8 +180,7 @@ Connection to 10.129.2.28 port 25 [tcp/*] succeeded!
 
 #### Tcpdump - Intercepted Traffic
 
-```
-        shellsession
+```shellsession
 18:28:07.128564 IP 10.10.14.2.59618 > 10.129.2.28.smtp: Flags [S], seq 1798872233, win 65535, options [mss 1460,nop,wscale 6,nop,nop,TS val 331260178 ecr 0,sackOK,eol], length 0
 18:28:07.255151 IP 10.129.2.28.smtp > 10.10.14.2.59618: Flags [S.], seq 1130574379, ack 1798872234, win 65160, options [mss 1460,sackOK,TS val 1800383922 ecr 331260178,nop,wscale 7], length 0
 18:28:07.255281 IP 10.10.14.2.59618 > 10.129.2.28.smtp: Flags [.], ack 1, win 2058, options [nop,nop,TS val 331260304 ecr 1800383922], length 0

@@ -17,8 +17,7 @@ We see that even though we used characters that are not blocked by the web appli
 
 A basic command blacklist filter in `PHP` would look like the following:
 
-```
-        php
+```php
 $blacklist = ['whoami', 'cat', ...SNIP...];
 foreach ($blacklist as $word) {
     if (strpos('$_POST['ip']', $word) !== false) {
@@ -37,8 +36,7 @@ One very common and easy obfuscation technique is inserting certain characters w
 
 The easiest to use are quotes, and they work on both Linux and Windows servers. For example, if we want to obfuscate the `whoami` command, we can insert single quotes between its characters, as follows:
 
-```
-        shellsession
+```shellsession
 21y4d@htb[/htb]$ w'h'o'am'i
 
 21y4d
@@ -46,8 +44,7 @@ The easiest to use are quotes, and they work on both Linux and Windows servers. 
 
 The same works with double-quotes as well:
 
-```
-        shellsession
+```shellsession
 21y4d@htb[/htb]$ w"h"o"am"i
 
 21y4d
@@ -67,8 +64,7 @@ As we can see, this method indeed works.
 
 We can insert a few other Linux-only characters in the middle of commands, and the `bash` shell would ignore them and execute the command. These characters include the backslash `\` and the positional parameter character `$@`. This works exactly as it did with the quotes, but in this case, `the number of characters do not have to be even`, and we can insert just one of them if we want to:
 
-```
-        bash
+```bash
 who$@ami
 w\ho\am\i
 ```
@@ -81,8 +77,7 @@ Exercise: Try the above two examples in your payload, and see if they work in by
 
 There are also some Windows-only characters we can insert in the middle of commands that do not affect the outcome, like a caret (`^`) character, as we can see in the following example:
 
-```
-        cmd
+```bat
 C:\htb> who^ami
 
 21y4d

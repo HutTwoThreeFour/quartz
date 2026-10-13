@@ -20,8 +20,7 @@ We have our attack host (10.10.15.x) and a target Ubuntu server (10.129.x.x), wh
 
 #### Scanning the Pivot Target
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sT -p22,3306 10.129.202.64
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2022-02-24 12:12 EST
@@ -39,8 +38,7 @@ The Nmap output shows that the SSH port is open. To access the MySQL service, we
 
 #### Executing the Local Port Forward
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh -L 1234:localhost:3306 ubuntu@10.129.202.64
 
 ubuntu@10.129.202.64's password: 
@@ -76,8 +74,7 @@ The `-L` command tells the SSH client to request the SSH server to forward all t
 
 #### Confirming Port Forward with Netstat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netstat -antp | grep 1234
 
 (Not all processes could be identified, non-owned process info
@@ -88,8 +85,7 @@ tcp6       0      0 ::1:1234                :::*                    LISTEN      
 
 #### Confirming Port Forward with Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -v -sV -p1234 localhost
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2022-02-24 12:18 EST
@@ -125,8 +121,7 @@ Similarly, if we want to forward multiple ports from the Ubuntu server to your l
 
 #### Forwarding Multiple Ports
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh -L 1234:localhost:3306 -L 8080:localhost:80 ubuntu@10.129.202.64
 ```
 
@@ -142,8 +137,7 @@ Now, if you type `ifconfig` on the Ubuntu host, you will find that this server h
 
 #### Looking for Opportunities to Pivot using ifconfig
 
-```
-        shellsession
+```shellsession
 ubuntu@WEB01:~$ ifconfig 
 
 ens192: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
@@ -187,8 +181,7 @@ In the above image, the attack host starts the SSH client and requests the SSH s
 
 #### Enabling Dynamic Port Forwarding with SSH
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh -D 9050 ubuntu@10.129.202.64
 ```
 
@@ -198,8 +191,7 @@ To inform proxychains that we must use port 9050, we must modify the proxychains
 
 #### Checking /etc/proxychains.conf
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tail -4 /etc/proxychains.conf
 
 # meanwile
@@ -211,8 +203,7 @@ Now when you start Nmap with proxychains using the below command, it will route 
 
 #### Using Nmap with Proxychains
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains nmap -v -sn 172.16.5.1-200
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -236,8 +227,7 @@ We will perform a remote system scan using the below command.
 
 #### Enumerating the Windows Target through Proxychains
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains nmap -v -Pn -sT 172.16.5.19
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -284,8 +274,7 @@ The Nmap scan shows several open ports, one of which is `RDP port` (3389). Simil
 
 We can also open Metasploit using proxychains and send all associated traffic through the proxy we have established.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains msfconsole
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -345,8 +334,7 @@ Let's use the `rdp_scanner` auxiliary module to check if the host on the interna
 
 #### Using rdp\_scanner Module
 
-```
-        shellsession
+```shellsession
 msf6 > search rdp_scanner
 
 Matching Modules
@@ -377,8 +365,7 @@ Depending on the level of access we have to this host during an assessment, we m
 
 #### Using xfreerdp with Proxychains
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains xfreerdp /v:172.16.5.19 /u:victor /p:pass@123
 
 ProxyChains-3.1 (http://proxychains.sf.net)

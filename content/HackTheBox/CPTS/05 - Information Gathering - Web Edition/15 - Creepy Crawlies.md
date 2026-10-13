@@ -21,8 +21,7 @@ We will leverage Scrapy and a custom spider tailored for reconnaissance on `inla
 
 Before we begin, ensure you have Scrapy installed on your system. If you don't, you can easily install it using pip, the Python package installer:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ pip3 install scrapy
 ```
 
@@ -32,16 +31,14 @@ This command will download and install Scrapy along with its dependencies, prepa
 
 First, run this command in your terminal to download the custom scrapy spider, `ReconSpider`, and extract it to the current working directory.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget -O ReconSpider.zip https://cdn.services-k8s.prod.aws.htb.systems/content/modules/144/ReconSpider.v1.2.zip
 hiimeins@htb[/htb]$ unzip ReconSpider.zip
 ```
 
 With the files extracted, you can run `ReconSpider.py` using the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 ReconSpider.py http://inlanefreight.com
 ```
 
@@ -51,8 +48,7 @@ Replace `inlanefreight.com` with the domain you want to spider. The spider will 
 
 After running `ReconSpider.py`, the data will be saved in a JSON file, `results.json`. This file can be explored using any text editor. Below is the structure of the JSON file produced:
 
-```
-        json
+```json
 {
     "emails": [
         "lily.floid@inlanefreight.com",

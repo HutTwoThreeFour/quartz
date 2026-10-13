@@ -22,8 +22,7 @@ We see that we get a message saying `Only images are allowed`. The error message
 
 The following is an example of how a PHP web application tests the Content-Type header to validate the file type:
 
-```
-        php
+```php
 $type = $_FILES['uploadFile']['type'];
 
 if (!in_array($type, array('image/jpg', 'image/jpeg', 'image/png', 'image/gif'))) {
@@ -36,8 +35,7 @@ The code sets the (`$type`) variable from the uploaded file's `Content-Type` hea
 
 We may start by fuzzing the Content-Type header with SecLists' [Content-Type Wordlist](https://github.com/danielmiessler/SecLists/blob/master/Discovery/Web-Content/web-all-content-types.txt) through Burp Intruder, to see which types are allowed. However, the message tells us that only images are allowed, so we can limit our scan to image types, which reduces the wordlist to `45` types only (compared to around 700 originally). We can do so as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Discovery/Web-Content/web-all-content-types.txt
 hiimeins@htb[/htb]$ cat web-all-content-types.txt | grep 'image/' > image-content-types.txt
 ```
@@ -70,8 +68,7 @@ This is usually done by inspecting the first few bytes of the file's content, wh
 
 Let's take a basic example to demonstrate this. The `file` command on Unix systems finds the file type through the MIME type. If we create a basic file with text in it, it would be considered as a text file, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo "this is a text file" > text.jpg 
 hiimeins@htb[/htb]$ file text.jpg 
 text.jpg: ASCII text
@@ -79,8 +76,7 @@ text.jpg: ASCII text
 
 As we see, the file's MIME type is `ASCII text`, even though its extension is `.jpg`. However, if we write `GIF8` to the beginning of the file, it will be considered as a `GIF` image instead, even though its extension is still `.jpg`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo "GIF8" > text.jpg 
 hiimeins@htb[/htb]$ file text.jpg
 text.jpg: GIF image data
@@ -88,8 +84,7 @@ text.jpg: GIF image data
 
 Web servers can also utilize this standard to determine file types, which is usually more accurate than testing the file extension. The following example shows how a PHP web application can test the MIME type of an uploaded file:
 
-```
-        php
+```php
 $type = mime_content_type($_FILES['uploadFile']['tmp_name']);
 
 if (!in_array($type, array('image/jpg', 'image/jpeg', 'image/png', 'image/gif'))) {

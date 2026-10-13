@@ -40,8 +40,7 @@ If we look at these scans, we will see how the results differ.
 
 #### SYN-Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p 21,22,25 -sS -Pn -n --disable-arp-ping --packet-trace
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-21 14:56 CEST
@@ -66,8 +65,7 @@ Nmap done: 1 IP address (1 host up) scanned in 0.07 seconds
 
 #### ACK-Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p 21,22,25 -sA -Pn -n --disable-arp-ping --packet-trace
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-21 14:57 CEST
@@ -127,8 +125,7 @@ With this method, we can generate random (`RND`) a specific number (for example:
 
 #### Scan by Using Decoys
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p 80 -sS -Pn -n --disable-arp-ping --packet-trace -D RND:5
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-21 16:14 CEST
@@ -166,8 +163,7 @@ Another scenario would be that only individual subnets would not have access to 
 
 #### Testing Firewall Rule
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -n -Pn -p445 -O
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-22 01:23 CEST
@@ -186,8 +182,7 @@ Nmap done: 1 IP address (1 host up) scanned in 3.14 seconds
 
 #### Scan by Using Different Source IP
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -n -Pn -p 445 -O -S 10.129.2.200 -e tun0
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-22 01:16 CEST
@@ -227,8 +222,7 @@ However, `Nmap` still gives us a way to specify DNS servers ourselves (`--dns-se
 
 #### SYN-Scan of a Filtered Port
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p50000 -sS -Pn -n --disable-arp-ping --packet-trace
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-21 22:50 CEST
@@ -245,8 +239,7 @@ Nmap done: 1 IP address (1 host up) scanned in 2.06 seconds
 
 #### SYN-Scan From DNS Port
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p50000 -sS -Pn -n --disable-arp-ping --packet-trace --source-port 53
 
 SENT (0.0482s) TCP 10.10.14.2:53 > 10.129.2.28:50000 S ttl=58 id=27470 iplen=44  seq=4003923435 win=1024 <mss 1460>
@@ -278,8 +271,7 @@ Now that we have found out that the firewall accepts `TCP port 53`, it is very l
 
 #### Connect To The Filtered Port
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ncat -nv --source-port 53 10.129.2.28 50000
 
 Ncat: Version 7.80 ( https://nmap.org/ncat )

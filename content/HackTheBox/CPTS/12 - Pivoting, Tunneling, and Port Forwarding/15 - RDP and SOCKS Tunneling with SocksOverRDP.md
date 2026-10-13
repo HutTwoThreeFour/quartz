@@ -15,8 +15,7 @@ We can then connect to the target using xfreerdp and copy the `SocksOverRDPx64.z
 
 #### Loading SocksOverRDP.dll using regsvr32.exe
 
-```
-        cmd
+```bat
 C:\Users\htb-student\Desktop\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 
@@ -34,8 +33,7 @@ When we go back to our foothold target and check with Netstat, we should see our
 
 #### Confirming the SOCKS Listener is Started
 
-```
-        cmd
+```bat
 C:\Users\htb-student\Desktop\SocksOverRDP-x64> netstat -antb | findstr 1080
 
   TCP    127.0.0.1:1080         0.0.0.0:0              LISTENING

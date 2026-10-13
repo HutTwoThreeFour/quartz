@@ -8,8 +8,7 @@ The `pam_unix.so` module uses standardized API calls from system libraries to up
 
 The `/etc/passwd` file contains information about every user on the system and is readable by all users and services. Each entry in the file corresponds to a single user and consists of `seven fields`, which store user-related data in a structured format. These fields are separated by colons (`:`). As such, a typical entry may look something like this:
 
-```
-        shellsession
+```shellsession
 htb-student:x:1000:1000:,,,:/home/htb-student:/bin/bash
 ```
 
@@ -27,8 +26,7 @@ The most relevant field for our purposes is the `Password` field, as it can cont
 
 Usually, we will find the value `x` in this field, indicating that the passwords are stored in a hashed form within the `/etc/shadow` file. However, it can also be that the `/etc/passwd` file is writeable by mistake. This would allow us to remove the password field for the `root` user entirely.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ head -n 1 /etc/passwd
 
 root::0:0:root:/root:/bin/bash
@@ -36,8 +34,7 @@ root::0:0:root:/root:/bin/bash
 
 This results in no password prompt being displayed when attempting to log in as `root`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ su
 
 root@htb[/htb]#
@@ -49,8 +46,7 @@ Although the scenarios described are rare, we should still pay attention and wat
 
 Since reading password hash values can put the entire system at risk, the `/etc/shadow` file was introduced. It has a similar format to `/etc/passwd` but is solely responsible for password storage and management. It contains all password information for created users. For example, if there is no entry in the `/etc/shadow` file for a user listed in `/etc/passwd`, that user is considered invalid. The `/etc/shadow` file is also only readable by users with administrative privileges. The format of this file is divided into the following `nine fields`:
 
-```
-        shellsession
+```shellsession
 htb-student:$y$j9T$3QSBB6CbHEu...SNIP...f8Ms:18955:0:99999:7:::
 ```
 
@@ -89,8 +85,7 @@ Many Linux distributions, including Debian, now use `yescrypt` as the default ha
 
 The PAM library (`pam_unix.so`) can prevent users from reusing old passwords. These previous passwords are stored in the `/etc/security/opasswd` file. Administrator (root) privileges are required to read this file, assuming its permissions have not been modified manually.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo cat /etc/security/opasswd
 
 cry0l1t3:1000:2:$1$HjFAfYTG$qNDkF0zJ3v8ylCOrKB0kt0,$1$kcUjWZJX$E9uMSmiQeRh4pAAgzuvkq1
@@ -102,8 +97,7 @@ Looking at the contents of this file, we can see that it contains several entrie
 
 Once we have root access on a Linux machine, we can gather user password hashes and attempt to crack them using various methods to recover the plaintext passwords. To do this, we can use a tool called [unshadow](https://github.com/pmittaldev/john-the-ripper/blob/master/src/unshadow.c), which is included with John the Ripper (JtR). It works by combining the `passwd` and `shadow` files into a single file suitable for cracking.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo cp /etc/passwd /tmp/passwd.bak 
 hiimeins@htb[/htb]$ sudo cp /etc/shadow /tmp/shadow.bak 
 hiimeins@htb[/htb]$ unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes
@@ -111,8 +105,7 @@ hiimeins@htb[/htb]$ unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.h
 
 This "unshadowed" file can now be attacked with either JtR or hashcat.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 1800 -a 0 /tmp/unshadowed.hashes rockyou.txt -o /tmp/unshadowed.cracked
 ```
 

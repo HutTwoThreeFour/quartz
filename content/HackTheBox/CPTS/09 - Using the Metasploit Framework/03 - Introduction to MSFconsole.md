@@ -12,8 +12,7 @@ Upon launching the `msfconsole`, we are met with their coined splash art and the
 
 #### Launching MSFconsole
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfconsole
                                                   
                                               `:oDFo:`                            

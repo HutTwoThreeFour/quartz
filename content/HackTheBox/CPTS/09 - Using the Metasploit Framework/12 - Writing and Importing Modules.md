@@ -16,8 +16,7 @@ Let's say we want to use an exploit found for `Nagios3`, which will take advanta
 
 #### MSF - Search for Exploits
 
-```
-        shellsession
+```shellsession
 msf6 > search nagios
 
 Matching Modules
@@ -37,8 +36,7 @@ Matching Modules
 
 We can, however, find the exploit code [inside ExploitDB's entries](https://www.exploit-db.com/exploits/9861). Alternatively, if we do not want to use our web browser to search for a specific exploit within ExploitDB, we can use the CLI version, `searchsploit`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ searchsploit nagios3
 
 --------------------------------------------------------------------------------------------------------------------------------------------- ---------------------------------
@@ -54,8 +52,7 @@ Shellcodes: No Results
 
 Note that the hosted file terminations that end in `.rb` are Ruby scripts that most likely have been crafted specifically for use within `msfconsole`. We can also filter only by `.rb` file terminations to avoid output from scripts that cannot run within `msfconsole`. Note that not all `.rb` files are automatically converted to `msfconsole` modules. Some exploits are written in Ruby without having any Metasploit module-compatible code in them. We will look at one of these examples in the following sub-section.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ searchsploit -t Nagios3 --exclude=".py"
 
 --------------------------------------------------------------------------------------------------------------------------------------------- ---------------------------------
@@ -72,8 +69,7 @@ We have to download the `.rb` file and place it in the correct directory. The de
 
 #### MSF - Directory Structure
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /usr/share/metasploit-framework/
 
 app     db             Gemfile.lock                  modules     msfdb            msfrpcd    msf-ws.ru  ruby             script-recon  vendor
@@ -81,8 +77,7 @@ config  documentation  lib                           msfconsole  msf-json-rpc.ru
 data    Gemfile        metasploit-framework.gemspec  msfd        msfrpc           msfvenom   Rakefile   script-password  tools
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls .msf4/
 
 history  local  logos  logs  loot  modules  plugins  store
@@ -99,23 +94,20 @@ For example:
 
 #### MSF - Loading Additional Modules at Runtime
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cp ~/Downloads/9861.rb /usr/share/metasploit-framework/modules/exploits/unix/webapp/nagios3_command_injection.rb
 hiimeins@htb[/htb]$ msfconsole -m /usr/share/metasploit-framework/modules/
 ```
 
 #### MSF - Loading Additional Modules
 
-```
-        shellsession
+```shellsession
 msf6> loadpath /usr/share/metasploit-framework/modules/
 ```
 
 Alternatively, we can also launch `msfconsole` and run the `reload_all` command for the newly installed module to appear in the list. After the command is run and no errors are reported, try either the `search [name]` function inside `msfconsole` or directly with the `use [module-path]` to jump straight into the newly installed module.
 
-```
-        shellsession
+```shellsession
 msf6 > reload_all
 msf6 > use exploit/unix/webapp/nagios3_command_injection 
 msf6 exploit(unix/webapp/nagios3_command_injection) > show options
@@ -154,15 +146,13 @@ We start by picking some exploit code to port over to Metasploit. In this exampl
 
 #### Porting MSF Modules
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /usr/share/metasploit-framework/modules/exploits/linux/http/ | grep bludit
 
 bludit_upload_images_exec.rb
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cp ~/Downloads/48746.rb /usr/share/metasploit-framework/modules/exploits/linux/http/bludit_auth_bruteforce_mitigation_bypass.rb
 ```
 
@@ -182,8 +172,7 @@ Please look below at a similar module that we can use as boilerplate code for ou
 
 #### Proof-of-Concept - Requirements
 
-```
-        ruby
+```ruby
 ##
 # This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
@@ -213,8 +202,7 @@ We see that there are different sections dedicated to the `info` page of the mod
 
 #### Proof-of-Concept - Module Information
 
-```
-        ruby
+```ruby
   def initialize(info={})
     super(update_info(info,
       'Name'           => "Bludit Directory Traversal Image File Upload Vulnerability",
@@ -257,8 +245,7 @@ After the general identification information is filled in, we can move over to t
 
 #### Proof-of-Concept - Functions
 
-```
-        ruby
+```ruby
  register_options(
       [
         OptString.new('TARGETURI', [true, 'The base path for Bludit', '/']),
@@ -270,8 +257,7 @@ After the general identification information is filled in, we can move over to t
 
 Looking back at our exploit, we see that a wordlist will be required instead of the `BLUDITPASS` variable for the module to brute-force the passwords for the same username. It would look something like the following snippet:
 
-```
-        ruby
+```ruby
 OptPath.new('PASSWORDS', [ true, 'The list of passwords',
           File.join(Msf::Config.data_directory, "wordlists", "passwords.txt") ])
 ```
@@ -280,8 +266,7 @@ The rest of the exploit code needs to be adjusted according to the classes, meth
 
 #### Proof-of-Concept
 
-```
-        ruby
+```ruby
 ##
 # This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework

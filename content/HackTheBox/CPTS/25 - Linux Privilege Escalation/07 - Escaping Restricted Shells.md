@@ -36,8 +36,7 @@ Imagine that we are in a restricted shell that allows us to execute commands by 
 
 For example, we could use the following command to inject a `pwd` command into the argument of the `ls` command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -l `pwd`
 ```
 

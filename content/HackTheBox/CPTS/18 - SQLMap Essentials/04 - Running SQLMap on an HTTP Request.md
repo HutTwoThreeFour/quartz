@@ -15,8 +15,7 @@ One of the best and easiest ways to properly set up an SQLMap request against th
 
 By pasting the clipboard content (`Ctrl-V`) into the command line, and changing the original command `curl` to `sqlmap`, we are able to use SQLMap with the identical `curl` command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap 'http://www.example.com/?id=1' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0' -H 'Accept: image/webp,*/*' -H 'Accept-Language: en-US,en;q=0.5' --compressed -H 'Connection: keep-alive' -H 'DNT: 1'
 ```
 
@@ -28,15 +27,13 @@ When providing data for testing to SQLMap, there has to be either a parameter va
 
 In the most common scenario, `GET` parameters are provided with the usage of option `-u`/`--url`, as in the previous example. As for testing `POST` data, the `--data` flag can be used, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap 'http://www.example.com/' --data 'uid=1&name=test'
 ```
 
 In such cases, `POST` parameters `uid` and `name` will be tested for SQLi vulnerability. For example, if we have a clear indication that the parameter `uid` is prone to an SQLi vulnerability, we could narrow down the tests to only this parameter using `-p uid`. Otherwise, we could mark it inside the provided data with the usage of special marker `*` as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap 'http://www.example.com/' --data 'uid=1*&name=test'
 ```
 
@@ -50,8 +47,7 @@ If we need to specify a complex HTTP request with lots of different header value
 
 An example of an HTTP request captured with `Burp` would look like:
 
-```
-        http
+```http
 GET /?id=1 HTTP/1.1
 Host: www.example.com
 User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0
@@ -70,8 +66,7 @@ We can either manually copy the HTTP request from within `Burp` and write it to 
 
 To run SQLMap with an HTTP request file, we use the `-r` flag, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -r req.txt
         ___
        __H__
@@ -98,15 +93,13 @@ If we wanted to craft complicated requests manually, there are numerous switches
 
 For example, if there is a requirement to specify the (session) cookie value to `PHPSESSID=ab4530f4a7d10448457fa8b0eadac29c` option `--cookie` would be used as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap ... --cookie='PHPSESSID=ab4530f4a7d10448457fa8b0eadac29c'
 ```
 
 The same effect can be done with the usage of option `-H/--header`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap ... -H='Cookie:PHPSESSID=ab4530f4a7d10448457fa8b0eadac29c'
 ```
 
@@ -118,8 +111,7 @@ While SQLMap, by default, targets only the HTTP parameters, it is possible to te
 
 Also, if we wanted to specify an alternative HTTP method, other than `GET` and `POST` (e.g., `PUT`), we can utilize the option `--method`, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u www.target.com --data='id=1' --method PUT
 ```
 
@@ -133,8 +125,7 @@ Support for these formats is implemented in a "relaxed" manner; thus, there are 
 
 However, in the case of a complex or long POST body, we can once again use the `-r` option:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat req.txt
 HTTP / HTTP/1.0
 Host: www.example.com
@@ -158,8 +149,7 @@ Host: www.example.com
 }
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -r req.txt
         ___
        __H__

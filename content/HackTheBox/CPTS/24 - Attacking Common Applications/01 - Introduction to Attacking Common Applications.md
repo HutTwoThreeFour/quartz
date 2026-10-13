@@ -70,16 +70,14 @@ Throughout the module sections, we will refer to URLs such as `http://app.inlane
 
 To do this quickly, we could run the following:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ IP=10.129.42.195
 hiimeins@htb[/htb]$ printf "%s\t%s\n\n" "$IP" "app.inlanefreight.local dev.inlanefreight.local blog.inlanefreight.local" | sudo tee -a /etc/hosts
 ```
 
 After this command, our `/etc/hosts` file would look like the following (on a newly spawned Pwnbox):
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/hosts
 
 # Your system has configured 'manage_etc_hosts' as True.

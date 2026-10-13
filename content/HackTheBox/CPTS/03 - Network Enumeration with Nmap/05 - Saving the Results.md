@@ -13,8 +13,7 @@ While we run various scans, we should always save the results. We can use these 
 
 We can also specify the option (`-oA`) to save the results in all formats. The command could look like this:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.28 -p- -oA target
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-16 12:14 CEST
@@ -38,8 +37,7 @@ Nmap done: 1 IP address (1 host up) scanned in 10.22 seconds
 
 If no full path is given, the results will be stored in the directory we are currently in. Next, we look at the different formats `Nmap` has created for us.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls
 
 target.gnmap target.xml  target.nmap
@@ -47,8 +45,7 @@ target.gnmap target.xml  target.nmap
 
 #### Normal Output
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat target.nmap
 
 # Nmap 7.80 scan initiated Tue Jun 16 12:14:53 2020 as: nmap -p- -oA target 10.129.2.28
@@ -66,8 +63,7 @@ MAC Address: DE:AD:00:00:BE:EF (Intel Corporate)
 
 #### Grepable Output
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat target.gnmap
 
 # Nmap 7.80 scan initiated Tue Jun 16 12:14:53 2020 as: nmap -p- -oA target 10.129.2.28
@@ -78,8 +74,7 @@ Host: 10.129.2.28 ()    Ports: 22/open/tcp//ssh///, 25/open/tcp//smtp///, 80/ope
 
 #### XML Output
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat target.xml
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -116,8 +111,7 @@ hiimeins@htb[/htb]$ cat target.xml
 With the XML output, we can easily create HTML reports that are easy to read, even for non-technical people. This is later very useful for documentation, as it presents our results in a detailed and clear way.
 To convert the stored results from XML format to HTML, we can use the tool `xsltproc`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xsltproc target.xml -o target.html
 ```
 

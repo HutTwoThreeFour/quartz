@@ -18,8 +18,7 @@ We can try entering the localhost IP `127.0.0.1` to check the functionality, and
 
 Although we do not have access to the source code of the web application, we can confidently guess that the IP we entered is going into a `ping` command since the output we receive suggests that. As the result shows a single packet transmitted in the ping command, the command used may be as follows:
 
-```
-        bash
+```bash
 ping -c 1 OUR_INPUT
 ```
 

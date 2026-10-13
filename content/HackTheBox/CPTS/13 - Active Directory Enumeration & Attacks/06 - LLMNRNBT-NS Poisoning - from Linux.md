@@ -68,8 +68,7 @@ Responder also has support for:
 
 Responder is a relatively straightforward tool, but is extremely powerful and has many different functions. In the `Initial Enumeration` section earlier, we utilized Responder in Analysis (passive) mode. This means it listened for any resolution requests, but did not answer them or send out poisoned packets. We were acting like a fly on the wall, just listening. Now, we will take things a step further and let Responder do what it does best. Let's look at some options available by typing `responder -h` into our console.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ responder -h
                                          __
   .----.-----.-----.-----.-----.-----.--|  |.-----.----.
@@ -131,8 +130,7 @@ With this configuration shown above, Responder will listen and answer any reques
 
 We must run the tool with sudo privileges or as root and make sure the following ports are available on our attack host for it to function best:
 
-```
-        shellsession
+```shellsession
 
 UDP 137, UDP 138, UDP 53, UDP/TCP 389,TCP 1433, UDP 1434, TCP 80, TCP 135, TCP 139, TCP 445, TCP 21, TCP 3141,TCP 25, TCP 110, TCP 587, TCP 3128, Multicast UDP 5355 and 5353
 ```
@@ -141,8 +139,7 @@ Any of the rogue servers (i.e., SMB) can be disabled in the `Responder.conf` fil
 
 #### Responder Logs
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls
 
 Analyzer-Session.log                Responder-Session.log
@@ -158,8 +155,7 @@ We can kick off a Responder session rather quickly:
 
 #### Starting Responder with Default Settings
 
-```
-        bash
+```bash
 sudo responder -I ens224
 ```
 
@@ -173,8 +169,7 @@ Once we have enough, we need to get these hashes into a usable format for us rig
 
 #### Cracking an NTLMv2 Hash With Hashcat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 5600 forend_ntlmv2 /usr/share/wordlists/rockyou.txt 
 
 hashcat (v6.1.1) starting...

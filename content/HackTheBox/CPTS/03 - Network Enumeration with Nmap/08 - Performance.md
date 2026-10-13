@@ -12,8 +12,7 @@ When Nmap sends a packet, it takes some time (`Round-Trip-Time` - `RTT`) to rece
 
 #### Default Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F
 
 <SNIP>
@@ -22,8 +21,7 @@ Nmap done: 256 IP addresses (10 hosts up) scanned in 39.44 seconds
 
 #### Optimized RTT
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F --initial-rtt-timeout 50ms --max-rtt-timeout 100ms
 
 <SNIP>
@@ -47,8 +45,7 @@ Another way to increase scan speed is by specifying the retry rate of sent packe
 
 #### Default Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F | grep "/tcp" | wc -l
 
 23
@@ -56,8 +53,7 @@ hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F | grep "/tcp" | wc -l
 
 #### Reduced Retries
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F --max-retries 0 | grep "/tcp" | wc -l
 
 21
@@ -79,8 +75,7 @@ During a white-box penetration test, we may get whitelisted for the security sys
 
 #### Default Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F -oN tnet.default
 
 <SNIP>
@@ -89,8 +84,7 @@ Nmap done: 256 IP addresses (10 hosts up) scanned in 29.83 seconds
 
 #### Optimized Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F -oN tnet.minrate300 --min-rate 300
 
 <SNIP>
@@ -108,8 +102,7 @@ Nmap done: 256 IP addresses (10 hosts up) scanned in 8.67 seconds
 
 #### Default Scan - Found Open Ports
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat tnet.default | grep "/tcp" | wc -l
 
 23
@@ -117,8 +110,7 @@ hiimeins@htb[/htb]$ cat tnet.default | grep "/tcp" | wc -l
 
 #### Optimized Scan - Found Open Ports
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat tnet.minrate300 | grep "/tcp" | wc -l
 
 23
@@ -141,8 +133,7 @@ These templates contain options that we can also set manually, and have seen som
 
 #### Default Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F -oN tnet.default 
 
 <SNIP>
@@ -151,8 +142,7 @@ Nmap done: 256 IP addresses (10 hosts up) scanned in 32.44 seconds
 
 #### Insane Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.2.0/24 -F -oN tnet.T5 -T 5
 
 <SNIP>
@@ -170,8 +160,7 @@ Nmap done: 256 IP addresses (10 hosts up) scanned in 18.07 seconds
 
 #### Default Scan - Found Open Ports
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat tnet.default | grep "/tcp" | wc -l
 
 23
@@ -179,8 +168,7 @@ hiimeins@htb[/htb]$ cat tnet.default | grep "/tcp" | wc -l
 
 #### Insane Scan - Found Open Ports
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat tnet.T5 | grep "/tcp" | wc -l
 
 23

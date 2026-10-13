@@ -45,8 +45,7 @@ We see that our request was not denied this time, and we bypassed the space filt
 
 There are many other methods we can utilize to bypass space filters. For example, we can use the `Bash Brace Expansion` feature, which automatically adds spaces between arguments wrapped between braces, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ {ls,-la}
 
 total 0

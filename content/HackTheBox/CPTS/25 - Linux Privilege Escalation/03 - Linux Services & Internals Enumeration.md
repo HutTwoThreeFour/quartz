@@ -30,8 +30,7 @@ When we talk about the `internals`, we mean the internal configuration and way o
 
 #### Network Interfaces
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ip a
 
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
@@ -54,8 +53,7 @@ Is there anything interesting in the `/etc/hosts` file?
 
 #### Hosts
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/hosts
 
 127.0.0.1 localhost
@@ -72,8 +70,7 @@ It can also be helpful to check out each user's last login time to try to see wh
 
 #### User's Last Login
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ lastlog
 
 Username         Port     From             Latest
@@ -100,8 +97,7 @@ In addition, let's see if anyone else is currently on the system with us. There 
 
 #### Logged In Users
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ w
 
  12:27:21 up 1 day, 16:55,  1 user,  load average: 0.00, 0.00, 0.00
@@ -113,8 +109,7 @@ It is also important to check a user's bash history, as they may be passing pass
 
 #### Command History
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ history
 
     1  id
@@ -130,8 +125,7 @@ Sometimes we can also find special history files created by scripts or programs.
 
 #### Finding History Files
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -type f \( -name *_hist -o -name *_history \) -exec ls -l {} \; 2>/dev/null
 
 -rw------- 1 htb-student htb-student 387 Nov 27 14:02 /home/htb-student/.bash_history
@@ -141,8 +135,7 @@ It's also a good idea to check for any cron jobs on the system. Cron jobs on Lin
 
 #### Cron
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -la /etc/cron.daily/
 
 total 48
@@ -163,8 +156,7 @@ The [proc filesystem](https://man7.org/linux/man-pages/man5/proc.5.html) (`proc`
 
 #### Proc
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find /proc -name cmdline -exec cat {} \; 2>/dev/null | tr " " "\n"
 
 ...SNIP...
@@ -184,8 +176,7 @@ If it is a slightly older Linux system, the likelihood increases that we can fin
 
 #### Installed Packages
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ apt list --installed | tr "/" " " | cut -d" " -f1,3 | sed 's/[0-9]://g' | tee -a installed_pkgs.list
 
 Listing...                                                 
@@ -219,8 +210,7 @@ It's also a good idea to check if the `sudo` version installed on the system is 
 
 #### Sudo Version
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo -V
 
 Sudo version 1.8.31
@@ -233,8 +223,7 @@ Occasionally it can also happen that no direct packages are installed on the sys
 
 #### Binaries
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -l /bin /usr/bin/ /usr/sbin/
 
 lrwxrwxrwx 1 root root     7 Oct 27 11:14 /bin -> usr/bin
@@ -274,8 +263,7 @@ lrwxrwxrwx 1 root root         7 Okt 27 11:14 addgroup -> adduser
 
 #### GTFObins
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(curl -s https://gtfobins.org/api.json | jq -r '.executables | keys[]'); do if grep -q "$i" installed_pkgs.list; then echo "Check for GTFO: $i";fi; done
 
 Check GTFO for: ab                                         
@@ -310,8 +298,7 @@ The output of `strace` can be written to a file for later analysis, and it provi
 
 #### Trace System Calls
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ strace ping -c1 10.129.112.20
 
 execve("/usr/bin/ping", ["ping", "-c1", "10.129.112.20"], 0x7ffdc8b96cc0 /* 80 vars */) = 0
@@ -356,8 +343,7 @@ Users can read almost all configuration files on a Linux operating system if the
 
 #### Configuration Files
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -type f \( -name *.conf -o -name *.config \) -exec ls -l {} \; 2>/dev/null
 
 -rw-r--r-- 1 root root 448 Nov 28 12:31 /run/tmpfiles.d/static-nodes.conf
@@ -373,8 +359,7 @@ The scripts are similar to the configuration files. Often administrators are laz
 
 #### Scripts
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -type f -name "*.sh" 2>/dev/null | grep -v "src\|snap\|share"
 
 /home/htb-student/automation.sh
@@ -391,8 +376,7 @@ Also, if we look at the process list, it can give us information about which scr
 
 #### Running Services by User
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ps aux | grep root
 
 ...SNIP...

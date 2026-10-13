@@ -14,15 +14,13 @@ For some parameters, like usernames, we can find a pre-made wordlist for potenti
 
 There are many ways to create this wordlist, from manually typing the IDs in a file, or scripting it using Bash or Python. The simplest way is to use the following command in Bash that writes all numbers from 1-1000 to a file:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(seq 1 1000); do echo $i >> ids.txt; done
 ```
 
 Once we run our command, we should have our wordlist ready:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat ids.txt
 
 1
@@ -42,8 +40,7 @@ Now we can move on to fuzzing for values.
 
 Our command should be fairly similar to the `POST` command we used to fuzz for parameters, but our `FUZZ` keyword should be put where the parameter value would be, and we will use the `ids.txt` wordlist we just created, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w ids.txt:FUZZ -u http://admin.academy.htb:PORT/admin/admin.php -X POST -d 'id=FUZZ' -H 'Content-Type: application/x-www-form-urlencoded' -fs xxx
 
         /'___\  /'___\           /'___\

@@ -24,8 +24,7 @@ Finally, we will also add the flag `-v` to output the full URLs. Otherwise, it m
 
 Let us repeat the first command we used, add the recursion flags to it while specifying `.php` as our extension, and see what results we get:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://SERVER_IP:PORT/FUZZ -recursion -recursion-depth 1 -e .php -v
 
         /'___\  /'___\           /'___\       

@@ -18,8 +18,7 @@ As the front-end of the web application is where most (but not all) of the user 
 
 For example, in the exercise of the `XSS Discovery` section, we saw that the web application will not allow us to submit the form if the email format is invalid. This was done with the following JavaScript code:
 
-```
-        javascript
+```javascript
 function validateEmail(email) {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test($("#login input[name=email]").val());
@@ -32,8 +31,7 @@ As we can see, this code is testing the `email` input field and returning `true`
 
 In addition to input validation, we should always ensure that we do not allow any input with JavaScript code in it, by escaping any special characters. For this, we can utilize the [DOMPurify](https://github.com/cure53/DOMPurify) JavaScript library, as follows:
 
-```
-        javascript
+```javascript
 <script type="text/javascript" src="dist/purify.min.js"></script>
 let clean = DOMPurify.sanitize( dirty );
 ```
@@ -85,8 +83,7 @@ Input validation in the back-end is quite similar to the front-end, and it uses 
 
 An example of E-Mail validation on a PHP back-end is the following:
 
-```
-        php
+```php
 if (filter_var($_GET['email'], FILTER_VALIDATE_EMAIL)) {
     // do task
 } else {
@@ -102,8 +99,7 @@ When it comes to input sanitization, then the back-end plays a vital role, as fr
 
 For example, for a PHP back-end, we can use the `addslashes` function to sanitize user input by escaping special characters with a backslash:
 
-```
-        php
+```php
 addslashes($_GET['email'])
 ```
 
@@ -111,8 +107,7 @@ In any case, direct user input (e.g. `$_GET['email']`) should never be directly 
 
 For a NodeJS back-end, we can also use the [DOMPurify](https://github.com/cure53/DOMPurify) library as we did with the front-end, as follows:
 
-```
-        javascript
+```javascript
 import DOMPurify from 'dompurify';
 var clean = DOMPurify.sanitize(dirty);
 ```
@@ -121,15 +116,13 @@ var clean = DOMPurify.sanitize(dirty);
 
 Another important aspect to pay attention to in the back-end is `Output Encoding`. This means that we have to encode any special characters into their HTML codes, which is helpful if we need to display the entire user input without introducing an XSS vulnerability. For a PHP back-end, we can use the `htmlspecialchars` or the `htmlentities` functions, which would encode certain special characters into their HTML codes (e.g. `<` into `&lt;`), so the browser will display them correctly, but they will not cause any injection of any sort:
 
-```
-        php
+```php
 htmlentities($_GET['email']);
 ```
 
 For a NodeJS back-end, we can use any library that does HTML encoding, like `html-entities`, as follows:
 
-```
-        javascript
+```javascript
 import encode from 'html-entities';
 encode('<'); // -> '&lt;'
 ```

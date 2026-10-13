@@ -64,8 +64,7 @@ After receiving and processing the response, the client disconnects from the LDA
 
 For example, `ldapsearch` is a command-line utility used to search for information stored in a directory using the LDAP protocol. It is commonly used to query and retrieve data from an LDAP directory service.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ldapsearch -H ldap://ldap.example.com:389 -D "cn=admin,dc=example,dc=com" -w secret123 -b "ou=people,dc=example,dc=com" "(mail=john.doe@example.com)"
 ```
 
@@ -115,8 +114,7 @@ LDAP injection attacks are `similar to SQL injection attacks` but target the LDA
 
 For example, suppose an application uses the following LDAP query to authenticate users:
 
-```
-        php
+```php
 (&(objectClass=user)(sAMAccountName=$username)(userPassword=$password))
 ```
 
@@ -124,8 +122,7 @@ In this query, `$username` and `$password` contain the user's login credentials.
 
 If an attacker injects the `*` character into the `$username` field, the LDAP query will match any user account with the password `dummy`. This would allow the attacker to gain access to the application using any password, as shown below:
 
-```
-        php
+```php
 $username = "*";
 $password = "dummy";
 (&(objectClass=user)(sAMAccountName=$username)(userPassword=$password))
@@ -133,8 +130,7 @@ $password = "dummy";
 
 Alternatively, if an attacker injects the `*` character into the `$password` field, the LDAP query would match the `dummy` user account using any password that contains the injected string. This would allow the attacker to gain access to the application with any username, as shown below:
 
-```
-        php
+```php
 $username = "dummy";
 $password = "*";
 (&(objectClass=user)(sAMAccountName=$username)(userPassword=$password))
@@ -152,8 +148,7 @@ Enumerating the target helps us to understand services and exposed ports. An `nm
 
 #### nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -p- -sC -sV --open --min-rate=1000 10.129.204.229
 
 Starting Nmap 7.93 ( https://nmap.org ) at 2023-03-23 14:43 SAST

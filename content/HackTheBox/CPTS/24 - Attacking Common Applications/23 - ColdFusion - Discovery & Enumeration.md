@@ -8,8 +8,7 @@ It is used to build dynamic and interactive web applications that can be connect
 
 ColdFusion Markup Language (`CFML`) is the proprietary programming language used in ColdFusion to develop dynamic web applications. It has a syntax similar to HTML, making it easy to learn for web developers. CFML includes tags and functions for database integration, web services, email management, and other common web development tasks. Its tag-based approach simplifies application development by reducing the amount of code needed to accomplish complex tasks. For instance, the `cfquery` tag can execute SQL statements to retrieve data from a database:
 
-```
-        html
+```html
 <cfquery name="myQuery" datasource="myDataSource">
   SELECT *
   FROM myTable
@@ -18,8 +17,7 @@ ColdFusion Markup Language (`CFML`) is the proprietary programming language used
 
 Developers can then use the `cfloop` tag to iterate through the records retrieved from the database:
 
-```
-        html
+```html
 <cfloop query="myQuery">
   <p>#myQuery.firstName# #myQuery.lastName#</p>
 </cfloop>
@@ -78,8 +76,7 @@ During a penetration testing enumeration, several ways exist to identify whether
 
 #### NMap ports and service scan results
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -p- -sC -Pn 10.129.247.30 --open
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2023-03-13 11:45 GMT

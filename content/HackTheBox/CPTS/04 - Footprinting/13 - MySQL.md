@@ -39,8 +39,7 @@ The management of SQL databases and their configurations is a vast topic. It is 
 
 #### Default Configuration
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install mysql-server -y
 hiimeins@htb[/htb]$ cat /etc/mysql/mysql.conf.d/mysqld.cnf | grep -v "#" | sed -r '/^\s*$/d'
 
@@ -98,8 +97,7 @@ There are many reasons why a MySQL server could be accessed from an external net
 
 #### Scanning MySQL Server
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.14.128 -sV -sC -p3306 --script mysql*
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-21 00:53 CEST
@@ -151,8 +149,7 @@ As with all our scans, we must be careful with the results and manually confirm 
 
 #### Interaction with the MySQL Server
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mysql -u root -h 10.129.14.132
 
 ERROR 1045 (28000): Access denied for user 'root'@'10.129.14.1' (using password: NO)
@@ -160,8 +157,7 @@ ERROR 1045 (28000): Access denied for user 'root'@'10.129.14.1' (using password:
 
 For example, if we use a password that we have guessed or found through our research, we will be able to log in to the MySQL server and execute some commands.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mysql -u root -pP4SSw0rd -h 10.129.14.128
 
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
@@ -218,8 +214,7 @@ MySQL [mysql]> show tables;
 
 If we look at the existing databases, we will see several already exist. The most important databases for the MySQL server are the `system schema` (`sys`) and `information schema` (`information_schema`). The system schema contains tables, information, and metadata necessary for management. More about this database can be found in the [reference manual](https://dev.mysql.com/doc/refman/8.0/en/system-schema.html#:~:text=The%20mysql%20schema%20is%20the,used%20for%20other%20operational%20purposes) of MySQL.
 
-```
-        shellsession
+```shellsession
 mysql> use sys;
 mysql> show tables;  
 

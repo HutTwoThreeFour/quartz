@@ -22,8 +22,7 @@ After that, we can enable request interception once more and refresh the page wi
 
 Let's try changing the `type="number"` on line 27 to `type="text"`, which should enable us to write any value we want. We will also change the `maxlength="3"` to `maxlength="100"` so we can enter longer input:
 
-```
-        html
+```html
 <input type="text" id="ip" name="ip" min="1" max="255" maxlength="100"
     oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
     required>

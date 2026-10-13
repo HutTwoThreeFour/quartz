@@ -21,8 +21,7 @@ Knowing that users tend to keep their passwords as simple as possible, we can cr
 
 Let's look at a simple example using a password list with only one entry.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat password.list
 
 password
@@ -41,8 +40,7 @@ We can use Hashcat to combine lists of potential names and labels with specific 
 
 Each rule is written on a new line and determines how a given word should be transformed. If we write the functions shown above into a file, it may look like this:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat custom.rule
 
 :
@@ -64,15 +62,13 @@ $! c so0 sa@
 
 We can use the following command to apply the rules in `custom.rule` to each word in `password.list` and store the mutated results in `mut_password.list`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat --force password.list -r custom.rule --stdout | sort -u > mut_password.list
 ```
 
 In this case, the single input word will produce fifteen mutated variants.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat mut_password.list
 
 password
@@ -98,8 +94,7 @@ Hashcat and JtR both come with pre-built rule lists that can be used for passwor
 
 We can use a tool called [CeWL](https://github.com/digininja/CeWL) to scan potential words from a company's website and save them in a separate list. We can then combine this list with the desired rules to create a customized password list—one that has a higher probability of containing the correct password for an employee. We specify some parameters, like the depth to spider (`-d`), the minimum length of the word (`-m`), the storage of the found words in lowercase (`--lowercase`), as well as the file where we want to store the results (`-w`).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cewl https://www.inlanefreight.com -d 4 -m 6 --lowercase -w inlane.wordlist
 hiimeins@htb[/htb]$ wc -l inlane.wordlist
 

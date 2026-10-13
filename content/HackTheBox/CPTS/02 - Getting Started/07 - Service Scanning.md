@@ -14,8 +14,7 @@ To access a service remotely, we need to connect using the correct IP address an
 
 Let us start with the most basic scan. Suppose that we want to perform a basic scan against a target residing at 10.129.42.253. To do this we should type `nmap 10.129.42.253` and hit return. We see that the `Nmap` scan was completed very quickly. This is because if we don't specify any additional options, Nmap will only scan the 1,000 most common ports by default. The scan output reveals that ports 21, 22, 80, 139, and 445 are available.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap 10.129.42.253
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-02-25 16:07 EST
@@ -40,8 +39,7 @@ As we gain familiarity, we will notice that several ports are commonly associate
 
 We can use the `-sC` parameter to specify that `Nmap` scripts should be used to try and obtain more detailed information. The `-sV` parameter instructs `Nmap` to perform a version scan. In this scan, Nmap will fingerprint services on the target system and identify the service protocol, application name, and version. The version scan is underpinned by a comprehensive database of over 1,000 service signatures. Finally, `-p-` tells Nmap that we want to scan all 65,535 TCP ports.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sV -sC -p- 10.129.42.253
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-02-25 16:18 EST
@@ -106,8 +104,7 @@ http://10.129.42.253/index.php
 
 Specifying `-sC` will run many useful default scripts against a target, but there are cases when running a specific script is required. For example, in an assessment scope, we may be asked to audit a large Citrix installation. We could use [this](https://raw.githubusercontent.com/cyberstruggle/DeltaGroup/master/CVE-2019-19781/CVE-2019-19781.nse) `Nmap` script to audit for the severe Citrix NetScaler vulnerability ([CVE-2019–19781](https://www.rapid7.com/blog/post/2020/01/17/active-exploitation-of-citrix-netscaler-cve-2019-19781-what-you-need-to-know/)), while `Nmap` also has other scripts to audit a Citrix installation.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ locate scripts/citrix
 
 /usr/share/nmap/scripts/citrix-brute-xml.nse
@@ -129,8 +126,7 @@ The syntax for running an Nmap script is `nmap --script <script name> -p<port> <
 
 As previously discussed, banner grabbing is a useful technique to fingerprint a service quickly. Often a service will look to identify itself by displaying a banner once a connection is initiated. Nmap will attempt to grab the banners if the syntax `nmap -sV --script=banner <target>` is specified. We can also attempt this manually using `Netcat`. Let us take another example, using the `nc` version of `Netcat`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nv 10.129.42.253 21
 
 (UNKNOWN) [10.129.42.253] 21 (ftp) open
@@ -143,8 +139,7 @@ This reveals that the version of `vsFTPd` on the server is `3.0.3`. We can also 
 
 It is worth gaining familiarity with FTP, as it is a standard protocol, and this service can often contain interesting data. A `Nmap` scan of the default port for FTP (21) reveals the vsftpd 3.0.3 installation that we identified previously. Further, it also reports that anonymous authentication is enabled and that a `pub` directory is available.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sC -sV -p21 10.129.42.253
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-12-20 00:54 GMT
@@ -176,8 +171,7 @@ Nmap done: 1 IP address (1 host up) scanned in 1.78 seconds
 
 Let us connect to the service using the `ftp` command-line utility.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ftp -p 10.129.42.253
 
 Connected to 10.129.42.253.
@@ -215,8 +209,7 @@ ftp> exit
 
 In the above shell, we see that FTP supports common commands such as `cd` and `ls` and allows us to download files using the `get` command. Inspection of the downloaded `login.txt` reveals credentials that we could use to further our access to the system.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat login.txt 
 
 admin:ftp@dmin123
@@ -228,8 +221,7 @@ admin:ftp@dmin123
 
 SMB (Server Message Block) is a prevalent protocol on Windows machines that provides many vectors for vertical and lateral movement. Sensitive data, including credentials, can be in network file shares, and some SMB versions may be vulnerable to RCE exploits such as [EternalBlue](https://www.avast.com/c-eternalblue). It is crucial to enumerate this sizeable potential attack surface carefully. `Nmap` has many scripts for enumerating SMB, such as [smb-os-discovery.nse](https://nmap.org/nsedoc/scripts/smb-os-discovery.html), which will interact with the SMB service to extract the reported operating system version.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap --script smb-os-discovery.nse -p445 10.10.10.40
 
 Starting Nmap 7.91 ( https://nmap.org ) at 2020-12-27 00:59 GMT
@@ -253,8 +245,7 @@ Nmap done: 1 IP address (1 host up) scanned in 2.71 seconds
 
 In this case, the host runs a legacy Windows 7 OS, and we could conduct further enumeration to confirm if it is vulnerable to EternalBlue. The Metasploit Framework has several [modules](https://www.rapid7.com/db/modules/exploit/windows/smb/ms17_010_eternalblue/) for EternalBlue that can be used to validate the vulnerability and exploit it, as we will see in a coming section. We can run a scan against our target for this module section to gather information from the SMB service. We can ascertain that the host runs a Linux kernel, Samba version 4.6.2, and the hostname is GS-SVCSCAN.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -A -p445 10.129.42.253
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-02-25 16:29 EST
@@ -292,8 +283,7 @@ Nmap done: 1 IP address (1 host up) scanned in 12.72 seconds
 
 SMB allows users and administrators to share folders and make them accessible remotely by other users. Often these shares have files in them that contain sensitive information such as passwords. A tool that can enumerate and interact with SMB shares is [smbclient](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html). The `-L` flag specifies that we want to retrieve a list of available shares on the remote host, while `-N` suppresses the password prompt.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbclient -N -L \\\\10.129.42.253
 
     Sharename       Type      Comment
@@ -306,8 +296,7 @@ SMB1 disabled -- no workgroup available
 
 This reveals the non-default share `users`. Let us attempt to connect as the guest user.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbclient \\\\10.129.42.253\\users
 
 Enter WORKGROUP\users's password: 
@@ -321,8 +310,7 @@ smb: \> exit
 
 The `ls` command resulted in an access denied message, indicating that guest access is not permitted. Let us try again using credentials for the user bob (`bob:Welcome1`).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbclient -U bob \\\\10.129.42.253\\users
 
 Enter WORKGROUP\bob's password: 
@@ -356,15 +344,13 @@ We successfully gained access to the `users` share using credentials and gained 
 
 SNMP Community strings provide information and statistics about a router or device, helping us gain access to it. The manufacturer default community strings of `public` and `private` are often unchanged. In SNMP versions 1 and 2c, access is controlled using a plaintext community string, and if we know the name, we can gain access to it. Encryption and authentication were only added in SNMP version 3. Much information can be gained from SNMP. Examination of process parameters might reveal credentials passed on the command line, which might be possible to reuse for other externally accessible services given the prevalence of password reuse in enterprise environments. Routing information, services bound to additional interfaces, and the version of installed software can also be revealed.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ snmpwalk -v 2c -c public 10.129.42.253 1.3.6.1.2.1.1.5.0
 
 iso.3.6.1.2.1.1.5.0 = STRING: "gs-svcscan"
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ snmpwalk -v 2c -c private  10.129.42.253 
 
 Timeout: No Response from 10.129.42.253
@@ -372,8 +358,7 @@ Timeout: No Response from 10.129.42.253
 
 A tool such as [onesixtyone](https://github.com/trailofbits/onesixtyone) can be used to brute force the community string names using a dictionary file of common community strings such as the `dict.txt` file included in the GitHub repo for the tool.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ onesixtyone -c dict.txt 10.129.42.254
 
 Scanning 1 hosts, 51 communities

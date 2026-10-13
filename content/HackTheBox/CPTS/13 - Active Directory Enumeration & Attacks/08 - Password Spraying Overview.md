@@ -18,8 +18,7 @@ In this first example, I performed all my standard checks and could not find any
 
 In the second assessment, I was faced with a similar setup, but enumerating valid domain users with common username lists, and results from LinkedIn did not yield any results. I turned to Google and searched for PDFs published by the organization. My search generated many results, and I confirmed in the document properties of 4 of them that the internal username structure was in the format of `F9L8`, randomly generated GUIDs using just capital letters and numbers (`A-Z and 0-9`). This information was published with the document in the `Author` field and shows the importance of scrubbing document metadata before posting anything online. From here, a short Bash script could be used to generate 1,679,616 possible username combinations.
 
-```
-        bash
+```bash
 
 #!/bin/bash
 

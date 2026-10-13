@@ -6,8 +6,7 @@
 
 As stated in the previous section, we can pull the domain password policy in several ways, depending on how the domain is configured and whether or not we have valid domain credentials. With valid domain credentials, the password policy can also be obtained remotely using tools such as [CrackMapExec](https://github.com/byt3bl33d3r/CrackMapExec) or `rpcclient`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 172.16.5.5 -u avazquez -p Password123 --pass-pol
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -46,8 +45,7 @@ Once connected, we can issue an RPC command such as `querydominfo` to obtain inf
 
 #### Using rpcclient
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rpcclient -U "" -N 172.16.5.5
 
 rpcclient $> querydominfo
@@ -68,8 +66,7 @@ We can also obtain the password policy. We can see that the password policy is r
 
 #### Obtaining the Password Policy using rpcclient
 
-```
-        shellsession
+```shellsession
 rpcclient $> querydominfo
 
 Domain:     INLANEFREIGHT
@@ -103,8 +100,7 @@ Let's try this using [enum4linux](https://labs.portcullis.co.uk/tools/enum4linux
 
 #### Using enum4linux
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ enum4linux -P 172.16.5.5
 
 <SNIP>
@@ -156,8 +152,7 @@ The tool [enum4linux-ng](https://github.com/cddmp/enum4linux-ng) is a rewrite of
 
 #### Using enum4linux-ng
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ enum4linux-ng -P 172.16.5.5 -oA ilfreight
 
 ENUM4LINUX - next generation
@@ -219,8 +214,7 @@ Enum4linux-ng provided us with a bit clearer output and handy JSON and YAML outp
 
 #### Displaying the contents of ilfreight.json
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat ilfreight.json 
 
 {
@@ -264,8 +258,7 @@ It is less common to do this type of null session attack from Windows, but we co
 
 #### Establish a null session from windows
 
-```
-        cmd
+```bat
 C:\htb> net use \\DC01\ipc$ "" /u:""
 The command completed successfully.
 ```
@@ -274,8 +267,7 @@ We can also use a username/password combination to attempt to connect. Let's see
 
 #### Error: Account is Disabled
 
-```
-        cmd
+```bat
 C:\htb> net use \\DC01\ipc$ "" /u:guest
 System error 1331 has occurred.
 
@@ -284,8 +276,7 @@ This user can't sign in because this account is currently disabled.
 
 #### Error: Password is Incorrect
 
-```
-        cmd
+```bat
 C:\htb> net use \\DC01\ipc$ "password" /u:guest
 System error 1326 has occurred.
 
@@ -294,8 +285,7 @@ The user name or password is incorrect.
 
 #### Error: Account is locked out (Password Policy)
 
-```
-        cmd
+```bat
 C:\htb> net use \\DC01\ipc$ "password" /u:guest
 System error 1909 has occurred.
 
@@ -310,8 +300,7 @@ With an LDAP anonymous bind, we can use LDAP-specific enumeration tools such as 
 
 #### Using ldapsearch
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "*" | grep -m 1 -B 10 pwdHistoryLength
 
 forceLogoff: -9223372036854775808
@@ -341,8 +330,7 @@ Using built-in commands is helpful if we land on a Windows system and cannot tra
 
 #### Using net.exe
 
-```
-        cmd
+```bat
 C:\htb> net accounts
 
 Force user logoff how long after time expires?:       Never
@@ -370,8 +358,7 @@ PowerView is also quite handy for this:
 
 #### Using PowerView
 
-```
-        powershell
+```powershell
 PS C:\htb> import-module .\PowerView.ps1
 PS C:\htb> Get-DomainPolicy
 

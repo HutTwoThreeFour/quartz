@@ -46,16 +46,14 @@ If a `Sink` function writes the exact input without any sanitization (like the a
 
 We can look at the source code of the `To-Do` web application, and check `script.js`, and we will see that the `Source` is being taken from the `task=` parameter:
 
-```
-        javascript
+```javascript
 var pos = document.URL.indexOf("task=");
 var task = document.URL.substring(pos + 5, document.URL.length);
 ```
 
 Right below these lines, we see that the page uses the `innerHTML` function to write the `task` variable in the `todo` DOM:
 
-```
-        javascript
+```javascript
 document.getElementById("todo").innerHTML = "<b>Next Task:</b> " + decodeURIComponent(task);
 ```
 
@@ -67,8 +65,7 @@ So, we can see that we can control the input, and the output is not being saniti
 
 If we try the XSS payload we have been using previously, we will see that it will not execute. This is because the `innerHTML` function does not allow the use of the `<script>` tags within it as a security feature. Still, there are many other XSS payloads we use that do not contain `<script>` tags, like the following XSS payload:
 
-```
-        html
+```html
 <img src="" onerror=alert(window.origin)>
 ```
 

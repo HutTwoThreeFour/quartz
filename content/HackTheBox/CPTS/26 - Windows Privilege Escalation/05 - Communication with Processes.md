@@ -18,8 +18,7 @@ The most common way people interact with processes is through a network socket (
 
 #### Display Active Network Connections
 
-```
-        cmd
+```bat
 C:\htb> netstat -ano
 
 Active Connections
@@ -105,8 +104,7 @@ We can use the tool [PipeList](https://docs.microsoft.com/en-us/sysinternals/dow
 
 #### Listing Named Pipes with Pipelist
 
-```
-        cmd
+```bat
 C:\htb> pipelist.exe /accepteula
 
 PipeList v1.02 - Lists open named pipes
@@ -145,8 +143,7 @@ Additionally, we can use PowerShell to list named pipes using `gci` (`Get-ChildI
 
 #### Listing Named Pipes with PowerShell
 
-```
-        powershell
+```powershell
 PS C:\htb>  gci \\.\pipe\
 
     Directory: \\.\pipe
@@ -177,8 +174,7 @@ After obtaining a listing of named pipes, we can use [Accesschk](https://docs.mi
 
 #### Reviewing LSASS Named Pipe Permissions
 
-```
-        cmd
+```bat
 C:\htb> accesschk.exe /accepteula \\.\Pipe\lsass -v
 
 Accesschk v6.12 - Reports effective permissions for securable objects
@@ -230,8 +226,7 @@ Let's walk through an example of taking advantage of an exposed named pipe to es
 
 Confirming with `accesschk` we see that the Everyone group does indeed have `FILE_ALL_ACCESS` (All possible access rights) over the pipe.
 
-```
-        cmd
+```bat
 C:\htb> accesschk.exe -accepteula -w \pipe\WindscribeService -v
 
 Accesschk v6.13 - Reports effective permissions for securable objects

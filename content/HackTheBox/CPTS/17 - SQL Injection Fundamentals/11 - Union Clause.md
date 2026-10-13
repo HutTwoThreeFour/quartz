@@ -10,8 +10,7 @@ So far, we have only been manipulating the original query to subvert the web app
 
 Before we start learning about Union Injection, we should first learn more about the SQL Union clause. The [Union](https://dev.mysql.com/doc/refman/8.0/en/union.html) clause is used to combine results from multiple `SELECT` statements. This means that through a `UNION` injection, we will be able to `SELECT` and dump data from all across the DBMS, from multiple tables and databases. Let us try using the `UNION` operator in a sample database. First, let us see the content of the `ports` table:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT * FROM ports;
 
 +----------+-----------+
@@ -26,8 +25,7 @@ mysql> SELECT * FROM ports;
 
 Next, let us see the output of the `ships` tables:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT * FROM ships;
 
 +----------+-----------+
@@ -40,8 +38,7 @@ mysql> SELECT * FROM ships;
 
 Now, let us try to use `UNION` to combine both results:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT * FROM ports UNION SELECT * FROM ships;
 
 +----------+-----------+
@@ -65,8 +62,7 @@ Note: The data types of the selected columns on all positions should be the same
 
 A `UNION` statement can only operate on `SELECT` statements with an equal number of columns. For example, if we attempt to `UNION` two queries that have results with a different number of columns, we get the following error:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT city FROM ports UNION SELECT * FROM ships;
 
 ERROR 1222 (21000): The used SELECT statements have a different number of columns
@@ -76,15 +72,13 @@ The above query results in an error, as the first `SELECT` returns one column an
 
 For example, if the query is:
 
-```
-        sql
+```sql
 SELECT * FROM products WHERE product_id = 'user_input'
 ```
 
 We can inject a `UNION` query into the input, such that rows from another table are returned:
 
-```
-        sql
+```sql
 SELECT * from products where product_id = '1' UNION SELECT username, password from passwords-- '
 ```
 
@@ -104,22 +98,19 @@ Tip: For advanced SQL injection, we may want to simply use 'NULL' to fill other 
 
 The `products` table has two columns in the above example, so we have to `UNION` with two columns. If we only wanted to get one column 'e.g. `username`', we have to do `username, 2`, such that we have the same number of columns:
 
-```
-        sql
+```sql
 SELECT * from products where product_id = '1' UNION SELECT username, 2 from passwords
 ```
 
 If we had more columns in the table of the original query, we have to add more numbers to create the remaining required columns. For example, if the original query used `SELECT` on a table with four columns, our `UNION` injection would be:
 
-```
-        sql
+```sql
 UNION SELECT username, 2, 3, 4 from passwords-- '
 ```
 
 This query would return:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT * from products where product_id UNION SELECT username, 2, 3, 4 from passwords-- '
 
 +-----------+-----------+-----------+-----------+

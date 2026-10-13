@@ -38,15 +38,13 @@ However, misconfigurations can still occur due to human error or outdated practi
 
 You can use the `dig` command to request a zone transfer:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig axfr @nsztm1.digi.ninja zonetransfer.me
 ```
 
 This command instructs `dig` to request a full zone transfer (`axfr`) from the DNS server responsible for `zonetransfer.me`. If the server is misconfigured and allows the transfer, you'll receive a complete list of DNS records for the domain, including all subdomains.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig axfr @nsztm1.digi.ninja zonetransfer.me
 
 ; <<>> DiG 9.18.12-1~bpo11+1-Debian <<>> axfr @nsztm1.digi.ninja zonetransfer.me

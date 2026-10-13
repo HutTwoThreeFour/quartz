@@ -73,8 +73,7 @@ There are two popular options for searching CT logs:
 
 While `crt.sh` offers a convenient web interface, you can also leverage its API for automated searches directly from your terminal. Let's see how to find all 'dev' subdomains on `facebook.com` using `curl` and `jq`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s "https://crt.sh/?q=facebook.com&output=json" | jq -r '.[]
  | select(.name_value | contains("dev")) | .name_value' | sort -u
  

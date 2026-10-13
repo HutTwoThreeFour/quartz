@@ -19,8 +19,7 @@ Each finding should have the same general type of information that should be cus
 
 Some additional, optional fields include:
 
-```
-        text
+```text
 - CVE
 - OWASP, MITRE IDs
 - CVSS or similar score

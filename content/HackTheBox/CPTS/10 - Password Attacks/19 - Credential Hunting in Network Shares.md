@@ -21,8 +21,7 @@ With all of this in mind, you may want to begin with basic command-line searches
 
 The first tool we will cover is [Snaffler](https://github.com/SnaffCon/Snaffler). This is a C# program that, when run on a `domain-joined` machine, automatically identifies accessible network shares and searches for interesting files. The `README` file in the Github repository describes the numerous configuration options in great detail, however a basic search can be carried out like so:
 
-```
-        cmd
+```bat
 c:\Users\Public>Snaffler.exe -s
 
  .::::::.:::.    :::.  :::.    .-:::::'.-:::::':::    .,:::::: :::::::..
@@ -74,8 +73,7 @@ Another tool that can be used is [PowerHuntShares](https://github.com/NetSPI/Pow
 
 We can run a basic scan using `PowerHuntShares` like so:
 
-```
-        powershell
+```powershell
 PS C:\Users\Public\PowerHuntShares> Invoke-HuntSMBShares -Threads 100 -OutputDirectory c:\Users\Public
 
  ===============================================================
@@ -124,8 +122,7 @@ PS C:\Users\Public\PowerHuntShares> Invoke-HuntSMBShares -Threads 100 -OutputDir
 
 If we don’t have access to a domain-joined computer, or simply prefer to search for files remotely, tools like [MANSPIDER](https://github.com/blacklanternsecurity/MANSPIDER) allow us to scan SMB shares from Linux. It's best to run `MANSPIDER` using the official Docker container to avoid dependency issues. Like the other tools, `MANSPIDER` offers many parameters that can be configured to fine-tune the search. A basic scan for files containing the string `passw` can be run as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ docker run --rm -v ./manspider:/root/.manspider blacklanternsecurity/manspider 10.129.234.121 -c 'passw' -u 'mendres' -p 'Inlanefreight2025!'
 
 [+] MANSPIDER command executed: /usr/local/bin/manspider 10.129.234.121 -c passw -u mendres -p Inlanefreight2025!
@@ -142,8 +139,7 @@ hiimeins@htb[/htb]$ docker run --rm -v ./manspider:/root/.manspider blacklantern
 
 In addition to its many other uses, `NetExec` can also be used to search through network shares using the `--spider` option. This functionality is described in great detail on the [official wiki](https://www.netexec.wiki/smb-protocol/spidering-shares). A basic scan of network shares for files containing the string `"passw"` can be run like so:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nxc smb 10.129.234.121 -u mendres -p 'Inlanefreight2025!' --spider IT --content --pattern "passw"
 
 SMB         10.129.234.121  445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:inlanefreight.local) (signing:True) (SMBv1:False)

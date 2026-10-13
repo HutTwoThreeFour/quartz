@@ -24,8 +24,7 @@ During an external penetration test, we encounter what appears to be a CMS, but 
 
 A Drupal website can be identified in several ways, including by the header or footer message `Powered by Drupal`, the standard Drupal logo, the presence of a `CHANGELOG.txt` file or `README.txt file`, via the page source, or clues in the robots.txt file such as references to `/node`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://drupal.inlanefreight.local | grep Drupal
 
 <meta name="Generator" content="Drupal 8 (https://www.drupal.org)" />
@@ -54,8 +53,7 @@ Drupal supports three types of users by default:
 
 Once we have discovered a Drupal instance, we can do a combination of manual and tool-based (automated) enumeration to uncover the version, installed plugins, and more. Depending on the Drupal version and any hardening measures that have been put in place, we may need to try several ways to identify the version number. Newer installs of Drupal by default block access to the `CHANGELOG.txt` and `README.txt` files, so we may need to do further enumeration. Let's look at an example of enumerating the version number using the `CHANGELOG.txt` file. To do so, we can use `cURL` along with `grep`, `sed`, `head`, etc.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://drupal-acc.inlanefreight.local/CHANGELOG.txt | grep -m2 ""
 
 Drupal 7.57, 2018-02-21
@@ -63,8 +61,7 @@ Drupal 7.57, 2018-02-21
 
 Here we have identified an older version of Drupal in use. Trying this against the latest Drupal version at the time of writing, we get a 404 response.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://drupal.inlanefreight.local/CHANGELOG.txt
 
 <!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "http://drupal.inlanefreight.local/CHANGELOG.txt" was not found on this server.</p></body></html>
@@ -74,8 +71,7 @@ There are several other things we could check in this instance to identify the v
 
 Let's run a scan against the `http://drupal.inlanefreight.local` host.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ droopescan scan drupal -u http://drupal.inlanefreight.local
 
 [+] Plugins found:                                                              

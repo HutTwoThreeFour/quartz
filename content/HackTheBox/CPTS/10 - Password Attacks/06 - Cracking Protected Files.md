@@ -10,8 +10,7 @@ Up until now, we've focused on cracking password hashes specifically. In the nex
 
 Many different extensions correspond to encrypted files—a useful reference list can be found on [FileInfo](https://fileinfo.com/filetypes/encoded). As an example, consider this command we might use to locate commonly encrypted files on a Linux system:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for ext in $(echo ".xls .xls* .xltx .od* .doc .doc* .pdf .pot .pot* .pp*");do echo -e "\nFile extension: " $ext; find / -name *$ext 2>/dev/null | grep -v "lib\|fonts\|share\|core" ;done
 
 File extension:  .xls
@@ -33,8 +32,7 @@ If we encounter file extensions on a system that we are unfamiliar with, we can 
 
 Certain files, such as SSH keys, do not have standard file extension. In cases like these, it may be possible to identify files by standard content such as header and footer values. For example, SSH private keys always begin with `-----BEGIN [...SNIP...] PRIVATE KEY-----`. We can use tools like `grep` to recursively search the file system for them during post-exploitation.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ grep -rnE '^\-{5}BEGIN [A-Z0-9]+ PRIVATE KEY\-{5}$' /* 2>/dev/null
 
 /home/jsmith/.ssh/id_ed25519:1:-----BEGIN OPENSSH PRIVATE KEY-----
@@ -45,8 +43,7 @@ hiimeins@htb[/htb]$ grep -rnE '^\-{5}BEGIN [A-Z0-9]+ PRIVATE KEY\-{5}$' /* 2>/de
 
 Some SSH keys are encrypted with a passphrase. With older PEM formats, it was possible to tell if an SSH key is encrypted based on the header, which contains the encryption method in use. Modern SSH keys, however, appear the same whether encrypted or not.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /home/jsmith/.ssh/SSH.private
 
 -----BEGIN RSA PRIVATE KEY-----
@@ -60,8 +57,7 @@ DEK-Info: AES-128-CBC,2109D25CC91F8DBFCEB0F7589066B2CC
 
 One way to tell whether an SSH key is encrypted or not, is to try reading the key with `ssh-keygen`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh-keygen -yf ~/.ssh/id_ed25519 
 
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpNefJd834VkD5iq+22Zh59Gzmmtzo6rAffCx2UtaS6
@@ -69,8 +65,7 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIpNefJd834VkD5iq+22Zh59Gzmmtzo6rAffCx2UtaS6
 
 As shown below, attempting to read a password-protected SSH key will prompt the user for a passphrase:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh-keygen -yf ~/.ssh/id_rsa
 
 Enter passphrase for "/home/jsmith/.ssh/id_rsa":
@@ -80,8 +75,7 @@ Enter passphrase for "/home/jsmith/.ssh/id_rsa":
 
 As mentioned in a previous section, JtR has many different scripts for extracting hashes from files—which we can then proceed to crack. We can find these scripts on our system using the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ locate *2john*
 
 /usr/bin/bitlocker2john
@@ -111,8 +105,7 @@ hiimeins@htb[/htb]$ locate *2john*
 
 For example, we could use the Python script `ssh2john.py` to acquire the corresponding hash for an encrypted SSH key, and then use JtR to try and crack it.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh2john.py SSH.private > ssh.hash
 hiimeins@htb[/htb]$ john --wordlist=rockyou.txt ssh.hash
 
@@ -131,8 +124,7 @@ Session completed
 
 We can then view the resulting hash:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ john ssh.hash --show
 
 SSH.private:1234
@@ -144,8 +136,7 @@ SSH.private:1234
 
 Over the course of our careers, we are likely to encounter a wide variety of documents that are password-protected to restrict access to authorized individuals. Today, most reports, documentation, and information sheets are commonly distributed as Microsoft Office documents or PDFs. John the Ripper (JtR) includes a Python script called `office2john.py`, which can be used to extract password hashes from all common Office document formats. These hashes can then be supplied to JtR or Hashcat for offline cracking. The cracking procedure remains consistent with other hash types.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ office2john.py Protected.docx > protected-docx.hash
 hiimeins@htb[/htb]$ john --wordlist=rockyou.txt protected-docx.hash
 hiimeins@htb[/htb]$ john protected-docx.hash --show
@@ -157,8 +148,7 @@ Protected.docx:1234
 
 The process for cracking PDF files is quite similar, as we simply swap out `office2john.py` for `pdf2john.py`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ pdf2john.py PDF.pdf > pdf.hash
 hiimeins@htb[/htb]$ john --wordlist=rockyou.txt pdf.hash
 hiimeins@htb[/htb]$ john pdf.hash --show

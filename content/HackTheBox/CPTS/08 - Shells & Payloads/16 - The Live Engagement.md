@@ -37,8 +37,7 @@ Foothold:
 `Connection Instructions`:  
 Accessing the Skills Assessment lab environment will require the use of [XfreeRDP](https://manpages.ubuntu.com/manpages/trusty/man1/xfreerdp.1.html) to provide GUI access to the virtual machine. We will be connecting to the Academy lab like normal utilizing your own VM with a HTB Academy `VPN key` or the `Pwnbox` built into the module section. You can start the `FreeRDP` client on the Pwnbox by typing the following into your shell once the target spawns:
 
-```
-        bash
+```bash
 xfreerdp /v:<target IP> /u:htb-student /p:HTB_@cademy_stdnt!
 ```
 

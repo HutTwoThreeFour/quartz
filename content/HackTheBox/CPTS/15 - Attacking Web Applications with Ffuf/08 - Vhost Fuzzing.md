@@ -22,8 +22,7 @@ This is where we utilize `VHosts Fuzzing` on an IP we already have. We will run 
 
 To scan for VHosts, without manually adding the entire wordlist to our `/etc/hosts`, we will be fuzzing HTTP headers, specifically the `Host:`  header. To do that, we can use the `-H` flag to specify a header and will use the `FUZZ` keyword within it, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://academy.htb:PORT/ -H 'Host: FUZZ.academy.htb'
 
         /'___\  /'___\           /'___\       

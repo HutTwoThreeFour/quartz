@@ -28,8 +28,7 @@ We can change any of the details in our profile and click `Update profile`, and 
 
 We see that the page is sending a `PUT` request to the `/profile/api.php/profile/1` API endpoint. `PUT` requests are usually used in APIs to update item details, while `POST` is used to create new items, `DELETE` to delete items, and `GET` to retrieve item details. So, a `PUT` request for the `Update profile` function is expected. The interesting bit is the JSON parameters it is sending:
 
-```
-        json
+```json
 {
     "uid": 1,
     "uuid": "40f5888b67c748df7efba008e7c2f9d2",

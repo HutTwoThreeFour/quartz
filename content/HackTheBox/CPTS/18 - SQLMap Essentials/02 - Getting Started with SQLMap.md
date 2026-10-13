@@ -6,8 +6,7 @@ Upon starting using SQLMap, the first stop for new users is usually the program'
 
 - `Basic Listing` shows only the basic options and switches, sufficient in most cases (switch `-h`):
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -h
         ___
        __H__
@@ -35,8 +34,7 @@ Options:
 
 - `Advanced Listing` shows all options and switches (switch `-hh`):
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -hh
         ___
        __H__
@@ -86,8 +84,7 @@ For more details, users are advised to consult the project's [wiki](https://gith
 
 In a simple scenario, a penetration tester accesses the web page that accepts user input via a `GET` parameter (e.g., `id`). They then want to test if the web page is affected by the SQL injection vulnerability. If so, they would want to exploit it, retrieve as much information as possible from the back-end database, or even try to access the underlying file system and execute OS commands. An example SQLi vulnerable PHP code for this scenario would look as follows:
 
-```
-        php
+```php
 $link = mysqli_connect($host, $username, $password, $database, 3306);
 $sql = "SELECT * FROM users WHERE id = " . $_GET["id"] . " LIMIT 0, 1";
 $result = mysqli_query($link, $sql);
@@ -103,8 +100,7 @@ http://www.example.com/vuln.php?id=1
 
 To run SQLMap against this example, located at the example URL `http://www.example.com/vuln.php?id=1`, would look like the following:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/vuln.php?id=1" --batch
         ___
        __H__

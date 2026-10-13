@@ -44,8 +44,7 @@ One useful tool for auditing Unix-based systems (Linux, macOS, BDS, etc.) is [Ly
 
 After cloning the entire repo, we can run the tool by typing `./lynis audit system` and receive a full report.
 
-```
-        shellsession
+```shellsession
 htb_student@NIX02:~$ ./lynis audit system
 
 [ Lynis 3.0.1 ]
@@ -88,8 +87,7 @@ htb_student@NIX02:~$ ./lynis audit system
 
 The resulting scan will be broken down into warnings:
 
-```
-        shellsession
+```shellsession
 Warnings (2):
   ----------------------------
   ! Found one or more cronjob files with incorrect file permissions (see log for details) [SCHD-7704] 
@@ -101,8 +99,7 @@ Warnings (2):
 
 Suggestions:
 
-```
-        shellsession
+```shellsession
 Suggestions (53):
   ----------------------------
   * Set a password on GRUB boot loader to prevent altering boot configuration (e.g. boot in single user mode without password) [BOOT-5122] 
@@ -120,8 +117,7 @@ Suggestions (53):
 
 and an overal scan details section:
 
-```
-        shellsession
+```shellsession
 Lynis security scan details:
 
   Hardening index : 60 [############        ]

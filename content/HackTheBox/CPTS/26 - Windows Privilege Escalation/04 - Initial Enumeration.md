@@ -36,8 +36,7 @@ Looking at the system itself will give us a better idea of the exact operating s
 
 #### Tasklist
 
-```
-        cmd
+```bat
 C:\htb> tasklist /svc
 
 Image Name                     PID Services
@@ -98,8 +97,7 @@ The environment variables explain a lot about the host configuration. To get a p
 
 In addition to the PATH, `set` can also give up other helpful information such as the HOME DRIVE. In enterprises, this will often be a file share. Navigating to the file share itself may reveal other directories that can be accessed. It is not unheard of to be able to access an "IT Directory," which contains an inventory spreadsheet that includes passwords. Additionally, shares are utilized for home directories so the user can log on to other computers and have the same experience/files/desktop/etc. ([Roaming Profiles](https://docs.microsoft.com/en-us/windows-server/storage/folder-redirection/folder-redirection-rup-overview)). This may also mean the user takes malicious items with them. If a file is placed in `USERPROFILE\AppData\Microsoft\Windows\Start Menu\Programs\Startup`, when the user logs into a different machine, this file will execute.
 
-```
-        cmd
+```bat
 C:\htb> set
 
 ALLUSERSPROFILE=C:\ProgramData
@@ -146,8 +144,7 @@ The `systeminfo` command will show if the box has been patched recently and if i
 
 Additionally, many guides will say the Network Information is important as it could indicate a dual-homed machine (connected to multiple networks). Generally speaking, when it comes to enterprises, devices will just be granted access to other networks via a firewall rule and not have a physical cable run to them.
 
-```
-        cmd
+```bat
 C:\htb> systeminfo
 
 Host Name:                 WINLPE-SRV01
@@ -209,8 +206,7 @@ Hyper-V Requirements:      A hypervisor has been detected. Features required for
 
 If `systeminfo` doesn't display hotfixes, they may be queriable with [WMI](https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page) using the WMI-Command binary with [QFE (Quick Fix Engineering)](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-quickfixengineering) to display patches.
 
-```
-        cmd
+```bat
 C:\htb> wmic qfe
 
 Caption                                     CSName        Description      FixComments  HotFixID   InstallDate  InstalledBy          InstalledOn  Name  ServicePackInEffect  Status
@@ -221,8 +217,7 @@ http://support.microsoft.com/?kbid=4103723  WINLPE-SRV01  Security Update       
 
 We can do this with PowerShell as well using the [Get-Hotfix](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-hotfix?view=powershell-7.1) cmdlet.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-HotFix | ft -AutoSize
 
 Source       Description     HotFixID  InstalledBy                InstalledOn
@@ -237,8 +232,7 @@ WINLPE-SRV01 Security Update KB3200970 WINLPE-SRV01\Administrator 4/13/2021 12:0
 
 WMI can also be used to display installed software. This information can often guide us towards hard-to-find exploits. Is `FileZilla`/`Putty`/etc installed? Run `LaZagne` to check if stored credentials for those applications are installed. Also, some programs may be installed and running as a service that is vulnerable.
 
-```
-        cmd
+```bat
 C:\htb> wmic product get name
 
 Name
@@ -255,8 +249,7 @@ Java Auto Updater
 
 We can, of course, do this with PowerShell as well using the [Get-WmiObject](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-wmiobject?view=powershell-5.1) cmdlet.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-WmiObject -Class Win32_Product |  select Name, Version
 
 Name                                                                    Version
@@ -289,8 +282,7 @@ The [netstat](https://docs.microsoft.com/en-us/windows-server/administration/win
 
 #### Netstat
 
-```
-        powershell
+```powershell
 PS C:\htb> netstat -ano
 
 Active Connections
@@ -315,8 +307,7 @@ Users are often the weakest link in an organization, especially when systems are
 
 It is always important to determine what users are logged into a system. Are they idle or active? Can we determine what they are working on? While more challenging to pull off, we can sometimes attack users directly to escalate privileges or gain further access. During an evasive engagement, we would need to tread lightly on a host with other user(s) actively working on it to avoid detection.
 
-```
-        cmd
+```bat
 C:\htb> query user
 
  USERNAME              SESSIONNAME        ID  STATE   IDLE TIME  LOGON TIME
@@ -327,8 +318,7 @@ C:\htb> query user
 
 When we gain access to a host, we should always check what user context our account is running under first. Sometimes, we are already SYSTEM or equivalent! Suppose we gain access as a service account. In that case, we may have privileges such as `SeImpersonatePrivilege`, which can often be easily abused to escalate privileges using a tool such as [Juicy Potato](https://github.com/ohpe/juicy-potato).
 
-```
-        cmd
+```bat
 C:\htb> echo %USERNAME%
 
 htb-student
@@ -338,8 +328,7 @@ htb-student
 
 As mentioned prior, knowing what privileges our user has can greatly help in escalating privileges. We will look at individual user privileges and escalation paths later in this module.
 
-```
-        cmd
+```bat
 C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION
@@ -355,8 +344,7 @@ SeIncreaseWorkingSetPrivilege Increase a process working set Disabled
 
 Has our user inherited any rights through their group membership? Are they privileged in the Active Directory domain environment, which could be leveraged to gain access to more systems?
 
-```
-        cmd
+```bat
 C:\htb> whoami /groups
 
 GROUP INFORMATION
@@ -381,8 +369,7 @@ Mandatory Label\Medium Mandatory Level Label            S-1-16-8192
 
 Knowing what other users are on the system is important as well. If we gained RDP access to a host using credentials we captured for a user `bob`, and see a `bob_adm` user in the local administrators group, it is worth checking for credential re-use. Can we access the user profile directory for any important users? We may find valuable files such as scripts with passwords or SSH keys in a user's Desktop, Documents, or Downloads folder.
 
-```
-        cmd
+```bat
 C:\htb> net user
 
 User accounts for \\WINLPE-SRV01
@@ -398,8 +385,7 @@ The command completed successfully.
 
 Knowing what non-standard groups are present on the host can help us determine what the host is used for, how heavily accessed it is, or may even lead to discovering a misconfiguration such as all Domain Users in the Remote Desktop or local administrators groups.
 
-```
-        cmd
+```bat
 C:\htb> net localgroup
 
 Aliases for \\WINLPE-SRV01
@@ -436,8 +422,7 @@ The command completed successfully.
 
 It is worth checking out the details for any non-standard groups. Though unlikely, we may find a password or other interesting information stored in the group's description. During our enumeration, we may discover credentials of another non-admin user who is a member of a local group that can be leveraged to escalate privileges.
 
-```
-        cmd
+```bat
 C:\htb> net localgroup administrators
 
 Alias name     administrators
@@ -455,8 +440,7 @@ The command completed successfully.
 
 #### Get Password Policy & Other Account Information
 
-```
-        cmd
+```bat
 C:\htb> net accounts
 
 Force user logoff how long after time expires?:       Never

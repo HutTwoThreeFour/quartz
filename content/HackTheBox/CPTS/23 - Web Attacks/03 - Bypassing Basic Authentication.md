@@ -50,8 +50,7 @@ So, it seems like the web server configurations do cover both `GET` and `POST` r
 
 To see whether the server accepts `HEAD` requests, we can send an `OPTIONS` request to it and see what HTTP methods are accepted, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -i -X OPTIONS http://SERVER_IP:PORT/
 
 HTTP/1.1 200 OK

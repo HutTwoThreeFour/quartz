@@ -40,8 +40,7 @@ As we can imagine, Samba offers a wide range of [settings](https://www.samba.org
 
 #### Default Configuration
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/samba/smb.conf | grep -v "#\|\;" 
 
 [global]
@@ -119,8 +118,7 @@ Let us create a share called `[notes]` and a few others and see how the settings
 
 #### Example Share
 
-```
-        shellsession
+```shellsession
 ...SNIP...
 
 [notes]
@@ -141,8 +139,7 @@ It is highly recommended to look at the man pages for Samba and configure it our
 
 #### Restart Samba
 
-```
-        shellsession
+```shellsession
 root@samba:~# sudo systemctl restart smbd
 ```
 
@@ -150,8 +147,7 @@ Now we can display a list (`-L`) of the server's shares with the `smbclient` com
 
 #### SMBclient - Connecting to the Share
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbclient -N -L //10.129.14.128
 
         Sharename       Type      Comment
@@ -166,8 +162,7 @@ SMB1 disabled -- no workgroup available
 
 We can see that we now have five different shares on the Samba server from the result. Thereby `print$` and an `IPC$` are already included by default in the basic setting, as we have already seen. Since we deal with the `[notes]` share, let us log in and inspect it using the same client program. If we are not familiar with the client program, we can use the `help` command on successful login, listing all the possible commands we can execute.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbclient //10.129.14.128/notes
 
 Enter WORKGROUP\<username>'s password: 
@@ -208,8 +203,7 @@ Once we have discovered interesting files or folders, we can download them using
 
 #### Download Files from SMB
 
-```
-        shellsession
+```shellsession
 smb: \> get prep-prod.txt 
 
 getting file \prep-prod.txt of size 71 as prep-prod.txt (8,7 KiloBytes/sec) 
@@ -232,8 +226,7 @@ For example, with domain-level security, the samba server acts as a member of a 
 
 #### Samba Status
 
-```
-        shellsession
+```shellsession
 root@samba:~# smbstatus
 
 Samba version 4.11.6-Ubuntu
@@ -256,8 +249,7 @@ Let us go back to one of our enumeration tools. Nmap also has many options and N
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.14.128 -sV -sC -p139,445
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-19 15:15 CEST
@@ -288,8 +280,7 @@ The [Remote Procedure Call](https://www.geeksforgeeks.org/remote-procedure-call-
 
 #### RPCclient
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rpcclient -U "" 10.129.14.128
 
 Enter WORKGROUP\'s password:
@@ -310,8 +301,7 @@ The `rpcclient` offers us many different requests with which we can execute spec
 
 #### RPCclient - Enumeration
 
-```
-        shellsession
+```shellsession
 rpcclient $> srvinfo
 
         DEVSMB         Wk Sv PrQ Unx NT SNT DEVSM
@@ -391,8 +381,7 @@ Most importantly, anonymous access to such services can also lead to the discove
 
 #### Rpcclient - User Enumeration
 
-```
-        shellsession
+```shellsession
 rpcclient $> enumdomusers
 
 user:[mrb3n] rid:[0x3e8]
@@ -461,8 +450,7 @@ We can then use the results to identify the group's RID, which we can then use t
 
 #### Rpcclient - Group Information
 
-```
-        shellsession
+```shellsession
 rpcclient $> querygroup 0x201
 
         Group Name:     None
@@ -475,8 +463,7 @@ However, it can also happen that not all commands are available to us, and we ha
 
 #### Brute Forcing User RIDs
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for i in $(seq 500 1100);do rpcclient -N -U "" 10.129.14.128 -c "queryuser 0x$(printf '%x\n' $i)" | grep "User Name\|user_rid\|group_rid" && echo "";done
 
         User Name   :   sambauser
@@ -496,8 +483,7 @@ An alternative to this would be a Python script from [Impacket](https://github.c
 
 #### Impacket - Samrdump.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ samrdump.py 10.129.14.128
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -534,8 +520,7 @@ The information we have already obtained with `rpcclient` can also be obtained u
 
 #### SMBmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smbmap -H 10.129.14.128
 
 [+] Finding open SMB ports....
@@ -552,8 +537,7 @@ hiimeins@htb[/htb]$ smbmap -H 10.129.14.128
 
 #### CrackMapExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 10.129.14.128 --shares -u '' -p ''
 
 SMB         10.129.14.128   445    DEVSMB           [*] Windows 6.1 Build 0 (name:DEVSMB) (domain:) (signing:False) (SMBv1:False)
@@ -572,8 +556,7 @@ Another tool worth mentioning is the so-called [enum4linux-ng](https://github.co
 
 #### Enum4Linux-ng - Installation
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/cddmp/enum4linux-ng.git
 hiimeins@htb[/htb]$ cd enum4linux-ng
 hiimeins@htb[/htb]$ pip3 install -r requirements.txt
@@ -581,8 +564,7 @@ hiimeins@htb[/htb]$ pip3 install -r requirements.txt
 
 #### Enum4Linux-ng - Enumeration
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./enum4linux-ng.py 10.129.14.128 -A
 
 ENUM4LINUX - next generation

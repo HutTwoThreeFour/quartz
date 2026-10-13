@@ -41,8 +41,7 @@ Different `DNS records` are used for the DNS queries, which all have various tas
 
 The `SOA` record is located in a domain's zone file and specifies who is responsible for the operation of the domain and how DNS information for the domain is managed.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig soa www.inlanefreight.com
 
 ; <<>> DiG 9.16.27-Debian <<>> soa www.inlanefreight.com
@@ -89,8 +88,7 @@ Global options are general and affect all zones. A zone option only affects the 
 
 #### Local DNS Configuration
 
-```
-        shellsession
+```shellsession
 root@bind9:~# cat /etc/bind/named.conf.local
 
 //
@@ -115,8 +113,7 @@ In short, here, all `forward records` are entered according to the BIND format. 
 
 #### Zone Files
 
-```
-        shellsession
+```shellsession
 root@bind9:~# cat /etc/bind/db.domain.com
 
 ;
@@ -154,8 +151,7 @@ For the `Fully Qualified Domain Name` (`FQDN`) to be resolved from the IP addres
 
 #### Reverse Name Resolution Zone Files
 
-```
-        shellsession
+```shellsession
 root@bind9:~# cat /etc/bind/db.10.129.14
 
 ;
@@ -201,8 +197,7 @@ The footprinting at DNS servers is done as a result of the requests we send. So,
 
 #### DIG - NS Query
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig ns inlanefreight.htb @10.129.14.128
 
 ; <<>> DiG 9.16.1-Ubuntu <<>> ns inlanefreight.htb @10.129.14.128
@@ -233,8 +228,7 @@ Sometimes it is also possible to query a DNS server's version using a class CHAO
 
 #### DIG - Version Query
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig CH TXT version.bind 10.129.120.85
 
 ; <<>> DiG 9.10.6 <<>> CH TXT version.bind
@@ -259,8 +253,7 @@ We can use the option `ANY` to view all available records. This will cause the s
 
 #### DIG - ANY Query
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig any inlanefreight.htb @10.129.14.128
 
 ; <<>> DiG 9.16.1-Ubuntu <<>> any inlanefreight.htb @10.129.14.128
@@ -301,8 +294,7 @@ The slave fetches the `SOA` record of the relevant zone from the master at certa
 
 #### DIG - AXFR Zone Transfer
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig axfr inlanefreight.htb @10.129.14.128
 
 ; <<>> DiG 9.16.1-Ubuntu <<>> axfr inlanefreight.htb @10.129.14.128
@@ -327,8 +319,7 @@ If the administrator used a subnet for the `allow-transfer` option for testing p
 
 #### DIG - AXFR Zone Transfer - Internal
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig axfr internal.inlanefreight.htb @10.129.14.128
 
 ; <<>> DiG 9.16.1-Ubuntu <<>> axfr internal.inlanefreight.htb @10.129.14.128
@@ -359,8 +350,7 @@ An option would be to execute a `for-loop` in Bash that lists these entries and 
 
 #### Subdomain Brute Forcing
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ for sub in $(cat /opt/useful/seclists/Discovery/DNS/subdomains-top1million-110000.txt);do dig $sub.inlanefreight.htb @10.129.14.128 | grep -v ';\|SOA' | sed -r '/^\s*$/d' | grep $sub | tee -a subdomains.txt;done
 
 ns.inlanefreight.htb.   604800  IN      A       10.129.34.136
@@ -370,8 +360,7 @@ app.inlanefreight.htb.  604800  IN      A       10.129.18.15
 
 Many different tools can be used for this, and most of them work in the same way. One of these tools is, for example [DNSenum](https://github.com/fwaeytens/dnsenum).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dnsenum --dnsserver 10.129.14.128 --enum -p 0 -s 0 -o subdomains.txt -f /opt/useful/seclists/Discovery/DNS/subdomains-top1million-110000.txt inlanefreight.htb
 
 dnsenum VERSION:1.2.6

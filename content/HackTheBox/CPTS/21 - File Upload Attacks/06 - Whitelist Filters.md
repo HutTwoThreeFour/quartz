@@ -26,8 +26,7 @@ We can see that all variations of PHP extensions are blocked (e.g. `php5`, `php7
 
 The following is an example of a file extension whitelist test:
 
-```
-        php
+```php
 $fileName = basename($_FILES["uploadFile"]["name"]);
 
 if (!preg_match('^.*\.(jpg|jpeg|png|gif)', $fileName)) {
@@ -62,8 +61,7 @@ http://SERVER\_IP:PORT/profile\_images/shell.jpg.php?cmd=id
 
 However, this may not always work, as some web applications may use a strict `regex` pattern, as mentioned earlier, like the following:
 
-```
-        php
+```php
 if (!preg_match('/^.*\.(jpg|jpeg|png|gif)$/', $fileName)) { ...SNIP... }
 ```
 
@@ -77,8 +75,7 @@ In some cases, the file upload functionality itself may not be vulnerable, but t
 
 For example, the `/etc/apache2/mods-enabled/php7.4.conf` for the `Apache2` web server may include the following configuration:
 
-```
-        xml
+```xml
 <FilesMatch ".+\.ph(ar|p|tml)">
     SetHandler application/x-httpd-php
 </FilesMatch>
@@ -122,8 +119,7 @@ Each character has a specific use case that may trick the web application to mis
 
 We can write a small bash script that generates all permutations of the file name, where the above characters would be injected before and after both the `PHP` and `JPG` extensions, as follows:
 
-```
-        bash
+```bash
 for char in '%20' '%0a' '%00' '%0d0a' '/' '.\\' '.' '…' ':'; do
     for ext in '.php' '.phps'; do
         echo "shell$char$ext.jpg" >> wordlist.txt

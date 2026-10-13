@@ -40,8 +40,7 @@ Let's discuss some commands to interact with file share using Command Shell (`CM
 
 #### Windows CMD - DIR
 
-```
-        cmd
+```bat
 C:\htb> dir \\192.168.220.129\Finance\
 
 Volume in drive \\192.168.220.129\Finance has no label.
@@ -58,8 +57,7 @@ The command [net use](https://docs.microsoft.com/en-us/previous-versions/windows
 
 #### Windows CMD - Net Use
 
-```
-        cmd
+```bat
 C:\htb> net use n: \\192.168.220.129\Finance
 
 The command completed successfully.
@@ -67,8 +65,7 @@ The command completed successfully.
 
 We can also provide a username and password to authenticate to the share.
 
-```
-        cmd
+```bat
 C:\htb> net use n: \\192.168.220.129\Finance /user:plaintext Password123
 
 The command completed successfully.
@@ -78,8 +75,7 @@ With the shared folder mapped as the `n` drive, we can execute Windows commands 
 
 #### Windows CMD - DIR
 
-```
-        cmd
+```bat
 C:\htb> dir n: /a-d /s /b | find /c ":\"
 
 29302
@@ -87,8 +83,7 @@ C:\htb> dir n: /a-d /s /b | find /c ":\"
 
 We found 29,302 files. Let's walk through the command:
 
-```
-        shellsession
+```shellsession
 dir n: /a-d /s /b | find /c ":\"
 ```
 
@@ -109,8 +104,7 @@ The following command `| find /c ":\\"` process the output of `dir n: /a-d /s /b
 - key
 - Common File Extensions for source code such as: .cs, .c, .go, .java, .php, .asp, .aspx, .html.
 
-```
-        cmd
+```bat
 C:\htb>dir n:\*cred* /s /b
 
 n:\Contracts\private\credentials.txt
@@ -124,8 +118,7 @@ If we want to search for a specific word within a text file, we can use [findstr
 
 #### Windows CMD - Findstr
 
-```
-        cmd
+```bat
 c:\htb>findstr /s /i cred n:\*.*
 
 n:\Contracts\private\secret.txt:file with all credentials
@@ -140,8 +133,7 @@ PowerShell was designed to extend the capabilities of the Command shell to run P
 
 #### Windows PowerShell
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ChildItem \\192.168.220.129\Finance\
 
     Directory: \\192.168.220.129\Finance
@@ -153,8 +145,7 @@ d-----         2/23/2022   3:27 PM                Contracts
 
 Instead of `net use`, we can use `New-PSDrive` in PowerShell.
 
-```
-        powershell
+```powershell
 PS C:\htb> New-PSDrive -Name "N" -Root "\\192.168.220.129\Finance" -PSProvider "FileSystem"
 
 Name           Used (GB)     Free (GB) Provider      Root                                               CurrentLocation
@@ -166,8 +157,7 @@ To provide a username and password with Powershell, we need to create a [PSCrede
 
 #### Windows PowerShell - PSCredential Object
 
-```
-        powershell
+```powershell
 PS C:\htb> $username = 'plaintext'
 PS C:\htb> $password = 'Password123'
 PS C:\htb> $secpassword = ConvertTo-SecureString $password -AsPlainText -Force
@@ -183,8 +173,7 @@ In PowerShell, we can use the command `Get-ChildItem` or the short variant `gci`
 
 #### Windows PowerShell - GCI
 
-```
-        powershell
+```powershell
 PS C:\htb> N:
 PS N:\> (Get-ChildItem -File -Recurse | Measure-Object).Count
 
@@ -193,8 +182,7 @@ PS N:\> (Get-ChildItem -File -Recurse | Measure-Object).Count
 
 We can use the property `-Include` to find specific items from the directory specified by the Path parameter.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ChildItem -Recurse -Path N:\ -Include *cred* -File
 
     Directory: N:\Contracts\private
@@ -208,8 +196,7 @@ The `Select-String` cmdlet uses regular expression matching to search for text p
 
 #### Windows PowerShell - Select-String
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ChildItem -Recurse -Path N:\ | Select-String "cred" -List
 
 N:\Contracts\private\secret.txt:1:file with all credentials
@@ -224,16 +211,14 @@ Linux (UNIX) machines can also be used to browse and mount SMB shares. Note that
 
 #### Linux - Mount
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo mkdir /mnt/Finance
 hiimeins@htb[/htb]$ sudo mount -t cifs -o username=plaintext,password=Password123,domain=. //192.168.220.129/Finance /mnt/Finance
 ```
 
 As an alternative, we can use a credential file.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mount -t cifs //192.168.220.129/Finance /mnt/Finance -o credentials=/path/credentialfile
 ```
 
@@ -254,8 +239,7 @@ Once a shared folder is mounted, you can use common Linux tools such as `find` o
 
 #### Linux - Find
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find /mnt/Finance/ -name *cred*
 
 /mnt/Finance/Contracts/private/credentials.txt
@@ -263,8 +247,7 @@ hiimeins@htb[/htb]$ find /mnt/Finance/ -name *cred*
 
 Next, let's find files that contain the string `cred`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ grep -rn /mnt/Finance/ -ie cred
 
 /mnt/Finance/Contracts/private/credentials.txt:1:admin:SecureCredentials!
@@ -285,8 +268,7 @@ We can use a mail client such as [Evolution](https://wiki.gnome.org/Apps/Evoluti
 
 #### Linux - Install Evolution
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt-get install evolution
 ...SNIP...
 ```
@@ -327,8 +309,7 @@ To interact with [MSSQL (Microsoft SQL Server)](https://www.microsoft.com/en-us/
 
 #### Linux - SQSH
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqsh -S 10.129.20.13 -U username -P Password123
 ```
 
@@ -341,8 +322,7 @@ The `sqlcmd` utility lets you enter Transact-SQL statements, system procedures, 
 
 #### Windows - SQLCMD
 
-```
-        cmd
+```bat
 C:\htb> sqlcmd -S 10.129.20.13 -U username -P Password123
 ```
 
@@ -354,8 +334,7 @@ To interact with [MySQL](https://en.wikipedia.org/wiki/MySQL), we can use MySQL 
 
 #### Linux - MySQL
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mysql -u username -pPassword123 -h 10.129.20.13
 ```
 
@@ -363,8 +342,7 @@ We can easily start an interactive SQL Session using Windows:
 
 #### Windows - MySQL
 
-```
-        cmd
+```bat
 C:\htb> mysql.exe -u username -pPassword123 -h 10.129.20.13
 ```
 
@@ -376,8 +354,7 @@ To install [dbeaver](https://github.com/dbeaver/dbeaver) using a Debian package 
 
 #### Install dbeaver
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo dpkg -i dbeaver-<version>.deb
 ```
 
@@ -385,8 +362,7 @@ To start the application use:
 
 #### Run dbeaver
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dbeaver &
 ```
 

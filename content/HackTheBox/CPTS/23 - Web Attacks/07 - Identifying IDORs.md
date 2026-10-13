@@ -20,8 +20,7 @@ For example, if we did not have an admin account, only the user-level functions 
 
 This is not unique to admin functions, of course, but can also be any functions or calls that may not be found through monitoring HTTP requests. The following example shows a basic example of an AJAX call:
 
-```
-        javascript
+```javascript
 function changeUserPassword() {
     $.ajax({
         url:"change_password.php",
@@ -47,8 +46,7 @@ Suppose the reference was encoded with a common encoder (e.g. `base64`). In that
 
 On the other hand, the object reference may be hashed, like (`download.php?filename=c81e728d9d4c2f636f067f89cc14862c`). At a first glance, we may think that this is a secure object reference, as it is not using any clear text or easy encoding. However, if we look at the source code, we may see what is being hashed before the API call is made:
 
-```
-        javascript
+```javascript
 $.ajax({
     url:"download.php",
     type: "post",
@@ -70,8 +68,7 @@ If we want to perform more advanced IDOR attacks, we may need to register multip
 
 For example, if we had access to two different users, one of which can view their salary after making the following API call:
 
-```
-        json
+```json
 {
   "attributes" : 
     {

@@ -23,8 +23,7 @@ If the module is not loaded, run `Import-Module ActiveDirectory` to load it for 
 
 #### Discover Modules
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-Module
 
 ModuleType Version    Name                                ExportedCommands
@@ -37,8 +36,7 @@ We'll see that the ActiveDirectory module is not yet imported. Let's go ahead an
 
 #### Load ActiveDirectory Module
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module ActiveDirectory
 PS C:\htb> Get-Module
 
@@ -53,8 +51,7 @@ Now that our modules are loaded, let's begin. First up, we'll enumerate some bas
 
 ### Get Domain Info
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADDomain
 
 AllowedDNSSuffixes                 : {}
@@ -98,8 +95,7 @@ This will print out helpful information like the domain SID, domain functional l
 
 #### Get-ADUser
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
 
 DistinguishedName    : CN=adfs,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
@@ -133,8 +129,7 @@ Another interesting check we can run utilizing the ActiveDirectory module, would
 
 #### Checking For Trust Relationships
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADTrust -Filter *
 
 Direction               : BiDirectional
@@ -190,8 +185,7 @@ This cmdlet will print out any trust relationships the domain has. We can determ
 
 #### Group Enumeration
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADGroup -Filter * | select name
 
 name
@@ -232,8 +226,7 @@ We can take the results and feed interesting names back into the cmdlet to get m
 
 #### Detailed Group Info
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADGroup -Identity "Backup Operators"
 
 DistinguishedName : CN=Backup Operators,CN=Builtin,DC=INLANEFREIGHT,DC=LOCAL
@@ -250,8 +243,7 @@ Now that we know more about the group, let's get a member listing using the [Get
 
 ### Group Membership
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADGroupMember -Identity "Backup Operators"
 
 distinguishedName : CN=BACKUPAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
@@ -317,8 +309,7 @@ First up is the [Get-DomainUser](https://powersploit.readthedocs.io/en/latest/Re
 
 #### Domain User Information
 
-```
-        powershell
+```powershell
 PS C:\Windows\system32> cd C:\Tools\
 PS C:\Tools> Import-Module .\PowerView.ps1
 PS C:\htb> Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
@@ -345,8 +336,7 @@ We saw some basic user information with PowerView. Now let's enumerate some doma
 
 #### Recursive Group Membership
 
-```
-        powershell
+```powershell
 PS C:\htb>  Get-DomainGroupMember -Identity "Domain Admins" -Recurse
 
 GroupDomain             : INLANEFREIGHT.LOCAL
@@ -384,8 +374,7 @@ Above we performed a recursive look at the `Domain Admins` group to list its mem
 
 #### Trust Enumeration
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainTrustMapping
 
 SourceName      : INLANEFREIGHT.LOCAL
@@ -417,8 +406,7 @@ We can use the [Test-AdminAccess](https://powersploit.readthedocs.io/en/latest/R
 
 #### Testing for Local Admin Access
 
-```
-        powershell
+```powershell
 PS C:\htb> Test-AdminAccess -ComputerName ACADEMY-EA-MS01
 
 ComputerName    IsAdmin
@@ -430,8 +418,7 @@ Above, we determined that the user we are currently using is an administrator on
 
 #### Finding Users With SPN Set
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 
 serviceprincipalname                          samaccountname
@@ -458,8 +445,7 @@ PowerView is part of the now deprecated PowerSploit offensive PowerShell toolkit
 
 Another tool worth experimenting with is SharpView, a .NET port of PowerView. Many of the same functions supported by PowerView can be used with SharpView. We can type a method name with `-Help` to get an argument list.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\SharpView.exe Get-DomainUser -Help
 
 Get_DomainUser -Identity <String[]> -DistinguishedName <String[]> -SamAccountName <String[]> -Name <String[]> -MemberDistinguishedName <String[]> -MemberName <String[]> -SPN <Boolean> -AdminCount <Boolean> -AllowDelegation <Boolean> -DisallowDelegation <Boolean> -TrustedToAuth <Boolean> -PreauthNotRequired <Boolean> -KerberosPreauthNotRequired <Boolean> -NoPreauth <Boolean> -Domain <String> -LDAPFilter <String> -Filter <String> -Properties <String[]> -SearchBase <String> -ADSPath <String> -Server <String> -DomainController <String> -SearchScope <SearchScope> -ResultPageSize <Int32> -ServerTimeLimit <Nullable`1> -SecurityMasks <Nullable`1> -Tombstone <Boolean> -FindOne <Boolean> -ReturnOne <Boolean> -Credential <NetworkCredential> -Raw <Boolean> -UACFilter <UACEnum>
@@ -467,8 +453,7 @@ Get_DomainUser -Identity <String[]> -DistinguishedName <String[]> -SamAccountNam
 
 Here we can use SharpView to enumerate information about a specific user, such as the user `forend`, which we control.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\SharpView.exe Get-DomainUser -Identity forend
 
 [Get-DomainSearcher] search base: LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL
@@ -521,8 +506,7 @@ To execute Snaffler, we can use the command below:
 
 #### Snaffler Execution
 
-```
-        bash
+```bash
 Snaffler.exe -s -d inlanefreight.local -o snaffler.log -v data
 ```
 
@@ -530,8 +514,7 @@ The `-s` tells it to print results to the console for us, the `-d` specifies the
 
 #### Snaffler in Action
 
-```
-        powershell
+```powershell
 PS C:\htb> .\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data
 
  .::::::.:::.    :::.  :::.    .-:::::'.-:::::':::    .,:::::: :::::::..
@@ -586,8 +569,7 @@ If we run SharpHound with the `--help` option, we can see the options available 
 
 #### SharpHound in Action
 
-```
-        powershell
+```powershell
 PS C:\htb>  .\SharpHound.exe --help
 
 SharpHound 1.0.3
@@ -613,8 +595,7 @@ Copyright (C) 2022 SpecterOps
 
 We'll start by running the SharpHound.exe collector from the MS01 attack host.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\SharpHound.exe -c All --zipfilename ILFREIGHT
 
 2022-04-18T13:58:22.1163680-07:00|INFORMATION|Resolved Collection Methods: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote

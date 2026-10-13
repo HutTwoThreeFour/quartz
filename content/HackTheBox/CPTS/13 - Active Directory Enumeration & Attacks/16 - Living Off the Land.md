@@ -61,8 +61,7 @@ Let's see them in action now on the `MS01` host.
 
 #### Quick Checks Using PowerShell
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-Module
 
 ModuleType Version    Name                                ExportedCommands
@@ -132,8 +131,7 @@ Many defenders are unaware that several versions of PowerShell often exist on a 
 
 #### Downgrade Powershell
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-host
 
 Name             : ConsoleHost
@@ -193,8 +191,7 @@ The next few commands utilize the [netsh](https://docs.microsoft.com/en-us/windo
 
 #### Firewall Checks
 
-```
-        powershell
+```powershell
 PS C:\htb> netsh advfirewall show allprofiles
 
 Domain Profile Settings:
@@ -248,8 +245,7 @@ MaxFileSize                           4096
 
 #### Windows Defender Check (from CMD.exe)
 
-```
-        cmd
+```bat
 C:\htb> sc query windefend
 
 SERVICE_NAME: windefend
@@ -266,8 +262,7 @@ Above, we checked if Defender was running. Below we will check the status and co
 
 #### Get-MpComputerStatus
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-MpComputerStatus
 
 AMEngineVersion                  : 1.1.19000.8
@@ -315,8 +310,7 @@ When landing on a host for the first time, one important thing is to check and s
 
 #### Using qwinsta
 
-```
-        powershell
+```powershell
 PS C:\htb> qwinsta
 
  SESSIONNAME       USERNAME                 ID  STATE   TYPE        DEVICE
@@ -340,8 +334,7 @@ Commands such as `ipconfig /all` and `systeminfo` show us some basic networking 
 
 #### Using arp -a
 
-```
-        powershell
+```powershell
 PS C:\htb> arp -a
 
 Interface: 172.16.5.25 --- 0x8
@@ -368,8 +361,7 @@ Interface: 10.129.201.234 --- 0xc
 
 #### Viewing the Routing Table
 
-```
-        powershell
+```powershell
 PS C:\htb> route print
 
 ===========================================================================
@@ -434,8 +426,7 @@ Using `arp -a` and `route print` will not only benefit in enumerating AD environ
 
 Below we can see information about the domain and the child domain, and the external forest that our current domain has a trust with. This [cheatsheet](https://gist.github.com/xorrior/67ee741af08cb1fc86511047550cdaf4) has some useful commands for querying host and domain info using wmic.
 
-```
-        powershell
+```powershell
 PS C:\htb> wmic ntdomain get Caption,Description,DnsForestName,DomainName,DomainControllerAddress
 
 Caption          Description      DnsForestName           DomainControllerAddress  DomainName
@@ -490,8 +481,7 @@ We'll cover a few examples below. Keep in mind that `net.exe` commands are typic
 
 #### Listing Domain Groups
 
-```
-        powershell
+```powershell
 PS C:\htb> net group /domain
 
 The request will be processed at a domain controller for domain INLANEFREIGHT.LOCAL.
@@ -524,8 +514,7 @@ We can see above the `net group` command provided us with a list of groups withi
 
 #### Information about a Domain User
 
-```
-        powershell
+```powershell
 PS C:\htb> net user /domain wrouse
 
 The request will be processed at a domain controller for domain INLANEFREIGHT.LOCAL.
@@ -580,8 +569,7 @@ All we need is elevated privileges on a host or the ability to run an instance o
 
 #### User Search
 
-```
-        powershell
+```powershell
 PS C:\htb> dsquery user
 
 "CN=Administrator,CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
@@ -607,8 +595,7 @@ PS C:\htb> dsquery user
 
 #### Computer Search
 
-```
-        powershell
+```powershell
 PS C:\htb> dsquery computer
 
 "CN=ACADEMY-EA-DC01,OU=Domain Controllers,DC=INLANEFREIGHT,DC=LOCAL"
@@ -639,8 +626,7 @@ We can use a [dsquery wildcard search](https://docs.microsoft.com/en-us/previous
 
 #### Wildcard Search
 
-```
-        powershell
+```powershell
 PS C:\htb> dsquery * "CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
 
 "CN=Users,DC=INLANEFREIGHT,DC=LOCAL"
@@ -676,8 +662,7 @@ We can, of course, combine `dsquery` with LDAP search filters of our choosing. T
 
 #### Users With Specific Attributes Set (PASSWD\_NOTREQD)
 
-```
-        powershell
+```powershell
 PS C:\htb> dsquery * -filter "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=32))" -attr distinguishedName userAccountControl
 
   distinguishedName                                                                              userAccountControl
@@ -695,8 +680,7 @@ The below search filter looks for all Domain Controllers in the current domain, 
 
 #### Searching for Domain Controllers
 
-```
-        powershell
+```powershell
 PS C:\Users\forend.INLANEFREIGHT> dsquery * -filter "(userAccountControl:1.2.840.113556.1.4.803:=8192)" -limit 5 -attr sAMAccountName
 
  sAMAccountName

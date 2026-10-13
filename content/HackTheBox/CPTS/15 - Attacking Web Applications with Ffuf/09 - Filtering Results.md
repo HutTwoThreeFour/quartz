@@ -10,8 +10,7 @@ So far, we have not been using any filtering to our `ffuf`, and the results are 
 
 `Ffuf` provides the option to match or filter out a specific HTTP code, response size, or amount of words. We can see that with `ffuf -h`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -h
 ...SNIP...
 MATCHER OPTIONS:
@@ -32,8 +31,7 @@ FILTER OPTIONS:
 
 In this case, we cannot use matching, as we don't know what the response size from other VHosts would be. We know the response size of the incorrect results, which, as seen from the test above, is `900`, and we can filter it out with `-fs 900`. Now, let's repeat the same previous command, add the above flag, and see what we get:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://academy.htb:PORT/ -H 'Host: FUZZ.academy.htb' -fs 900
 
        /'___\  /'___\           /'___\       

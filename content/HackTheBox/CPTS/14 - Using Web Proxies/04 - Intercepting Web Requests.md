@@ -73,8 +73,7 @@ And many other potential web vulnerabilities, as we will see in other web module
 
 Let us turn request interception back on in the tool of our choosing, set the `IP` value on the page, then click on the `Ping` button. Once our request is intercepted, we should get a similar HTTP request to the following :
 
-```
-        http
+```http
 POST /ping HTTP/1.1
 Host: 94.237.62.138:32306
 Content-Length: 4

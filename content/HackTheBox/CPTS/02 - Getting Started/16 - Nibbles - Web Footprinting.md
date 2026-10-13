@@ -4,8 +4,7 @@
 
 We can use `whatweb` to try to identify the web application in use.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ whatweb 10.129.42.190
 
 http://10.129.42.190 [200 OK] Apache[2.4.18], Country[RESERVED][ZZ], HTTPServer[Ubuntu Linux][Apache/2.4.18 (Ubuntu)], IP[10.129.42.190]
@@ -21,8 +20,7 @@ Checking the page source reveals an interesting comment.
 
 We can also check this with cURL.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl http://10.129.42.190
 
 <b>Hello world!</b>
@@ -32,8 +30,7 @@ hiimeins@htb[/htb]$ curl http://10.129.42.190
 
 The HTML comment mentions a directory named `nibbleblog`. Let us check this with `whatweb`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ whatweb http://10.129.42.190/nibbleblog
 
 http://10.129.42.190/nibbleblog [301 Moved Permanently] Apache[2.4.18], Country[RESERVED][ZZ], HTTPServer[Ubuntu Linux][Apache/2.4.18 (Ubuntu)], IP[10.129.42.190], RedirectLocation[http://10.129.42.190/nibbleblog/], Title[301 Moved Permanently]
@@ -54,8 +51,7 @@ A quick Google search for "nibbleblog exploit" yields this [Nibbleblog File Uplo
 
 Let us use [Gobuster](https://github.com/OJ/gobuster) to be thorough and check for any other accessible pages/directories.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster dir -u http://10.129.42.190/nibbleblog/ --wordlist /usr/share/seclists/Discovery/Web-Content/common.txt
 
 ===============================================================
@@ -92,8 +88,7 @@ by OJ Reeves (@TheColonial) & Christian Mehlmauer (@_FireFart_)
 
 `Gobuster` finishes very quickly and confirms the presence of the `admin.php` page. We can check the `README` page for interesting information, such as the version number.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl http://10.129.42.190/nibbleblog/README
 
 ====== Nibbleblog ======
@@ -135,8 +130,7 @@ Let us go back to our directory brute-forcing results. The `200` status codes sh
 
 Browsing to `nibbleblog/content` shows some interesting subdirectories `public`, `private`, and `tmp`. Digging around for a while, we find a `users.xml` file which at least seems to confirm the username is indeed admin. It also shows blacklisted IP addresses. We can request this file with `cURL` and prettify the `XML` output using [xmllint](https://linux.die.net/man/1/xmllint).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://10.129.42.190/nibbleblog/content/private/users.xml | xmllint  --format -
 
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -166,8 +160,7 @@ At this point, we have a valid username but no password. Searches of Nibbleblog 
 
 There are no other ports open, and we did not find any other directories. Which we can confirm by performing additional directory brute-forcing against the root of the web application
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster dir -u http://10.129.42.190/ --wordlist /usr/share/seclists/Discovery/Web-Content/common.txt
 
 ===============================================================
@@ -195,8 +188,7 @@ by OJ Reeves (@TheColonial) & Christian Mehlmauer (@_FireFart_)
 
 Taking another look through all of the exposed directories, we find a `config.xml` file.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://10.129.42.190/nibbleblog/content/private/config.xml | xmllint --format -
 
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>

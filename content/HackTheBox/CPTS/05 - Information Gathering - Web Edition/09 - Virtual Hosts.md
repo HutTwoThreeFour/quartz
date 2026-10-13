@@ -84,8 +84,7 @@ There are a couple of things you need to prepare to brute force `Host` headers:
 
 The `gobuster` command to bruteforce vhosts generally looks like this:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster vhost -u http://<target_IP_address> -w <wordlist_file> --append-domain
 ```
 
@@ -104,8 +103,7 @@ There are a couple of other arguments that are worth knowing:
 - The `-k` flag can ignore SSL/TLS certificate errors.
 - You can use the `-o` flag to save the output to a file for later analysis.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster vhost -u http://inlanefreight.htb:81 -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt --append-domain
 ===============================================================
 Gobuster v3.6

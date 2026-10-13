@@ -27,8 +27,7 @@ There are generally two common forms of validating a file extension on the back-
 
 Furthermore, the validation may also check the `file type` or the `file content` for type matching. The weakest form of validation amongst these is `testing the file extension against a blacklist of extension` to determine whether the upload request should be blocked. For example, the following piece of code checks if the uploaded file extension is `PHP` and drops the request if it is:
 
-```
-        php
+```php
 $fileName = basename($_FILES["uploadFile"]["name"]);
 $extension = pathinfo($fileName, PATHINFO_EXTENSION);
 $blacklist = array('php', 'php7', 'phps');

@@ -22,8 +22,7 @@ As we can see, our input was displayed on the page. If no sanitization or filter
 
 We can test whether the page is vulnerable to XSS with the following basic XSS payload:
 
-```
-        html
+```html
 <script>alert(window.origin)</script>
 ```
 
@@ -35,8 +34,7 @@ http://SERVER\_IP:PORT/
 
 As we can see, we did indeed get the alert, which means that the page is vulnerable to XSS, since our payload executed successfully. We can confirm this further by looking at the page source by clicking `CTRL+U` or right-clicking and selecting `View Page Source`, and we should see our payload in the page source:
 
-```
-        html
+```html
 <div></div><ul class="list-unstyled" id="todo"><ul><script>alert(window.origin)</script>
 </ul></ul>
 ```

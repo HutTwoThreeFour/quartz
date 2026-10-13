@@ -42,8 +42,7 @@ As soon as we selected the icon, it opened the MATE terminal emulator applicatio
 
 #### Shell Validation From 'ps'
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ps
 
     PID TTY          TIME CMD
@@ -55,8 +54,7 @@ We can also find out what shell language is in use by viewing the environment va
 
 #### Shell Validation Using 'env'
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ env
 
 SHELL=/bin/bash

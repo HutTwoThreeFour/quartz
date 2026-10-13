@@ -105,8 +105,7 @@ For now, this is what we care about from its output. Inlanefreight is not a larg
 
 In the request above, we utilized `viewdns.info` to validate the IP address of our target. Both results match, which is a good sign. Now let's try another route to validate the two nameservers in our results.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nslookup ns1.inlanefreight.com
 
 Server:     192.168.186.1
@@ -159,8 +158,7 @@ We can use a tool such as [linkedin2username](https://github.com/initstring/link
 
 Note: For our purposes, the sample data below is fictional.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 dehashed.py -q inlanefreight.local -p
 
 id : 5996447501

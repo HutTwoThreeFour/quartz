@@ -12,8 +12,7 @@ One command obfuscation technique we can use is case manipulation, like invertin
 
 If we are dealing with a Windows server, we can change the casing of the characters of the command and send it. In Windows, commands for PowerShell and CMD are case-insensitive, meaning they will execute the command regardless of what case it is written in:
 
-```
-        powershell
+```powershell
 PS C:\htb> WhOaMi
 
 21y4d
@@ -21,8 +20,7 @@ PS C:\htb> WhOaMi
 
 However, when it comes to Linux and a bash shell, which are case-sensitive, as mentioned earlier, we have to get a bit creative and find a command that turns the command into an all-lowercase word. One working command we can use is the following:
 
-```
-        shellsession
+```shellsession
 21y4d@htb[/htb]$ $(tr "[A-Z]" "[a-z]"<<<"WhOaMi")
 
 21y4d
@@ -44,8 +42,7 @@ Once we replace the spaces with tabs (`%09`), we see that the command works perf
 
 There are many other commands we may use for the same purpose, like the following:
 
-```
-        bash
+```bash
 $(a="WhOaMi";printf %s "${a,,}")
 ```
 
@@ -59,16 +56,14 @@ Another command obfuscation technique we will discuss is reversing commands and 
 
 We can get creative with such techniques and create our own Linux/Windows commands that eventually execute the command without ever containing the actual command words. First, we'd have to get the reversed string of our command in our terminal, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo 'whoami' | rev
 imaohw
 ```
 
 Then, we can execute the original command by reversing it back in a sub-shell (`$()`), as follows:
 
-```
-        shellsession
+```shellsession
 21y4d@htb[/htb]$ $(rev<<<'imaohw')
 
 21y4d
@@ -84,8 +79,7 @@ Tip: If you wanted to bypass a character filter with the above method, you'd hav
 
 The same can be applied in `Windows.` We can first reverse a string, as follows:
 
-```
-        powershell
+```powershell
 PS C:\htb> "whoami"[-1..-20] -join ''
 
 imaohw
@@ -93,8 +87,7 @@ imaohw
 
 We can now use the below command to execute a reversed string with a PowerShell sub-shell (`iex "$()"`), as follows:
 
-```
-        powershell
+```powershell
 PS C:\htb> iex "$('imaohw'[-1..-20] -join '')"
 
 21y4d
@@ -108,8 +101,7 @@ The final technique we will discuss is helpful for commands containing filtered 
 
 We can utilize various encoding tools, like `base64` (for b64 encoding) or `xxd` (for hex encoding). Let's take `base64` as an example. First, we'll encode the payload we want to execute (which includes filtered characters):
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo -n 'cat /etc/passwd | grep 33' | base64
 
 Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==
@@ -117,8 +109,7 @@ Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==
 
 Now we can create a command that will decode the encoded string in a sub-shell (`$()`), and then pass it to `bash` to be executed (i.e. `bash<<<`), as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 
 www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
@@ -138,8 +129,7 @@ Even if some commands were filtered, like `bash` or `base64`, we could bypass th
 
 We use the same technique with Windows as well. First, we need to base64 encode our string, as follows:
 
-```
-        powershell
+```powershell
 PS C:\htb> [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes('whoami'))
 
 dwBoAG8AYQBtAGkA
@@ -147,8 +137,7 @@ dwBoAG8AYQBtAGkA
 
 We may also achieve the same thing on Linux, but we would have to convert the string from `utf-8` to `utf-16` before we `base64` it, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo -n whoami | iconv -f utf-8 -t utf-16le | base64
 
 dwBoAG8AYQBtAGkA
@@ -156,8 +145,7 @@ dwBoAG8AYQBtAGkA
 
 Finally, we can decode the b64 string and execute it with a PowerShell sub-shell (`iex "$()"`), as follows:
 
-```
-        powershell
+```powershell
 PS C:\htb> iex "$([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('dwBoAG8AYQBtAGkA')))"
 
 21y4d

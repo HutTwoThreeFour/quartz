@@ -64,8 +64,7 @@ Throughout the module, we will cover examples with accompanying command output, 
 
 We can connect via command line using the command `xfreerdp /v:<target ip> /u:htb-student` and typing in the provided password when prompted. Most sections will provide credentials for the `htb-student` user, but some, depending on the material, will have you RDP with a different user, and alternate credentials will be provided.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$  xfreerdp /v:10.129.43.36 /u:htb-student
 
 [21:17:27:323] [28158:28159] [INFO][com.freerdp.core] - freerdp_connect:freerdp_set_last_error_ex resetting error state

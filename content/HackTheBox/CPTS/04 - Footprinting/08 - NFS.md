@@ -24,8 +24,7 @@ NFS is not difficult to configure because there are not as many options as FTP o
 
 #### Exports File
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/exports 
 
 # /etc/exports: the access control list for filesystems which may be exported
@@ -56,8 +55,7 @@ Let us create such an entry for test purposes and play around with the settings.
 
 #### ExportFS
 
-```
-        shellsession
+```shellsession
 root@nfs:~# echo '/mnt/nfs  10.129.14.0/24(sync,no_subtree_check)' >> /etc/exports
 root@nfs:~# systemctl restart nfs-kernel-server 
 root@nfs:~# exportfs
@@ -92,8 +90,7 @@ When footprinting NFS, the TCP ports `111` and `2049` are essential. We can also
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.14.128 -p111,2049 -sV -sC
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-19 17:12 CEST
@@ -133,8 +130,7 @@ Nmap done: 1 IP address (1 host up) scanned in 6.58 seconds
 
 The `rpcinfo` NSE script retrieves a list of all currently running RPC services, their names and descriptions, and the ports they use. This lets us check whether the target share is connected to the network on all required ports. Also, for NFS, Nmap has some NSE scripts that can be used for the scans. These can then show us, for example, the `contents` of the share and its `stats`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap --script nfs* 10.129.14.128 -sV -p111,2049
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-19 17:37 CEST
@@ -190,8 +186,7 @@ Once we have discovered such an NFS service, we can mount it on our local machin
 
 #### Show Available NFS Shares
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ showmount -e 10.129.14.128
 
 Export list for 10.129.14.128:
@@ -200,8 +195,7 @@ Export list for 10.129.14.128:
 
 #### Mounting NFS Share
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mkdir target-NFS
 hiimeins@htb[/htb]$ sudo mount -t nfs 10.129.14.128:/ ./target-NFS/ -o nolock
 hiimeins@htb[/htb]$ cd target-NFS
@@ -221,8 +215,7 @@ There we will have the opportunity to access the rights and the usernames and gr
 
 #### List Contents with Usernames & Group Names
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -l mnt/nfs/
 
 total 16
@@ -235,8 +228,7 @@ total 16
 
 #### List Contents with UIDs & GUIDs
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -n mnt/nfs/
 
 total 16
@@ -256,8 +248,7 @@ After we have done all the necessary steps and obtained the information we need,
 
 #### Unmounting
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cd ..
 hiimeins@htb[/htb]$ sudo umount ./target-NFS
 ```

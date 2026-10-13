@@ -32,8 +32,7 @@ Antak is a web shell built in ASP.Net included within the [Nishang project](http
 
 The Antak files can be found in the `/usr/share/nishang/Antak-WebShell` directory.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /usr/share/nishang/Antak-WebShell
 
 antak.aspx  Readme.md
@@ -49,8 +48,7 @@ Now that we understand what Antak is and how it works let's put it to the test a
 
 #### Move a Copy for Modification
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cp /usr/share/nishang/Antak-WebShell/antak.aspx /home/administrator/Upload.aspx
 ```
 

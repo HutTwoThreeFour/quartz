@@ -30,8 +30,7 @@ Each SMTP server can be configured in many ways, as can all other services. Howe
 
 #### Default Configuration
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/postfix/main.cf | grep -v "#" | sed -r "/^\s*$/d"
 
 smtpd_banner = ESMTP Server 
@@ -74,8 +73,7 @@ To interact with the SMTP server, we can use the `telnet` tool to initialize a T
 
 #### Telnet - HELO/EHLO
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ telnet 10.129.14.128 25
 
 Trying 10.129.14.128...
@@ -104,8 +102,7 @@ The command `VRFY` can be used to enumerate existing users on the system. Howeve
 
 #### Telnet - VRFY
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ telnet 10.129.14.128 25
 
 Trying 10.129.14.128...
@@ -138,8 +135,7 @@ All the commands we enter in the command line to send an email we know from ever
 
 #### Send an Email
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ telnet 10.129.14.128 25
 
 Trying 10.129.14.128...
@@ -201,8 +197,7 @@ Often, administrators have no overview of which IP ranges they have to allow. Th
 
 #### Open Relay Configuration
 
-```
-        shellsession
+```shellsession
 mynetworks = 0.0.0.0/0
 ```
 
@@ -216,8 +211,7 @@ The default Nmap scripts include `smtp-commands`, which uses the `EHLO` command 
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.14.128 -sC -sV -p25
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-27 17:56 CEST
@@ -237,8 +231,7 @@ However, we can also use the [smtp-open-relay](https://nmap.org/nsedoc/scripts/s
 
 #### Nmap - Open Relay
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.14.128 -p25 --script smtp-open-relay -v
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-30 02:29 CEST

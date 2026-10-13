@@ -22,8 +22,7 @@ Note: These scripts will run many commands known for identifying vulnerabilities
 
 Let us take an example of running the Linux script from `PEASS` called `LinPEAS`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./linpeas.sh
 ...SNIP...
 
@@ -72,8 +71,7 @@ Another critical aspect to look for after gaining access to a server is the priv
 
 The `sudo` command in Linux allows a user to execute commands as a different user. It is usually used to allow lower privileged users to execute commands as root without giving them access to the root user. This is generally done as specific commands can only be run as root 'like `tcpdump`' or allow the user to access certain root-only directories. We can check what `sudo` privileges we have with the `sudo -l` command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo -l
 
 [sudo] password for user1:
@@ -85,8 +83,7 @@ User user1 may run the following commands on ExampleServer:
 
 The above output says that we can run all commands with `sudo`, which gives us complete access, and we can use the `su` command with `sudo` to switch to the root user:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo su -
 
 [sudo] password for user1:
@@ -96,8 +93,7 @@ root
 
 The above command requires a password to run any commands with `sudo`. There are certain occasions where we may be allowed to execute certain applications, or all applications, without having to provide a password:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo -l
 
     (user : user) NOPASSWD: /bin/echo
@@ -105,8 +101,7 @@ hiimeins@htb[/htb]$ sudo -l
 
 The `NOPASSWD` entry shows that the `/bin/echo` command can be executed without a password. This would be useful if we gained access to the server through a vulnerability and did not have the user's password. As it says `user`, we can run `sudo` as that user and not as root. To do so, we can specify the user with `-u user`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo -u user /bin/echo Hello World!
 
     Hello World!
@@ -139,8 +134,7 @@ If we can write to a directory called by a cron job, we can write a bash script 
 
 Next, we can look for files we can read and see if they contain any exposed credentials. This is very common with `configuration` files, `log` files, and user history files (`bash_history` in Linux and `PSReadLine` in Windows). The enumeration scripts we discussed at the beginning usually look for potential passwords in files and provide them to us, as below:
 
-```
-        shellsession
+```shellsession
 ...SNIP...
 [+] Searching passwords in config PHP files
 [+] Finding passwords inside logs (limit 70)
@@ -150,8 +144,7 @@ Next, we can look for files we can read and see if they contain any exposed cred
 
 As we can see, the database password '`password123`' is exposed, which would allow us to log in to the local `mysql` databases and look for interesting information. We may also check for `Password Reuse`, as the system user may have used their password for the databases, which may allow us to use the same password to switch to that user, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ su -
 
 Password: password123
@@ -168,8 +161,7 @@ We may also use the user credentials to `ssh` into the server as that user.
 
 Finally, let us discuss SSH keys. If we have read access over the `.ssh` directory for a specific user, we may read their private ssh keys found in `/home/user/.ssh/id_rsa` or `/root/.ssh/id_rsa`, and use it to log in to the server. If we can read the `/root/.ssh/` directory and can read the `id_rsa` file, we can copy it to our machine and use the `-i` flag to log in with it:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ vim id_rsa
 hiimeins@htb[/htb]$ chmod 600 id_rsa
 hiimeins@htb[/htb]$ ssh root@10.10.10.10 -i id_rsa
@@ -181,8 +173,7 @@ Note that we used the command 'chmod 600 id\_rsa' on the key after we created it
 
 If we find ourselves with write access to a users`/.ssh/` directory, we can place our public key in the user's ssh directory at `/home/user/.ssh/authorized_keys`. This technique is usually used to gain ssh access after gaining a shell as that user. The current SSH configuration will not accept keys written by other users, so it will only work if we have already gained control over that user. We must first create a new key with `ssh-keygen` and the `-f` flag to specify the output file:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh-keygen -f key
 
 Generating public/private rsa key pair.
@@ -203,15 +194,13 @@ The key's randomart image is:
 
 This will give us two files: `key` (which we will use with `ssh -i`) and `key.pub`, which we will copy to the remote machine. Let us copy `key.pub`, then on the remote machine, we will add it into `/root/.ssh/authorized_keys`:
 
-```
-        shellsession
+```shellsession
 user@remotehost$ echo "ssh-rsa AAAAB...SNIP...M= user@parrot" >> /root/.ssh/authorized_keys
 ```
 
 Now, the remote server should allow us to log in as that user by using our private key:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh root@10.10.10.10 -i key
 
 root@remotehost#

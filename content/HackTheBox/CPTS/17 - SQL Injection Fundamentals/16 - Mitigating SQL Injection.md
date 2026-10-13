@@ -10,8 +10,7 @@ We have learned about SQL injections, why they occur, and how we can exploit the
 
 Here's the snippet of the code from the authentication bypass section we discussed earlier:
 
-```
-        php
+```php
 <SNIP>
   $username = $_POST['username'];
   $password = $_POST['password'];
@@ -31,8 +30,7 @@ Here's the snippet of the code from the authentication bypass section we discuss
 
 As we can see, the script takes in the `username` and `password` from the POST request and passes it to the query directly. This will let an attacker inject anything they wish and exploit the application. Injection can be avoided by sanitizing any user input, rendering injected queries useless. Libraries provide multiple functions to achieve this, one such example is the [mysqli\_real\_escape\_string()](https://www.php.net/manual/en/mysqli.real-escape-string.php) function. This function escapes characters such as `'` and `"`, so they don't hold any special meaning.
 
-```
-        php
+```php
 <SNIP>
 $username = mysqli_real_escape_string($conn, $_POST['username']);
 $password = mysqli_real_escape_string($conn, $_POST['password']);
@@ -56,8 +54,7 @@ User input can also be validated based on the data used to query to ensure that 
 
 Consider the following code snippet from the ports page, which we used `UNION` injections on:
 
-```
-        php
+```php
 <?php
 if (isset($_GET["port_code"])) {
     $q = "Select * from ports where port_code ilike '%" . $_GET["port_code"] . "%'";
@@ -73,8 +70,7 @@ if (isset($_GET["port_code"])) {
 
 We see the GET parameter `port_code` being used in the query directly. It's already known that a port code consists only of letters or spaces. We can restrict the user input to only these characters, which will prevent the injection of queries. A regular expression can be used for validating the input:
 
-```
-        php
+```php
 <SNIP>
 $pattern = "/^[A-Za-z\s]+$/";
 $code = $_GET["port_code"];
@@ -95,8 +91,7 @@ http://SERVER\_IP:PORT/search.php?port\_code=c
 
 We can test the following injection:
 
-```
-        sql
+```sql
 '; SELECT 1,2,3,4-- -
 ```
 
@@ -114,8 +109,7 @@ As discussed initially, DBMS software allows the creation of users with fine-gra
 
 Superusers and users with administrative privileges should never be used with web applications. These accounts have access to functions and features, which could lead to server compromise.
 
-```
-        shellsession
+```shellsession
 MariaDB [(none)]> CREATE USER 'reader'@'localhost';
 
 Query OK, 0 rows affected (0.002 sec)
@@ -127,8 +121,7 @@ Query OK, 0 rows affected (0.000 sec)
 
 The commands above add a new MariaDB user named `reader` who is granted only `SELECT` privileges on the `ports` table. We can verify the permissions for this user by logging in:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mysql -u reader -p
 
 MariaDB [(none)]> use ilfreight;
@@ -171,8 +164,7 @@ Another way to ensure that the input is safely sanitized is by using parameteriz
 
 Consider the following modified code:
 
-```
-        php
+```php
 <SNIP>
   $username = $_POST['username'];
   $password = $_POST['password'];

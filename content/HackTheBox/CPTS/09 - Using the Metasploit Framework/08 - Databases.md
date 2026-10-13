@@ -14,8 +14,7 @@ First, we must ensure that the PostgreSQL server is up and running on our host m
 
 #### PostgreSQL Status
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo service postgresql status
 
 ● postgresql.service - PostgreSQL RDBMS
@@ -31,8 +30,7 @@ May 06 14:51:30 pwnbox-base systemd[1]: Finished PostgreSQL RDBMS.
 
 #### Start PostgreSQL
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo systemctl start postgresql
 ```
 
@@ -40,8 +38,7 @@ After starting PostgreSQL, we need to create and initialize the MSF database wit
 
 #### MSF - Initiate a Database
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo msfdb init
 
 [i] Database already started
@@ -59,8 +56,7 @@ Did you mean? with_options
 
 Sometimes an error can occur if Metasploit is not up to date. This difference that causes the error can happen for several reasons. First, often it helps to update Metasploit again (`apt update`) to solve this problem. Then we can try to reinitialize the MSF database.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo msfdb init
 
 [i] Database already started
@@ -69,8 +65,7 @@ hiimeins@htb[/htb]$ sudo msfdb init
 
 If the initialization is skipped and Metasploit tells us that the database is already configured, we can recheck the status of the database.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo msfdb status
 
 ● postgresql.service - PostgreSQL RDBMS
@@ -95,8 +90,7 @@ postgres    2458       1  0 15:19 ?        Ss     0:00 /usr/lib/postgresql/13/bi
 
 If this error does not appear, which often happens after a fresh installation of Metasploit, then we will see the following when initializing the database:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo msfdb init
 
 [+] Starting database
@@ -111,8 +105,7 @@ After the database has been initialized, we can start `msfconsole` and connect t
 
 #### MSF - Connect to the Initiated Database
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo msfdb run
 
 [i] Database already started
@@ -149,8 +142,7 @@ If, however, we already have the database configured and are not able to change 
 
 #### MSF - Reinitiate the Database
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfdb reinit
 hiimeins@htb[/htb]$ cp /usr/share/metasploit-framework/config/database.yml ~/.msf4/
 hiimeins@htb[/htb]$ sudo service postgresql restart
@@ -165,8 +157,7 @@ Now, we are good to go. The `msfconsole` also offers integrated help for the dat
 
 #### MSF - Database Options
 
-```
-        shellsession
+```shellsession
 msf6 > help database
 
 Database Backend Commands
@@ -206,8 +197,7 @@ We can think of `Workspaces` the same way we would think of folders in a project
 
 To view the current Workspace list, use the `workspace` command. Adding a `-a` or `-d` switch after the command, followed by the workspace's name, will either `add` or `delete` that workspace to the database.
 
-```
-        shellsession
+```shellsession
 msf6 > workspace
 
 * default
@@ -215,8 +205,7 @@ msf6 > workspace
 
 Notice that the default Workspace is named `default` and is currently in use according to the `*` symbol. Type the `workspace [name]` command to switch the presently used workspace. Looking back at our example, let us create a workspace for this assessment and select it.
 
-```
-        shellsession
+```shellsession
 msf6 > workspace -a Target_1
 
 [*] Added workspace: Target_1
@@ -234,8 +223,7 @@ msf6 > workspace
 
 To see what else we can do with Workspaces, we can use the `workspace -h` command for the help menu related to Workspaces.
 
-```
-        shellsession
+```shellsession
 msf6 > workspace -h
 
 Usage:
@@ -257,8 +245,7 @@ Next, let us assume we want to import a `Nmap scan` of a host into our Database'
 
 #### Stored Nmap Scan
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat Target.nmap
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-08-17 20:54 UTC
@@ -283,8 +270,7 @@ Nmap done: 1 IP address (1 host up) scanned in 60.81 seconds
 
 #### Importing Scan Results
 
-```
-        shellsession
+```shellsession
 msf6 > db_import Target.xml
 
 [*] Importing 'Nmap XML' data
@@ -327,8 +313,7 @@ Alternatively, we can use Nmap straight from msfconsole! To scan directly from t
 
 #### MSF - Nmap
 
-```
-        shellsession
+```shellsession
 msf6 > db_nmap -sV -sS 10.10.10.8
 
 [*] Nmap: Starting Nmap 7.80 ( https://nmap.org ) at 2020-08-17 21:04 UTC
@@ -378,8 +363,7 @@ After finishing the session, make sure to back up our data if anything happens w
 
 #### MSF - DB Export
 
-```
-        shellsession
+```shellsession
 msf6 > db_export -h
 
 Usage:
@@ -405,8 +389,7 @@ Hosts can also be manually added as separate entries in this table. After adding
 
 #### MSF - Stored Hosts
 
-```
-        shellsession
+```shellsession
 msf6 > hosts -h
 
 Usage: hosts [ options ] [addr1 addr2 ...]
@@ -438,8 +421,7 @@ The `services` command functions the same way as the previous one. It contains a
 
 #### MSF - Stored Services of Hosts
 
-```
-        shellsession
+```shellsession
 msf6 > services -h
 
 Usage: services [-h] [-u] [-a] [-r <proto>] [-p <port1,port2>] [-s <name1,name2>] [-o <filename>] [addr1 addr2 ...]
@@ -469,8 +451,7 @@ The `creds` command allows you to visualize the credentials gathered during your
 
 #### MSF - Stored Credentials
 
-```
-        shellsession
+```shellsession
 msf6 > creds -h
 
 With no sub-command, list credentials. If an address range is
@@ -572,8 +553,7 @@ The `loot` command works in conjunction with the command above to offer you an a
 
 #### MSF - Stored Loot
 
-```
-        shellsession
+```shellsession
 msf6 > loot -h
 
 Usage: loot [options]

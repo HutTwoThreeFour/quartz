@@ -72,8 +72,7 @@ By default, ports `110` and `995` are used for POP3, and ports `143` and `993` a
 
 #### Nmap
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap 10.129.14.128 -sV -p110,143,993,995 -sC
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2021-09-19 22:09 CEST
@@ -113,8 +112,7 @@ If we successfully figure out the access credentials for one of the employees, a
 
 #### cURL
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -k 'imaps://10.129.14.128' --user user:p4ssw0rd
 
 * LIST (\HasNoChildren) "." Important
@@ -123,8 +121,7 @@ hiimeins@htb[/htb]$ curl -k 'imaps://10.129.14.128' --user user:p4ssw0rd
 
 If we also use the `verbose` (`-v`) option, we will see how the connection is made. From this, we can see the version of TLS used for encryption, further details of the SSL certificate, and even the banner, which will often contain the version of the mail server.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -k 'imaps://10.129.14.128' --user cry0l1t3:1234 -v
 
 *   Trying 10.129.14.128:993...
@@ -171,8 +168,7 @@ To interact with the IMAP or POP3 server over SSL, we can use `openssl`, as well
 
 #### OpenSSL - TLS Encrypted Interaction POP3
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ openssl s_client -connect 10.129.14.128:pop3s
 
 CONNECTED(00000003)
@@ -228,8 +224,7 @@ read R BLOCK
 
 #### OpenSSL - TLS Encrypted Interaction IMAP
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ openssl s_client -connect 10.129.14.128:imaps
 
 CONNECTED(00000003)

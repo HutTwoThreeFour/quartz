@@ -12,8 +12,7 @@ Tools such as `SSH`, `Netcat`, `Tmux`, and `Vim` are essential and are used dail
 
 SSH uses a client-server model, connecting a user running an SSH client application such as `OpenSSH` to an SSH server. While attacking a box or during a real-world assessment, we often obtain cleartext credentials or an SSH private key that can be leveraged to connect directly to a system via SSH. An SSH connection is typically much more stable than a reverse shell connection and can often be used as a "jump host" to enumerate and attack other hosts in the network, transfer tools, set up persistence, etc. If we obtain a set of credentials, we can use SSH to login remotely to the server by using the username `@` the remote server IP, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh Bob@10.10.10.10
 
 Bob@remotehost's password: *********
@@ -29,8 +28,7 @@ It is also possible to read local private keys on a compromised system or add ou
 
 [Netcat](https://linux.die.net/man/1/nc), `ncat`, or `nc`, is an excellent network utility for interacting with TCP/UDP ports. It can be used for many things during a pentest. Its primary usage is for connecting to shells, which we'll discuss later in this module. In addition to that, `netcat` can be used to connect to any listening port and interact with the service running on that port. For example, `SSH` is programmed to handle connections over port 22 to send all data and keys. We can connect to TCP port 22 with `netcat`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ netcat 10.10.10.10 22
 
 SSH-2.0-OpenSSH_8.4p1 Debian-3
@@ -46,8 +44,7 @@ Another similar network utility is [socat](https://linux.die.net/man/1/socat), w
 
 Terminal multiplexers, like `tmux` or `Screen`, are great utilities for expanding a standard Linux terminal's features, like having multiple windows within one terminal and jumping between them. Let's see some examples of using `tmux`, which is the more common of the two. If `tmux` is not present on our Linux system, we can install it with the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt install tmux -y
 ```
 
@@ -71,8 +68,7 @@ We can switch between panes by hitting the prefix and then the `left` or `right`
 
 [Vim](https://linuxcommand.org/lc3_man_pages/vim1.html) is a great text editor that can be used for writing code or editing text files on Linux systems. One of the great benefits of using `Vim` is that it relies entirely on the keyboard, so you do not have to use the mouse, which (once we get the hold of it) will significantly increase your productivity and efficiency in writing/editing code. We usually find `Vim` or `Vi` installed on compromised Linux systems, so learning how to use it allows us to edit files even on remote systems. `Vim` also has many other features, like extensions and plugins, which can significantly extend its usage and make for a great code editor. Let's see some of the basics of `Vim`. To open a file with `Vim`, we can add the file name after it:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ vim /etc/hosts
 ```
 

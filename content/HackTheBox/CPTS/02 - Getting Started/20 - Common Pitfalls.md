@@ -14,8 +14,7 @@ We may sometimes face issues related to VPN connections to the HTB labs network.
 
 The easiest method of checking if we have successfully connected to the VPN network is by checking whether we have `Initialization Sequence Completed` at the end of our VPN connection messages:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo openvpn ./htb.ovpn
 
 ...SNIP...
@@ -27,8 +26,7 @@ Initialization Sequence Completed
 
 Another way of checking whether we are connected to the VPN network is by checking our VPN `tun0` address, which we can find with the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ip -4 a show tun0
 
 6: tun0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UNKNOWN group default qlen 500
@@ -42,8 +40,7 @@ As long we get our IP back, then we should be connected to the VPN network.
 
 Another way to check for connectivity is to use the command `sudo netstat -rn` to view our routing table:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo netstat -rn
 
 [sudo] password for user: 
@@ -60,8 +57,7 @@ Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
 
 From here, we can see that we are connected to the `10.10.14.0/23` network on the `tun0` adapter and have access to the `10.129.0.0/16` network and can ping the gateway `10.10.14.1` to confirm access.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ping -c 4 10.10.14.1
 PING 10.10.14.1 (10.10.14.1) 56(84) bytes of data.
 64 bytes from 10.10.14.1: icmp_seq=1 ttl=64 time=111 ms
@@ -120,8 +116,7 @@ If we are not using a plugin like `Foxy Proxy`, we can check the browser's conne
 
 In case we start facing some issues with connecting to SSH servers or connecting to our machine from a remote server, we may want to renew or change our SSH key and password to make sure they are not causing any issues. We can do this with the `ssh-keygen` command, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ssh-keygen
 
 Generating public/private rsa key pair.

@@ -37,8 +37,7 @@ Nmap offers many different types of scans that can be used to obtain various res
 
 The syntax for Nmap is fairly simple and looks like this:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap <scan types> <options> <target>
 ```
 
@@ -49,8 +48,7 @@ hiimeins@htb[/htb]$ nmap <scan types> <options> <target>
 Nmap offers many different scanning techniques, making different types of connections and using differently structured packets to send.
 Here we can see all the scanning techniques Nmap offers:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nmap --help
 
 <SNIP>
@@ -74,8 +72,7 @@ For example, the TCP-SYN scan (`-sS`) is one of the default settings unless we h
 
 Let us take an example of such a scan.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -sS localhost
 
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-06-11 22:50 UTC

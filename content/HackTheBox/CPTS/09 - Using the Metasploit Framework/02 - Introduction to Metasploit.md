@@ -79,8 +79,7 @@ These are the base files for the Framework. The Data and Lib are the functioning
 
 The Modules detailed above are split into separate categories in this folder. We will go into detail about these in the next sections. They are contained in the following folders:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /usr/share/metasploit-framework/modules
 
 auxiliary  encoders  evasion  exploits  nops  payloads  post
@@ -90,8 +89,7 @@ auxiliary  encoders  evasion  exploits  nops  payloads  post
 
 Plugins offer the pentester more flexibility when using the `msfconsole` since they can easily be manually or automatically loaded as needed to provide extra functionality and automation during our assessment.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /usr/share/metasploit-framework/plugins/
 
 aggregator.rb      ips_filter.rb  openvas.rb           sounds.rb
@@ -108,8 +106,7 @@ ffautoregen.rb     nexpose.rb     socket_logger.rb
 
 Meterpreter functionality and other useful scripts.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /usr/share/metasploit-framework/scripts/
 
 meterpreter  ps  resource  shell
@@ -119,8 +116,7 @@ meterpreter  ps  resource  shell
 
 Command-line utilities that can be called directly from the `msfconsole` menu.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /usr/share/metasploit-framework/tools/
 
 context  docs     hardware  modules   payloads

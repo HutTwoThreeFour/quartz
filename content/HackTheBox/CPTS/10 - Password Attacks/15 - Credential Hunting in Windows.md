@@ -61,15 +61,13 @@ It would be beneficial to keep a [standalone copy](https://github.com/Alessandro
 
 Once `LaZagne.exe` is on the target, we can open command prompt or PowerShell, navigate to the directory the file was uploaded to, and execute the following command:
 
-```
-        cmd
+```bat
 C:\Users\bob\Desktop> start LaZagne.exe all
 ```
 
 This will execute LaZagne and run `all` included modules. We can include the option `-vv` to study what it is doing in the background. Once we hit enter, it will open another prompt and display the results.
 
-```
-        cmd
+```bat
 |====================================================================|
 |                                                                    |
 |                        The LaZagne Project                         |
@@ -95,8 +93,7 @@ If we used the `-vv` option, we would see attempts to gather passwords from all 
 
 We can also use [findstr](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/findstr) to search from patterns across many types of files. Keeping in mind common key terms, we can use variations of this command to discover credentials on a Windows target:
 
-```
-        cmd
+```bat
 C:\> findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml
 ```
 

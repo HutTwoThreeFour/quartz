@@ -12,8 +12,7 @@ First, let us see how web applications use databases MySQL, in this case, to sto
 
 For example, within a `PHP` web application, we can connect to our database, and start using the `MySQL` database through `MySQL` syntax, right within `PHP`, as follows:
 
-```
-        php
+```php
 $conn = new mysqli("localhost", "root", "password", "users");
 $query = "select * from logins";
 $result = $conn->query($query);
@@ -21,8 +20,7 @@ $result = $conn->query($query);
 
 Then, the query's output will be stored in `$result`, and we can print it to the page or use it in any other way. The below PHP code will print all returned results of the SQL query in new lines:
 
-```
-        php
+```php
 while($row = $result->fetch_assoc() ){
     echo $row["name"]."<br>";
 }
@@ -30,8 +28,7 @@ while($row = $result->fetch_assoc() ){
 
 Web applications also usually use user-input when retrieving data. For example, when a user uses the search function to search for other users, their search input is passed to the web application, which uses the input to search within the databases:
 
-```
-        php
+```php
 $searchInput =  $_POST['findUser'];
 $query = "select * from logins where username like '%$searchInput'";
 $result = $conn->query($query);
@@ -55,8 +52,7 @@ Injection occurs when an application misinterprets user input as actual code rat
 
 An SQL injection occurs when user-input is inputted into the SQL query string without properly sanitizing or filtering the input. The previous example showed how user-input can be used within an SQL query, and it did not use any form of input sanitization:
 
-```
-        php
+```php
 $searchInput =  $_POST['findUser'];
 $query = "select * from logins where username like '%$searchInput'";
 $result = $conn->query($query);
@@ -64,15 +60,13 @@ $result = $conn->query($query);
 
 In typical cases, the `searchInput` would be inputted to complete the query, returning the expected outcome. Any input we type goes into the following SQL query:
 
-```
-        sql
+```sql
 select * from logins where username like '%$searchInput'
 ```
 
 So, if we input `admin`, it becomes `'%admin'`. In this case, if we write any SQL code, it would just be considered as a search term. For example, if we input `SHOW DATABASES;`, it would be executed as `'%SHOW DATABASES;'` The web application will search for usernames similar to `SHOW DATABASES;`. However, as there is no sanitization, in this case, **we can add a single quote (`'`), which will end the user-input field, and after it, we can write actual SQL code**. For example, if we search for `1'; DROP TABLE users;`, the search input would be:
 
-```
-        php
+```php
 '%1'; DROP TABLE users;'
 ```
 
@@ -80,8 +74,7 @@ Notice how we added a single quote (') after "1", in order to escape the bounds 
 
 So, the final SQL query executed would be as follows:
 
-```
-        sql
+```sql
 select * from logins where username like '%1'; DROP TABLE users;'
 ```
 
@@ -95,15 +88,13 @@ Note: In the above example, for the sake of simplicity, we added another SQL que
 
 The previous example of SQL injection would return an error:
 
-```
-        php
+```php
 Error: near line 1: near "'": syntax error
 ```
 
 This is because of the last trailing character, where we have a single extra quote (`'`) that is not closed, which causes a SQL syntax error when executed:
 
-```
-        sql
+```sql
 select * from logins where username like '%1'; DROP TABLE users;'
 ```
 

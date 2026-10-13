@@ -35,8 +35,7 @@ Some tools that can leverage SMB NULL sessions and LDAP anonymous binds include 
 
 #### Using enum4linux
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ enum4linux -U 172.16.5.5  | grep "user:" | cut -f2 -d"[" | cut -f1 -d"]"
 
 administrator
@@ -63,8 +62,7 @@ We can use the `enumdomusers` command after connecting anonymously using `rpccli
 
 #### Using rpcclient
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ rpcclient -U "" -N 172.16.5.5
 
 rpcclient $> enumdomusers 
@@ -82,8 +80,7 @@ Finally, we can use `CrackMapExec` with the `--users` flag. This is a useful too
 
 #### Using CrackMapExec --users Flag
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 172.16.5.5 --users
 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -106,8 +103,7 @@ We can use various tools to gather users when we find an LDAP anonymous bind. So
 
 #### Using ldapsearch
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "(&(objectclass=user))"  | grep sAMAccountName: | cut -f2 -d" "
 
 guest
@@ -131,8 +127,7 @@ Tools such as `windapsearch` make this easier (though we should still understand
 
 #### Using windapsearch
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
 
 [+] No username provided. Will try anonymous bind.
@@ -178,8 +173,7 @@ Let's try out this method using the [jsmith.txt](https://github.com/insidetrust/
 
 #### Kerbrute User Enumeration
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$  kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt 
 
     __             __               __     
@@ -218,8 +212,7 @@ With valid credentials, we can use any of the tools stated previously to build a
 
 #### Using CrackMapExec with Valid Credentials
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 
 [sudo] password for htb-student: 

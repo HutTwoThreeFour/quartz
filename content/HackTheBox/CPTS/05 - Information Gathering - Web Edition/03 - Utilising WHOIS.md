@@ -47,16 +47,14 @@ These insights allow analysts to create a detailed profile of the threat actor's
 
 Before using the `whois` command, you'll need to ensure it's installed on your Linux system. It's a utility available through linux package managers, and if it's not installed, it can be installed simply with
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt update
 hiimeins@htb[/htb]$ sudo apt install whois -y
 ```
 
 The simplest way to access WHOIS data is through the `whois` command-line tool. Let's perform a WHOIS lookup on `facebook.com`:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ whois facebook.com
 
    Domain Name: FACEBOOK.COM

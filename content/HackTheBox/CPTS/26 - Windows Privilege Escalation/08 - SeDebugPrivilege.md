@@ -10,8 +10,7 @@ During an internal penetration test, it is often helpful to use websites such as
 
 After logging on as a user assigned the `Debug programs` right and opening an elevated shell, we see `SeDebugPrivilege` is listed.
 
-```
-        cmd
+```bat
 C:\htb> whoami /priv
 
 PRIVILEGES INFORMATION
@@ -26,8 +25,7 @@ SeIncreaseWorkingSetPrivilege             Increase a process working set        
 
 We can use [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) from the [SysInternals](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) suite to leverage this privilege and dump process memory. A good candidate is the Local Security Authority Subsystem Service ([LSASS](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)) process, which stores user credentials after a user logs on to a system.
 
-```
-        cmd
+```bat
 C:\htb> procdump.exe -accepteula -ma lsass.exe lsass.dmp
 
 ProcDump v10.0 - Sysinternals process dump utility
@@ -44,8 +42,7 @@ This is successful, and we can load this in `Mimikatz` using the `sekurlsa::mini
 
 Note: It is always a good idea to type "log" before running any commands in "Mimikatz" this way all command output will put output to a ".txt" file. This is especially useful when dumping credentials from a server which may have many sets of credentials in memory.
 
-```
-        cmd
+```bat
 C:\htb> mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Sep 18 2020 19:18:29
@@ -127,8 +124,7 @@ The PoC script has received an update. Please visit its GitHub repository and re
 
 First, open an elevated PowerShell console (right-click, run as admin, and type in the credentials for the `jordan` user). Next, type `tasklist` to get a listing of running processes and accompanying PIDs.
 
-```
-        powershell
+```powershell
 PS C:\htb> tasklist 
 
 Image Name                     PID Session Name        Session#    Mem Usage

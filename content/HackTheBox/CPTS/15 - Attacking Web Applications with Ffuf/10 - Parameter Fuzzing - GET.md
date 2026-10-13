@@ -24,8 +24,7 @@ So, all we have to do is replace `param1` in the example above with `FUZZ` and r
 
 Once again, we will get many results back, so we will filter out the default response size we are getting.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ffuf -w /opt/useful/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:PORT/admin/admin.php?FUZZ=key -fs xxx
 
         /'___\  /'___\           /'___\       

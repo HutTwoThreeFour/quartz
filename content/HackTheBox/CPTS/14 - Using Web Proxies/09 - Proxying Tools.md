@@ -18,16 +18,14 @@ One very useful tool in Linux is [proxychains](https://github.com/haad/proxychai
 
 To use `proxychains`, we first have to edit `/etc/proxychains.conf`, comment out the final line and add the following line at the end of it:
 
-```
-        shellsession
+```shellsession
 #socks4         127.0.0.1 9050
 http 127.0.0.1 8080
 ```
 
 We should also make use of the `-q` option, which makes `proxychains` operate in "quiet" mode, suppressing the output of connection information to the console. This can be useful for reducing clutter in the terminal and focusing on the output of the application being proxied. For example, let's try using `cURL` on one of our previous exercises:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ proxychains -q curl http://SERVER_IP:PORT
 
 <!DOCTYPE html>
@@ -52,8 +50,7 @@ If we go back to our web proxy (Burp in this case), we will see that the request
 
 Finally, let's try to proxy web traffic made by Metasploit modules to better investigate and debug them. We should begin by starting Metasploit with `msfconsole`. Then, to set a proxy for any exploit within Metasploit, we can use the `set PROXIES` flag. Let's try the `robots_txt` scanner as an example and run it against one of our previous exercises:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ msfconsole
 
 msf6 > use auxiliary/scanner/http/robots_txt

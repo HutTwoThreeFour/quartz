@@ -10,8 +10,7 @@ Applications that are connected to services often include connection strings tha
 
 The `octopus_checker` binary is found on a remote machine during the testing. Running the application locally reveals that it connects to database instances in order to verify that they are available.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ./octopus_checker 
 
 Program had started..
@@ -26,8 +25,7 @@ connected
 
 The binary probably connects using a SQL connection string that contains credentials. Using tools like [PEDA](https://github.com/longld/peda) (Python Exploit Development Assistance for GDB) we can further examine the file. This is an extension of the standard GNU Debugger (GDB), which is used for debugging C and C++ programs. GDB is a command line tool that lets you step through the code, set breakpoints, and examine and change variables. Running the following command we can execute the binary through it.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gdb ./octopus_checker
 
 GNU gdb (Debian 9.2-1) 9.2
@@ -144,8 +142,7 @@ Apart from trying to connect to the MS SQL service, penetration testers can also
 
 A DLL file is a `Dynamically Linked Library` and it contains code that is called from other programs while they are running. The `MultimasterAPI.dll` binary is found on a remote machine during the enumeration process. Examination of the file reveals that this is a .Net assembly.
 
-```
-        powershell
+```powershell
 C:\> Get-FileMetaData .\MultimasterAPI.dll
 
 <SNIP>

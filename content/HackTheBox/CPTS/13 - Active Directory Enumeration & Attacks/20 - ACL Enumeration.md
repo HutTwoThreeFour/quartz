@@ -12,8 +12,7 @@ We can use PowerView to enumerate ACLs, but the task of digging through *all* of
 
 #### Using Find-InterestingDomainAcl
 
-```
-        powershell
+```powershell
 PS C:\htb> Find-InterestingDomainAcl
 
 ObjectDN                : DC=INLANEFREIGHT,DC=LOCAL
@@ -49,8 +48,7 @@ IdentityReferenceClass  : group
 
 If we try to dig through all of this data during a time-boxed assessment, we will likely never get through it all or find anything interesting before the assessment is over. Now, there is a way to use a tool such as PowerView more effectively -- by performing targeted enumeration starting with a user that we have control over. Let's focus on the user `wley`, which we obtained after solving the last question in the `LLMNR/NBT-NS Poisoning - from Linux` section. Let's dig in and see if this user has any interesting ACL rights that we could take advantage of. We first need to get the SID of our target user to search effectively.
 
-```
-        powershell
+```powershell
 PS C:\htb> Import-Module .\PowerView.ps1
 PS C:\htb> $sid = Convert-NameToSid wley
 ```
@@ -61,8 +59,7 @@ Note that this command will take a while to run, especially in a large environme
 
 #### Using Get-DomainObjectACL
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainObjectACL -Identity * | ? {$_.SecurityIdentifier -eq $sid}
 
 ObjectDN               : CN=Dana Amundsen,OU=DevOps,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
@@ -91,8 +88,7 @@ Note that if PowerView has already been imported, the cmdlet shown below will re
 
 #### Performing a Reverse Search & Mapping to a GUID Value
 
-```
-        powershell
+```powershell
 PS C:\htb> $guid= "00299570-246d-11d0-a768-00aa006e0529"
 PS C:\htb> Get-ADObject -SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" -Filter {ObjectClass -like 'ControlAccessRight'} -Properties * |Select Name,DisplayName,DistinguishedName,rightsGuid| ?{$_.rightsGuid -eq $guid} | fl
 
@@ -106,8 +102,7 @@ This gave us our answer, but would be highly inefficient during an assessment. P
 
 #### Using the -ResolveGUIDs Flag
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid} 
 
 AceQualifier           : AccessAllowed
@@ -138,8 +133,7 @@ This example is not very efficient, and the command can take a long time to run,
 
 #### Creating a List of Domain Users
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-ADUser -Filter * | Select-Object -ExpandProperty SamAccountName > ad_users.txt
 ```
 
@@ -147,8 +141,7 @@ We then read each line of the file using a `foreach` loop, and use the `Get-Acl`
 
 #### A Useful foreach Loop
 
-```
-        powershell
+```powershell
 PS C:\htb> foreach($line in [System.IO.File]::ReadLines("C:\Users\htb-student\Desktop\ad_users.txt")) {get-acl  "AD:\$(Get-ADUser $line)" | Select-Object Path -ExpandProperty Access | Where-Object {$_.IdentityReference -match 'INLANEFREIGHT\\wley'}}
 
 Path                  : Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=Dana 
@@ -171,8 +164,7 @@ So, to recap, we started with the user `wley` and now have control over the user
 
 #### Further Enumeration of Rights Using damundsen
 
-```
-        powershell
+```powershell
 PS C:\htb> $sid2 = Convert-NameToSid damundsen
 PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid2} -Verbose
 
@@ -199,8 +191,7 @@ Let's look and see if this group is nested into any other groups, remembering th
 
 #### Investigating the Help Desk Level 1 Group with Get-DomainGroup
 
-```
-        powershell
+```powershell
 PS C:\htb> Get-DomainGroup -Identity "Help Desk Level 1" | select memberof
 
 memberof                                                                      
@@ -223,8 +214,7 @@ Now let's look around and see if members of `Information Technology` can do anyt
 
 #### Investigating the Information Technology Group
 
-```
-        powershell
+```powershell
 PS C:\htb> $itgroupsid = Convert-NameToSid "Information Technology"
 PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $itgroupsid} -Verbose
 
@@ -249,8 +239,7 @@ Finally, let's see if the `adunn` user has any type of interesting access that w
 
 #### Looking for Interesting Access
 
-```
-        powershell
+```powershell
 PS C:\htb> $adunnsid = Convert-NameToSid adunn 
 PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $adunnsid} -Verbose
 

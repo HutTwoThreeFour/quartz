@@ -26,8 +26,7 @@ Let us imagine that during an external penetration test, we come across a compan
 
 A quick way to identify a WordPress site is by browsing to the `/robots.txt` file. A typical robots.txt on a WordPress installation may look like:
 
-```
-        shellsession
+```shellsession
 User-agent: *
 Disallow: /wp-admin/
 Allow: /wp-admin/admin-ajax.php
@@ -60,8 +59,7 @@ Getting access to an administrator is usually sufficient to obtain code executio
 
 Another quick way to identify a WordPress site is by looking at the page source. Viewing the page with `cURL` and grepping for `WordPress` can help us confirm that WordPress is in use and footprint the version number, which we should note down for later. We can enumerate WordPress using a variety of manual and automated tactics.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://blog.inlanefreight.local | grep WordPress
 
 <meta name="generator" content="WordPress 5.8" /
@@ -71,8 +69,7 @@ Browsing the site and perusing the page source will give us hints to the theme i
 
 Looking at the page source, we can see that the [Business Gravity](https://wordpress.org/themes/business-gravity/) theme is in use. We can go further and attempt to fingerprint the theme version number and look for any known vulnerabilities that affect it.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://blog.inlanefreight.local/ | grep themes
 
 <link rel='stylesheet' id='bootstrap-css'  href='http://blog.inlanefreight.local/wp-content/themes/business-gravity/assets/vendors/bootstrap/css/bootstrap.min.css' type='text/css' media='all' />
@@ -80,8 +77,7 @@ hiimeins@htb[/htb]$ curl -s http://blog.inlanefreight.local/ | grep themes
 
 Next, let's take a look at which plugins we can uncover.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://blog.inlanefreight.local/ | grep plugins
 
 <link rel='stylesheet' id='contact-form-7-css'  href='http://blog.inlanefreight.local/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.4.2' type='text/css' media='all' />
@@ -98,8 +94,7 @@ Browsing to `http://blog.inlanefreight.local/wp-content/plugins/mail-masta/` sho
 
 Let's dig around a bit more. Checking the page source of another page, we can see that the [wpDiscuz](https://wpdiscuz.com/) plugin is installed, and it appears to be version 7.0.4
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://blog.inlanefreight.local/?p=1 | grep plugins
 
 <link rel='stylesheet' id='contact-form-7-css'  href='http://blog.inlanefreight.local/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.4.2' type='text/css' media='all' />
@@ -145,8 +140,7 @@ Let's take things a step further and validate/add to some of our data points wit
 
 [WPScan](https://github.com/wpscanteam/wpscan) is an automated WordPress scanner and enumeration tool. It determines if the various themes and plugins used by a blog are outdated or vulnerable. It’s installed by default on Parrot OS but can also be installed manually with `gem`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo gem install wpscan
 ```
 
@@ -154,8 +148,7 @@ WPScan is also able to pull in vulnerability information from external sources. 
 
 Typing `wpscan -h` will bring up the help menu.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ wpscan -h
 
 _______________________________________________________________
@@ -194,8 +187,7 @@ Usage: wpscan [options]
 
 The `--enumerate` flag is used to enumerate various components of the WordPress application, such as plugins, themes, and users. By default, WPScan enumerates vulnerable plugins, themes, users, media, and backups. However, specific arguments can be supplied to restrict enumeration to specific components. For example, all plugins can be enumerated using the arguments `--enumerate ap`. Let’s invoke a normal enumeration scan against a WordPress website with the `--enumerate` flag and pass it an API token from WPVulnDB with the `--api-token` flag.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo wpscan --url http://blog.inlanefreight.local --enumerate --api-token dEOFB<SNIP>
 
 <SNIP>

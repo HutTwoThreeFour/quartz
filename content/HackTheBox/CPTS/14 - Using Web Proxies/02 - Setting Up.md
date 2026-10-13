@@ -12,8 +12,7 @@ If Burp is not pre-installed in our VM, we can start by downloading it from [Bur
 
 Once installed, Burp can either be launched from the terminal by typing `burpsuite`, or from the application menu as previously mentioned. Another option is to download the `JAR` file (which can be used on all operating systems with a Java Runtime Environment (JRE) installed) from the above downloads page. We can run it with the following command line or by double-clicking it:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ java -jar </path/to/burpsuite.jar>
 ```
 

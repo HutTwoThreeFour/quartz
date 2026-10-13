@@ -16,8 +16,7 @@ This command will execute the shell interpreter specified in the path in interac
 
 #### Interactive
 
-```
-        shellsession
+```shellsession
 /bin/sh -i
 sh: no job control in this shell
 sh-4.2$
@@ -31,13 +30,11 @@ If the programming language [Perl](https://www.perl.org) is present on the syste
 
 #### Perl To Shell
 
-```
-        shellsession
+```shellsession
 perl -e 'exec "/bin/sh";'
 ```
 
-```
-        shellsession
+```shellsession
 perl: exec "/bin/sh";
 ```
 
@@ -51,8 +48,7 @@ If the programming language [Ruby](https://www.ruby-lang.org/en/) is present on 
 
 #### Ruby To Shell
 
-```
-        shellsession
+```shellsession
 ruby: exec "/bin/sh"
 ```
 
@@ -66,8 +62,7 @@ If the programming language [Lua](https://www.lua.org) is present on the system,
 
 #### Lua To Shell
 
-```
-        shellsession
+```shellsession
 lua: os.execute('/bin/sh')
 ```
 
@@ -81,8 +76,7 @@ The command directly above should be run from a script.
 
 #### AWK To Shell
 
-```
-        shellsession
+```shellsession
 awk 'BEGIN {system("/bin/sh")}'
 ```
 
@@ -94,8 +88,7 @@ awk 'BEGIN {system("/bin/sh")}'
 
 #### Using Find For A Shell
 
-```
-        shellsession
+```shellsession
 find / -name nameoffile -exec /bin/awk 'BEGIN {system("/bin/sh")}' \;
 ```
 
@@ -105,8 +98,7 @@ This use of the find command is searching for any file listed after the `-name` 
 
 ## Using Exec To Launch A Shell
 
-```
-        shellsession
+```shellsession
 find . -exec /bin/sh \; -quit
 ```
 
@@ -120,15 +112,13 @@ Yes, we can set the shell interpreter language from within the popular command-l
 
 #### Vim To Shell
 
-```
-        shellsession
+```shellsession
 vim -c ':!/bin/sh'
 ```
 
 #### Vim Escape
 
-```
-        shellsession
+```shellsession
 vim
 :set shell=/bin/sh
 :shell
@@ -142,8 +132,7 @@ In addition to knowing about all the options listed above, we should be mindful 
 
 #### Permissions
 
-```
-        shellsession
+```shellsession
 ls -la <path/to/fileorbinary>
 ```
 
@@ -151,8 +140,7 @@ We can also attempt to run this command to check what `sudo` permissions the acc
 
 #### Sudo -l
 
-```
-        shellsession
+```shellsession
 sudo -l
 Matching Defaults entries for apache on ILF-WebSrv:
     env_reset, mail_badpass,

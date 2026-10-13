@@ -8,8 +8,7 @@ One interesting usage of sshuttle is that we don't need to use proxychains to co
 
 #### Installing sshuttle
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo apt-get install sshuttle
 
 Reading package lists... Done
@@ -49,8 +48,7 @@ To use sshuttle, we specify the option `-r` to connect to the remote machine wit
 
 #### Running sshuttle
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo sshuttle -r ubuntu@10.129.202.64 172.16.5.0/23 -v 
 
 Starting sshuttle proxy (version 1.1.0).
@@ -98,8 +96,7 @@ With this command, sshuttle creates an entry in our `iptables` to redirect all t
 
 #### Traffic Routing through iptables Routes
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nmap -v -A -sT -p3389 172.16.5.19 -Pn
 
 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-10-08 10:42 CDT

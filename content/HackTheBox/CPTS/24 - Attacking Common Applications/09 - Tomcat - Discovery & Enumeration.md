@@ -25,8 +25,7 @@ http://app-dev.inlanefreight.local:8080/invalid
 
 Custom error pages may be in use that do not leak this version information. In this case, another method of detecting a Tomcat server and version is through the `/docs` page.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ curl -s http://app-dev.inlanefreight.local:8080/docs/ | grep Tomcat 
 
 <html lang="en"><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><link href="./images/docs-stylesheet.css" rel="stylesheet" type="text/css"><title>Apache Tomcat 9 (9.0.30) - Documentation Index</title><meta name="author" 
@@ -36,8 +35,7 @@ hiimeins@htb[/htb]$ curl -s http://app-dev.inlanefreight.local:8080/docs/ | grep
 
 This is the default documentation page, which may not be removed by administrators. Here is the general folder structure of a Tomcat installation.
 
-```
-        shellsession
+```shellsession
 ├── bin
 ├── conf
 │   ├── catalina.policy
@@ -66,8 +64,7 @@ The `bin` folder stores scripts and binaries needed to start and run a Tomcat se
 
 Each folder inside `webapps` is expected to have the following structure.
 
-```
-        shellsession
+```shellsession
 webapps/customapp
 ├── images
 ├── index.jsp
@@ -88,8 +85,7 @@ The most important file among these is `WEB-INF/web.xml`, which is known as the 
 
 Here’s an example web.xml file.
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
@@ -115,8 +111,7 @@ Next, a new servlet mapping is created to map requests to `/admin` with `AdminSe
 
 The `tomcat-users.xml` file is used to allow or disallow access to the `/manager` and `host-manager` admin pages.
 
-```
-        xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 
 <SNIP>
@@ -164,8 +159,7 @@ The file shows us what each of the roles `manager-gui`, `manager-script`, `manag
 
 After fingerprinting the Tomcat instance, unless it has a known vulnerability, we'll typically want to look for the `/manager` and the `/host-manager` pages. We can attempt to locate these with a tool such as `Gobuster` or just browse directly to them.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ gobuster dir -u http://web01.inlanefreight.local:8180/ -w /usr/share/dirbuster/wordlists/directory-list-2.3-small.txt 
 
 ===============================================================

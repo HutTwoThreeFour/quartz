@@ -17,8 +17,7 @@ Let's send a `GET` request with another `uid`:
 
 As we can see, this returned the details of another user, with their own `uuid` and `role`, confirming an `IDOR Information Disclosure vulnerability`:
 
-```
-        json
+```json
 {
     "uid": "2",
     "uuid": "4a9bd19b3b8676199592a346051f950c",
@@ -53,8 +52,7 @@ Since we have identified an IDOR Information Disclosure vulnerability, we may al
 
 Once we enumerate all users, we will find an admin user with the following details:
 
-```
-        json
+```json
 {
     "uid": "X",
     "uuid": "a36fa9e66e85f2dd6f5e13cad45248ae",
@@ -71,8 +69,7 @@ We may modify the admin's details and then perform one of the above attacks to t
 
 This time, we do not get the `Invalid role` error message, nor do we get any access control error messages, meaning that there are no back-end access control measures to what roles we can set for our user. If we `GET` our user details, we see that our `role` has indeed been set to `web_admin`:
 
-```
-        json
+```json
 {
     "uid": "1",
     "uuid": "40f5888b67c748df7efba008e7c2f9d2",

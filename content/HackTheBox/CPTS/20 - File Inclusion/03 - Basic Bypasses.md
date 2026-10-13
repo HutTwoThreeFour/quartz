@@ -8,8 +8,7 @@ In the previous section, we saw several types of attacks that we can use for dif
 
 One of the most basic filters against LFI is a search and replace filter, where it simply deletes substrings of (`../`) to avoid path traversals. For example:
 
-```
-        php
+```php
 $language = str_replace('../', '', $_GET['language']);
 ```
 
@@ -54,8 +53,7 @@ You may refer to the [Command Injections](https://academy.hackthebox.com/app/mod
 
 Some web applications may also use Regular Expressions to ensure that the file being included is under a specific path. For example, the web application we have been dealing with may only accept paths that are under the `./languages` directory, as follows:
 
-```
-        php
+```php
 if(preg_match('/^\./languages/.+$/', $_GET['language'])) {
     include($_GET['language']);
 } else {
@@ -96,8 +94,7 @@ An example of such payload would be the following:
 
 Of course, we don't have to manually type `./` 2048 times (total of 4096 characters), but we can automate the creation of this string with the following command:
 
-```
-        shellsession
+```shellsession
 hiimeins@htb[/htb]$ echo -n "non_existing_directory/../../../etc/passwd/" && for i in {1..2048}; do echo -n "./"; done
 non_existing_directory/../../../etc/passwd/./././<SNIP>././././
 ```
