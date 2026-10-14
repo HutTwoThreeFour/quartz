@@ -30,16 +30,20 @@ pre:not(:has(> code.mermaid)) {
   color: #fff;
 }
 
+// Site title as a centered banner: logo stacked above the "Endurance" text,
+// sized to the sidebar width so it never overflows.
 .page-title a {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
   gap: 0.5rem;
 
   &::before {
     content: "";
-    flex-shrink: 0;
-    width: 15rem;
-    height: calc(15rem * 93.17 / 76.07);
+    width: 100%;
+    max-width: 12rem;
+    aspect-ratio: 76.07 / 93.17; // native logo proportions
     background-color: var(--dark);
     -webkit-mask: url("./static/endurance_logo.svg") center / contain no-repeat;
     mask: url("./static/endurance_logo.svg") center / contain no-repeat;
